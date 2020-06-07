@@ -4,6 +4,10 @@
 
 *Gigamesh* is a personal information manager.
 
+## Contributing
+
+For information about how to contribute to Gigamesh, see our [contributing guide](https://github.com/stepchowfun/gigamesh/blob/master/CONTRIBUTING.md). Please observe our [code of conduct](https://github.com/stepchowfun/gigamesh/blob/master/CODE_OF_CONDUCT.md).
+
 ## Licensing
 
 - Gigamesh is released under the MIT license, which can be found in [LICENSE.md](https://github.com/stepchowfun/gigamesh/blob/master/LICENSE.md).
