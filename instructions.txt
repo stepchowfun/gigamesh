@@ -1,0 +1,83 @@
+Instructions for serving a static website with GCP
+==================================================
+
+This guide roughly follows: https://cloud.google.com/storage/docs/hosting-static-website
+A few improvements have been added, most notably the redirects for HTTP -> HTTPS and non-www -> www.
+
+# The Cloud Storage bucket
+
+Set up the Cloud Storage bucket:
+
+    export DOMAIN=www.gigamesh.io
+    gsutil mb -b on -c standard -l us-east1 "gs://$DOMAIN"
+    gsutil iam ch allUsers:objectViewer "gs://$DOMAIN"
+    gsutil web set -m index.html "gs://$DOMAIN"
+    gsutil cp index.html "gs://$DOMAIN"
+
+# The load balancers
+
+We need 3 load balancers:
+
+1. The main one for https://www.gigamesh.io.
+2. One to redirect http://www.gigamesh.io to https://www.gigamesh.io.
+3. One to redirect http(s)://gigamesh.io to https://www.gigamesh.io.
+
+(1) and (2) will share the same IP address. (3) will have a different IP address.
+(1) and (3) will share the same certificate. (2) does not need a certificate.
+All the DNS records will be A records (not CNAME records).
+
+Set up the main load balancer.
+- https://console.cloud.google.com/net-services/loadbalancing/list
+- Click "Create load balancer".
+  - Under "HTTP(S) load balancing", click "Start configuration".
+  - Select "From Internet to my VMs" and click Continue.
+  - Give the load balancer a name, like `gigamesh-lb`.
+  - For "Backend configuration", create a new "backend bucket" (yes, even though we created a bucket above).
+    - Give the bucket a name, like `gigamesh-bb`.
+    - Find the Cloud Storage bucket.
+    - Enable Cloud CDN.
+  - Use the default settings for "Host and path rules".
+  - For "Frontend configuration":
+    - Set the protocol to HTTPS.
+    - Create a new static IP address. Give it a name, like `gigamesh-ip`.
+    - Create a new certificate. Give it a name, like `gigamesh-cert`. Set it to be Google-managed. Fill in the domain, both with and without the `www`.
+
+Set up a load balancer to redirect HTTP traffic to the HTTPS load balancer above:
+  https://cloud.google.com/load-balancing/docs/https/setting-up-traffic-management#setting_up_the_http_load_balancer
+- https://console.cloud.google.com/net-services/loadbalancing/list
+- Click "Create load balancer".
+  - Select "From Internet to my VMs" and click Continue.
+  - Give the load balancer a name, like `gigamesh-redirect-http-to-https-lb`.
+  - For "Host and path rules":
+    - Advanced host and path rule:
+      - Action: redirect.
+        - Path redirect: prefix redirect.
+        - Enable "HTTPS redirect".
+  - For "Frontend configuration":
+    - Choose the IP address created above.
+
+Set up one more load balancer to redirect non-www traffic to www.
+- https://console.cloud.google.com/net-services/loadbalancing/list
+- Click "Create load balancer".
+  - Select "From Internet to my VMs" and click Continue.
+  - Give the load balancer a name, like `gigamesh-redirect-non-www-to-www-lb`.
+  - For "Host and path rules":
+    - Advanced host and path rule:
+      - Action: redirect.
+        - Host redirect: www.gigamesh.io.
+        - Path redirect: prefix redirect.
+        - Enable "HTTPS redirect" (not strictly necessary due to the other load balancer but saves a round trip).
+  - For "Frontend configuration":
+    - New Frontend IP and port:
+      - Create a new static IP address. Give it a name, like `gigamesh-apex-ip`.
+      - Create a new certificate. Give it a name, like `gigamesh-cert`. Set it to be Google-managed. Fill in the domain, both with and without the `www`.
+    - New Frontend IP and port:
+      - Set the protocol to HTTPS.
+      - Choose the IP address created above.
+      - Choose the cert generated for the first load balancer.
+
+# The DNS configuration
+
+In Google Domains, set up two A records:
+- @ -> the IP address used in load balancer (3)
+- www -> the IP address used in load balancer (1) and (2)
