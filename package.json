@@ -1,0 +1,36 @@
+{
+  "name": "gigamesh",
+  "version": "1.0.0",
+  "description": "A personal information manager.",
+  "private": true,
+  "scripts": {
+    "build": "cp -R static/. dist && parcel build src/index.html",
+    "check": "tsc --noEmit && npx eslint './**/*{.js,.ts}' && prettier --check .",
+    "dev": "cp -R static/. dist && parcel --no-autoinstall src/index.html",
+    "format": "prettier --write ."
+  },
+  "author": "Stephan Boyer",
+  "license": "ISC",
+  "dependencies": {
+    "fastclick": "^1.0.6"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
+    "autoprefixer": "^9.7.6",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.20.2",
+    "parcel-bundler": "^1.12.4",
+    "postcss-modules": "^2.0.0",
+    "prettier": "^2.0.5",
+    "sass": "^1.26.5",
+    "typescript": "^3.9.2"
+  },
+  "postcss": {
+    "plugins": [
+      "autoprefixer"
+    ]
+  }
+}

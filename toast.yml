@@ -1,33 +1,66 @@
 image: ubuntu:18.04
+default: build
 tasks:
-  install_dependencies:
+  install_packages:
     command: |
       set -euo pipefail
       apt-get update
       echo 'deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main' | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
       apt-get install --yes apt-transport-https ca-certificates curl gnupg
       curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+      curl -sL https://deb.nodesource.com/setup_14.x | bash -
       apt-get update
-      apt-get install --yes google-cloud-sdk
+      apt-get install --yes google-cloud-sdk nodejs
 
   create_user:
     command: |
       set -euo pipefail
       adduser --disabled-password --gecos '' user
 
-  deploy:
+  npm_ci:
     dependencies:
       - create_user
-      - install_dependencies
+      - install_packages
+    input_paths:
+      - package-lock.json
+      - package.json
+    user: user
+    command: |
+      set -euo pipefail
+      npm ci
+
+  build:
+    dependencies:
+      - npm_ci
+    input_paths:
+      - .eslintignore
+      - .eslintrc.js
+      - .prettierignore
+      - prettier.config.json
+      - src
+      - static
+      - tsconfig.json
+    output_paths:
+      - dist
+    user: user
+    command: |
+      set -euo pipefail
+      npm run check
+      npm run build
+
+  deploy:
+    dependencies:
+      - build
+      - create_user
+      - install_packages
     cache: false
     environment:
       GCP_CREDENTIALS: none
-    input_paths:
-      - index.html
     user: user
     command: |
       set -euo pipefail
       export GOOGLE_APPLICATION_CREDENTIALS=~/gcp-credentials.json
       echo "$GCP_CREDENTIALS" > "$GOOGLE_APPLICATION_CREDENTIALS"
       gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
-      gsutil cp index.html "gs://www.gigamesh.io"
+      gsutil -m rm -r gs://www.gigamesh.io/* || true
+      gsutil -m cp -r dist/* gs://www.gigamesh.io
