@@ -81,3 +81,11 @@ Set up one more load balancer to redirect non-www traffic to www.
 In Google Domains, set up two A records:
 - @ -> the IP address used in load balancer (3)
 - www -> the IP address used in load balancer (1) and (2)
+
+# CI configuration
+
+Create a service account: https://console.cloud.google.com/apis/credentials/serviceaccountkey
+
+      export GOOGLE_APPLICATION_CREDENTIALS=~/gcp-credentials.json
+      gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
+      gsutil cp index.html "gs://www.gigamesh.io"
