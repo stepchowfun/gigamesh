@@ -1,0 +1,35 @@
+@import "./rajdhani.scss";
+@import "./vendor/reset.css";
+
+// This quantity will form the basis for our vertical rhythm.
+$line-height: 32px;
+
+// This is the smallest layout viewport width we support. It's the width of the iPhone 5/SE screen.
+$min-width: 320px;
+
+// I find this box sizing model to be easier to reason about.
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  // Use up the full layout viewport.
+  &,
+  body,
+  .layer {
+    width: 100%;
+    min-width: $min-width;
+    height: 100%;
+  }
+
+  // Style the body and its contents.
+  body {
+    // Set up a cool font.
+    font-family: "Rajdhani", sans-serif;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: $line-height;
+  }
+}
