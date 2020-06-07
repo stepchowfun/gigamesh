@@ -2,7 +2,8 @@
   "compilerOptions": {
     "moduleResolution": "node",
     "strict": true,
-    "target": "es6"
+    "target": "es6",
+    "jsx": "react"
   },
   "include": ["src/**/*"]
 }

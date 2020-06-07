@@ -2,7 +2,7 @@
 
 [![Build status](https://github.com/stepchowfun/gigamesh/workflows/Continuous%20integration/badge.svg?branch=master)](https://github.com/stepchowfun/gigamesh/actions?query=branch%3Amaster)
 
-*Gigamesh* is a personal information manager.
+_Gigamesh_ is a personal information manager.
 
 ## Contributing
 
