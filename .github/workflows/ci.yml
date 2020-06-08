@@ -16,7 +16,7 @@ jobs:
           write_remote_cache: ${{ github.event_name == 'push' }}
       - uses: stepchowfun/toast/.github/actions/toast@master
         with:
-          tasks: deploy
+          tasks: deploy_frontend
           repo: stephanmisc/toast
           write_remote_cache: ${{ github.event_name == 'push' }}
         env:

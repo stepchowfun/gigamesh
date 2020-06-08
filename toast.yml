@@ -1,5 +1,5 @@
 image: ubuntu:18.04
-default: build
+default: build_frontend
 tasks:
   install_packages:
     command: |
@@ -17,40 +17,42 @@ tasks:
       set -euo pipefail
       adduser --disabled-password --gecos '' user
 
-  npm_ci:
+  npm_ci_frontend:
     dependencies:
       - create_user
       - install_packages
     input_paths:
-      - package-lock.json
-      - package.json
+      - frontend/package-lock.json
+      - frontend/package.json
     user: user
     command: |
       set -euo pipefail
+      cd frontend
       npm ci
 
-  build:
+  build_frontend:
     dependencies:
-      - npm_ci
+      - npm_ci_frontend
     input_paths:
-      - .eslintignore
-      - .eslintrc.js
-      - .prettierignore
-      - prettier.config.json
-      - src
-      - static
-      - tsconfig.json
+      - frontend/.eslintignore
+      - frontend/.eslintrc.js
+      - frontend/.prettierignore
+      - frontend/prettier.config.json
+      - frontend/src
+      - frontend/static
+      - frontend/tsconfig.json
     output_paths:
-      - dist
+      - frontend/dist
     user: user
     command: |
       set -euo pipefail
+      cd frontend
       npm run check
       npm run build
 
-  deploy:
+  deploy_frontend:
     dependencies:
-      - build
+      - build_frontend
       - create_user
       - install_packages
     cache: false
@@ -62,7 +64,9 @@ tasks:
       export GOOGLE_APPLICATION_CREDENTIALS=~/gcp-credentials.json
       echo "$GCP_CREDENTIALS" > "$GOOGLE_APPLICATION_CREDENTIALS"
       gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
-      gsutil -m rsync -d -r -c dist gs://www.gigamesh.io
+
+      # Sync the files to Cloud Storage.
+      gsutil -m rsync -d -r -c frontend/dist gs://www.gigamesh.io
 
       # The command below tells browsers and proxies to always revalidate
       # certain files. We do this for HTML files because they aren't
