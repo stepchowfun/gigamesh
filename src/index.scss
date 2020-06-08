@@ -1,4 +1,4 @@
-@import "./rajdhani.scss";
+@import "./hind.scss";
 @import "./vendor/reset.css";
 
 // This quantity will form the basis for our vertical rhythm.
@@ -27,9 +27,9 @@ html {
   // Style the body and its contents.
   body {
     // Set up a cool font.
-    font-family: "Rajdhani", sans-serif;
+    font-family: "Bind", sans-serif;
     font-weight: 400;
-    font-size: 24px;
+    font-size: 18px;
     line-height: $line-height;
   }
 }
