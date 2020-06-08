@@ -63,6 +63,15 @@ tasks:
       echo "$GCP_CREDENTIALS" > "$GOOGLE_APPLICATION_CREDENTIALS"
       gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
       gsutil -m rsync -d -r -c dist gs://www.gigamesh.io
+
+      # The command below tells browsers and proxies to always revalidate
+      # certain files. We do this for HTML files because they aren't
+      # fingerprinted, and stale versions may refer to fingerprinted assets
+      # which no longer exist. For some reason, Parcel adds fingerprints
+      # to the images referenced from the `site.webmanifest` file, but strangely
+      # it doesn't add a fingerprint to the manifest file itself. As a result,
+      # we must give them the same caching treatment as HTML files.
       gsutil -m setmeta \
         -h 'Cache-Control:public, max-age=0, must-revalidate' \
-        'gs://www.gigamesh.io/**.html'
+        'gs://www.gigamesh.io/**.html' \
+        'gs://www.gigamesh.io/**.webmanifest'
