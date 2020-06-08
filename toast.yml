@@ -63,3 +63,6 @@ tasks:
       echo "$GCP_CREDENTIALS" > "$GOOGLE_APPLICATION_CREDENTIALS"
       gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
       gsutil -m rsync -d -r -c dist gs://www.gigamesh.io
+      gsutil -m setmeta \
+        -h 'Cache-Control:public, max-age=0, must-revalidate' \
+        'gs://www.gigamesh.io/**.html'
