@@ -1,0 +1,25 @@
+{
+  "name": "gigamesh-backend",
+  "version": "1.0.0",
+  "description": "A personal information manager.",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit && npx eslint 'src/**/*{.js,.ts}' && prettier --check .",
+    "format": "prettier --write ."
+  },
+  "author": "Stephan Boyer",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/express": "^4.17.6",
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.20.2",
+    "prettier": "^2.0.5",
+    "typescript": "^3.9.2"
+  }
+}
