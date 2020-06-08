@@ -41,7 +41,7 @@ If you want to run and manage your own instance of Gigamesh, here are instructio
 - Deploying manually:
   - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey). Export the `GCP_CREDENTIALS` environment variable to the contents of the credentials file.
   - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
-  - Once you have Toast installed, run `toast deploy_frontend` to build and deploy the website.
+  - Once you have Toast installed, run `toast deploy` to build and deploy the service.
 - Continuous integration: This repository has a [GitHub action](https://github.com/stepchowfun/gigamesh/blob/master/.github/workflows/ci.yml) configured to build and deploy the service, with deploys only happening on the `master` branch. Follow the steps below to make this work.
   - Create a new Docker repository on [Docker Hub](https://hub.docker.com/). You'll need to create a Docker ID if you don't already have one.
   - You'll need to change the `repo` field of the GitHub action in `.github/workflows/ci.yml` to point to the Docker repository you just created.

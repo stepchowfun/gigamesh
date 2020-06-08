@@ -1,5 +1,5 @@
 image: ubuntu:18.04
-default: build_frontend
+default: build
 tasks:
   install_packages:
     command: |
@@ -17,6 +17,19 @@ tasks:
       set -euo pipefail
       adduser --disabled-password --gecos '' user
 
+  npm_ci_backend:
+    dependencies:
+      - create_user
+      - install_packages
+    input_paths:
+      - backend/package-lock.json
+      - backend/package.json
+    user: user
+    command: |
+      set -euo pipefail
+      cd backend
+      npm ci
+
   npm_ci_frontend:
     dependencies:
       - create_user
@@ -29,6 +42,25 @@ tasks:
       set -euo pipefail
       cd frontend
       npm ci
+
+  build_backend:
+    dependencies:
+      - npm_ci_backend
+    input_paths:
+      - backend/.eslintignore
+      - backend/.eslintrc.js
+      - backend/.prettierignore
+      - backend/prettier.config.json
+      - backend/src
+      - backend/tsconfig.json
+    output_paths:
+      - backend/dist
+    user: user
+    command: |
+      set -euo pipefail
+      cd backend
+      npm run check
+      npm run build
 
   build_frontend:
     dependencies:
@@ -49,6 +81,38 @@ tasks:
       cd frontend
       npm run check
       npm run build
+
+  build:
+    dependencies:
+      - build_backend
+      - build_frontend
+
+  deploy_backend:
+    dependencies:
+      - build_backend
+      - create_user
+      - install_packages
+    cache: false
+    input_paths:
+      - backend/.gcloudignore
+    environment:
+      GCP_CREDENTIALS: none
+    user: user
+    command: |
+      set -euo pipefail
+      export GOOGLE_APPLICATION_CREDENTIALS=~/gcp-credentials.json
+      echo "$GCP_CREDENTIALS" > "$GOOGLE_APPLICATION_CREDENTIALS"
+      gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
+
+      # Deploy the Cloud Functions.
+      cd backend
+      gcloud functions deploy helloWorld \
+        --project gigamesh-279607 \
+        --region us-east1 \
+        --runtime nodejs10 \
+        --source . \
+        --trigger-http \
+        --allow-unauthenticated
 
   deploy_frontend:
     dependencies:
@@ -79,3 +143,8 @@ tasks:
         -h 'Cache-Control:public, max-age=0, must-revalidate' \
         'gs://www.gigamesh.io/**.html' \
         'gs://www.gigamesh.io/**.webmanifest'
+
+  deploy:
+    dependencies:
+      - deploy_backend
+      - deploy_frontend

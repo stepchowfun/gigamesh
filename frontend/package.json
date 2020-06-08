@@ -1,5 +1,5 @@
 {
-  "name": "gigamesh",
+  "name": "gigamesh-frontend",
   "version": "1.0.0",
   "description": "A personal information manager.",
   "private": true,
@@ -10,7 +10,7 @@
     "format": "prettier --write ."
   },
   "author": "Stephan Boyer",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "fastclick": "^1.0.6",
     "react": "^16.13.1",
