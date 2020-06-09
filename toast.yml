@@ -105,8 +105,8 @@ tasks:
       gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
 
       # Deploy the Cloud Functions. We copy the code into a new directory because `gcloud` doesn't
-      # seem to like the fact that the files are owned by `root` (even though they `user` can read
-      # from and write to them).
+      # seem to like the fact that the files are owned by `root` (even though `user` can read from
+      # and write to them).
       cp -R backend /tmp/backend
       cd /tmp/backend
       gcloud functions deploy helloWorld \
