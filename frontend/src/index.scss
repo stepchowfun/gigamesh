@@ -43,6 +43,30 @@ html {
     line-height: $line-height;
     color: #202020;
 
+    // Style links.
+    a {
+      color: #e8559b;
+      transition: color $hover-transition-duration;
+      text-decoration-line: none;
+      margin-left: 32px;
+
+      &:first-child {
+        margin-left: 0;
+      }
+
+      &:hover {
+        color: #ff8dc3;
+      }
+
+      &:active {
+        color: #d92e80;
+
+        // When a user clicks on a link, skip the transition and give immediate feedback since
+        // clicks tend to be quick.
+        transition-duration: 0s;
+      }
+    }
+
     // Style the header.
     .header {
       display: flex;
@@ -59,30 +83,6 @@ html {
 
       .authentication {
         text-align: right;
-
-        // Style links.
-        a {
-          color: #71bcfe;
-          transition: color $hover-transition-duration;
-          text-decoration-line: none;
-          margin-left: 32px;
-
-          &:first-child {
-            margin-left: 0;
-          }
-
-          &:hover {
-            color: #afd9ff;
-          }
-
-          &:active {
-            color: #3f96e4;
-
-            // When a user clicks on a link, skip the transition and give immediate feedback since
-            // clicks tend to be quick.
-            transition-duration: 0s;
-          }
-        }
       }
     }
 
