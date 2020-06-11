@@ -11,8 +11,7 @@ If you want to use the public hosted version of Gigamesh, head on over to [gigam
 If you want to run and manage your own instance of Gigamesh, here are instructions for doing so with Google Cloud Platform:
 
 - Sign into the Google Cloud Console and create a new project.
-- Install the [Google Cloud SDK](https://cloud.google.com/sdk/install).
-- Run `gcloud init` to configure and authorize Google Cloud SDK tools.
+- Install the [Google Cloud SDK](https://cloud.google.com/sdk/install) and run `gcloud init` to configure and authorize the SDK tools.
 - Set up a Cloud Storage bucket for serving the website.
 
   ```sh
