@@ -39,7 +39,7 @@ If you want to run and manage your own instance of Gigamesh, here are instructio
 - For the DNS configuration (e.g., in Google Domains): Create two A records, one for the root (`@`) and one for `www`. Use the appropriate IP addresses for the load balancers you created above.
 - Clone this repository.
 - Deploying manually:
-  - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey). Export the `GCP_CREDENTIALS` environment variable to the contents of the credentials file.
+  - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey). Export the `GCP_CREDENTIALS` environment variable to the contents of the credentials file. Grant the `Cloud Functions Developer`, `Service Account User`, and `Storage Object Admin` roles.
   - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
   - Once you have Toast installed, run `toast deploy` to build and deploy the service.
 - Continuous integration: This repository has a [GitHub action](https://github.com/stepchowfun/gigamesh/blob/master/.github/workflows/ci.yml) configured to build and deploy the service, with deploys only happening on the `master` branch. Follow the steps below to make this work.
