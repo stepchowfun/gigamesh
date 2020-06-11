@@ -28,7 +28,7 @@ class Main extends React.Component<{}, { name: string }> {
     (axios as AxiosInstance)
       .get("https://us-east1-gigamesh-279607.cloudfunctions.net/helloWorld", {
         params: {
-          message: "Gigamesh!",
+          message: "You clicked the link!",
         },
       })
       .then((response: AxiosResponse) => {

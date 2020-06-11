@@ -31,7 +31,7 @@ html {
   }
 
   // Style the body and its contents.
-  body .main {
+  body #main .main {
     // Set up a container in the middle of the page.
     max-width: $max-width;
     margin: 0 auto;
