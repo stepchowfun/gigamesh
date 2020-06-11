@@ -96,7 +96,7 @@ tasks:
     input_paths:
       - backend/.gcloudignore
     environment:
-      GCP_CREDENTIALS: none
+      GCP_CREDENTIALS: null
     user: user
     command: |
       set -euo pipefail
@@ -124,7 +124,7 @@ tasks:
       - install_packages
     cache: false
     environment:
-      GCP_CREDENTIALS: none
+      GCP_CREDENTIALS: null
     user: user
     command: |
       set -euo pipefail
