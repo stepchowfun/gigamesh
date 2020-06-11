@@ -6,13 +6,22 @@ import * as ReactDOM from "react-dom";
 // eslint-disable-next-line no-unused-vars
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 
-interface HelloProps {
-  name: string;
-}
-
 // eslint-disable-next-line no-unused-vars
-function Hello(props: HelloProps) {
-  function handleClick(e: React.MouseEvent) {
+class Main extends React.Component<{}, { name: string }> {
+  constructor(props: {}) {
+    super(props);
+    this.state = { name: "Visitor" };
+  }
+
+  static getStarted(e: React.MouseEvent) {
+    e.preventDefault();
+  }
+
+  static logIn(e: React.MouseEvent) {
+    e.preventDefault();
+  }
+
+  static handleClick(e: React.MouseEvent) {
     e.preventDefault();
 
     // Why is this cast necessary?
@@ -28,16 +37,31 @@ function Hello(props: HelloProps) {
       });
   }
 
-  return (
-    <div>
-      <h1>Hello, {props.name}!</h1>
-      <p>
-        <a href="#" onClick={handleClick}>
-          Click here!
-        </a>
-      </p>
-    </div>
-  );
+  render() {
+    return (
+      <div className="main">
+        <div className="header">
+          <div className="title">Gigamesh</div>
+          <div className="authentication">
+            <a href="#" onClick={Main.getStarted}>
+              Get started
+            </a>
+            <a href="#" onClick={Main.logIn}>
+              Log in
+            </a>
+          </div>
+        </div>
+        <div className="editor">
+          <p>
+            Hello, {this.state.name}!{" "}
+            <a href="#" onClick={Main.handleClick}>
+              Click here!
+            </a>
+          </p>
+        </div>
+      </div>
+    );
+  }
 }
 
-ReactDOM.render(<Hello name="Gigamesh" />, document.getElementById("main"));
+ReactDOM.render(<Main />, document.getElementById("main"));

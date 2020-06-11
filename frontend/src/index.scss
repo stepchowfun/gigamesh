@@ -7,6 +7,12 @@ $line-height: 32px;
 // This is the smallest layout viewport width we support. It's the width of the iPhone 5/SE screen.
 $min-width: 320px;
 
+// This is the largest width.
+$max-width: 800px;
+
+// This is the transition duration for hover states.
+$hover-transition-duration: 0.2s;
+
 // I find this box sizing model to be easier to reason about.
 *,
 *::before,
@@ -25,11 +31,65 @@ html {
   }
 
   // Style the body and its contents.
-  body {
+  body .main {
+    // Set up a container in the middle of the page.
+    max-width: $max-width;
+    margin: 0 auto;
+
     // Set up a cool font.
     font-family: "Bind", sans-serif;
     font-weight: 400;
     font-size: 18px;
     line-height: $line-height;
+    color: #202020;
+
+    // Style the header.
+    .header {
+      display: flex;
+      border-bottom: 1px solid #dddddd;
+      user-select: none;
+      cursor: default;
+
+      .title,
+      .authentication {
+        width: 50%;
+        height: $line-height * 2 - 1;
+        line-height: $line-height * 2 - 1px;
+      }
+
+      .authentication {
+        text-align: right;
+
+        // Style links.
+        a {
+          color: #71bcfe;
+          transition: color $hover-transition-duration;
+          text-decoration-line: none;
+          margin-left: 32px;
+
+          &:first-child {
+            margin-left: 0;
+          }
+
+          &:hover {
+            color: #afd9ff;
+          }
+
+          &:active {
+            color: #3f96e4;
+
+            // When a user clicks on a link, skip the transition and give immediate feedback since
+            // clicks tend to be quick.
+            transition-duration: 0s;
+          }
+        }
+      }
+    }
+
+    // Style the editor.
+    .editor {
+      outline: none;
+      padding: $line-height * 0.5 0;
+    }
   }
 }
