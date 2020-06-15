@@ -12,7 +12,6 @@
     gsutil iam ch allUsers:objectViewer "gs://$DOMAIN"
     gsutil web set -m index.html "gs://$DOMAIN"
     ```
-
   - Set up one or more load balancers. The number of load balancers you need depends on your domain and protocol. For example, the public hosted Gigamesh uses three load balancers: (1) the main one which serves `https://www.gigamesh.io`, (2) one to redirect `http://www.gigamesh.io` to `https://www.gigamesh.io`, and one to redirect `http(s)://gigamesh.io` to `https://www.gigamesh.io`. These instructions will assume you are following the same scheme.
     - You can create load balancers from the [Cloud Console](https://console.cloud.google.com/net-services/loadbalancing/list). All three load balancers will be HTTP(S) load balancers (as opposed to TCP load balancers or UDP load balancers).
     - Set up the main load balancer (1).
@@ -28,11 +27,27 @@
       - **Host and path rules:** Use an "Advanced host and path rule", and choose "Redirect the client to a different host/path". Set the "Host redirect" to the appropriate domain and configure an empty "Prefix redirect". Set the response code to 301 and enable "HTTPS redirect".
       - **Frontend configuration:** We'll set up two rules, one for HTTP and one for HTTPS. Create a new static IP address (different from the one you created earlier) and use it for both. For the HTTPS rule, use the certificate you created above for the first load balancer (1).
   - For the DNS configuration (e.g., in Google Domains): Create two A records, one for the root (`@`) and one for `www`. Use the appropriate IP addresses for the load balancers you created above.
+  - Set up a PostgreSQL database via the [Cloud Console](https://console.cloud.google.com/sql/create-instance-postgres).
+    - **Instance ID:** Use `gigamesh`.
+    - **Default password:** Choose a secure password (or let the Cloud Console generate one for you). Store it in your favorite password manager.
+    - **Region:** Choose the same region as the Cloud Storage bucket you created above.
+    - **Zone:** `Any` is fine.
+    - **Database version:** Use `PostgreSQL 12`.
   - Clone this repository.
   - Deploying manually:
     - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey). Export the `GCP_CREDENTIALS` environment variable to the contents of the credentials file. Grant the `Owner` role; I was unable to determine a more granular set of roles that include the necessary permissions.
     - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
-    - Once you have Toast installed, run `toast deploy` to build and deploy the service.
+    - Once you have Toast installed, run the following command to build and deploy the service:
+
+      ```sh
+      DOMAIN=www.gigamesh.io \
+        GCP_CREDENTIALS="$(cat credentials.json)" \
+        GCP_PROJECT_ID=gigamesh-279607 \
+        GCP_REGION=us-east1 \
+        toast deploy
+      ```
+
+      You should modify the environment variables as appropriate.
   - Continuous integration: This repository has a [GitHub action](https://github.com/stepchowfun/gigamesh/blob/master/.github/workflows/ci.yml) configured to build and deploy the service, with deploys only happening on the `master` branch. Follow the steps below to make this work.
     - Create a new Docker repository on [Docker Hub](https://hub.docker.com/). You'll need to create a Docker ID if you don't already have one.
     - You'll need to change the `repo` field of the GitHub action in `.github/workflows/ci.yml` to point to the Docker repository you just created.
