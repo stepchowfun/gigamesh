@@ -2,9 +2,7 @@
 import * as React from "react";
 
 import * as ReactDOM from "react-dom";
-
-// eslint-disable-next-line no-unused-vars
-import axios, { AxiosInstance, AxiosResponse } from "axios";
+import { helloWorld } from "./endpoints";
 
 // eslint-disable-next-line no-unused-vars
 class Main extends React.Component<{}, { name: string }> {
@@ -23,18 +21,10 @@ class Main extends React.Component<{}, { name: string }> {
 
   static handleClick(e: React.MouseEvent) {
     e.preventDefault();
-
-    // Why is this cast necessary?
-    (axios as AxiosInstance)
-      .get("https://us-east1-gigamesh-279607.cloudfunctions.net/helloWorld", {
-        params: {
-          message: "You clicked the link!",
-        },
-      })
-      .then((response: AxiosResponse) => {
-        // eslint-disable-next-line no-alert
-        alert(response.data);
-      });
+    helloWorld("You clicked the link!").then((response) => {
+      // eslint-disable-next-line no-alert
+      alert(response.data);
+    });
   }
 
   render() {

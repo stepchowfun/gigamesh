@@ -3,7 +3,12 @@ import { Request, Response } from "express";
 
 // eslint-disable-next-line import/prefer-default-export
 export function helloWorld(req: Request, res: Response) {
-  res.set("Access-Control-Allow-Origin", "https://www.gigamesh.io");
+  res.set(
+    "Access-Control-Allow-Origin",
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:1234"
+      : "https://www.gigamesh.io"
+  );
 
   if (req.method === "OPTIONS") {
     res.set("Access-Control-Allow-Methods", "GET, POST");

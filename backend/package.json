@@ -6,13 +6,14 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "check": "tsc --noEmit && npx eslint 'src/**/*{.js,.ts}' && prettier --check .",
+    "check-without-building": "tsc --noEmit && npx eslint 'src/**/*{.js,.ts}' && prettier --check .",
+    "development": "tsc && NODE_ENV=development functions-framework --target=helloWorld",
     "format": "prettier --write ."
   },
   "author": "Stephan Boyer",
   "license": "MIT",
   "devDependencies": {
-    "@types/express": "^4.17.6",
+    "@types/express": "^4.17.1",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
     "eslint": "^6.8.0",
@@ -21,5 +22,9 @@
     "eslint-plugin-import": "^2.20.2",
     "prettier": "^2.0.5",
     "typescript": "^3.9.2"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^1.5.1",
+    "express": "^4.17.1"
   }
 }
