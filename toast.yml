@@ -109,13 +109,16 @@ tasks:
     input_paths:
       - backend/.gcloudignore
     environment:
+      DOMAIN: www.gigamesh.io
       GCP_CREDENTIALS: null
+      GCP_PROJECT_ID: gigamesh-279607
+      GCP_REGION: us-east1
     user: user
     command: |
       set -euo pipefail
 
       # Authenticate with the Google Cloud SDK.
-      export GOOGLE_APPLICATION_CREDENTIALS=~/gcp-credentials.json
+      GOOGLE_APPLICATION_CREDENTIALS=~/gcp-credentials.json
       echo "$GCP_CREDENTIALS" > "$GOOGLE_APPLICATION_CREDENTIALS"
       gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
 
@@ -124,15 +127,15 @@ tasks:
       # and write to them).
       cp -R backend /tmp/backend
       gcloud functions deploy helloWorld \
-        --project gigamesh-279607 \
-        --region us-east1 \
+        --project "$GCP_PROJECT_ID" \
+        --region "$GCP_REGION" \
         --runtime nodejs10 \
         --source /tmp/backend \
         --trigger-http \
         --allow-unauthenticated
 
       # Sync the frontend files to Cloud Storage.
-      gsutil -m rsync -d -r -c frontend/dist gs://www.gigamesh.io
+      gsutil -m rsync -d -r -c frontend/dist "gs://$DOMAIN"
 
       # The command below tells browsers and proxies to always revalidate
       # certain files. We do this for HTML files because they aren't
@@ -143,5 +146,5 @@ tasks:
       # we must give them the same caching treatment as HTML files.
       gsutil -m setmeta \
         -h 'Cache-Control:public, max-age=0, must-revalidate' \
-        'gs://www.gigamesh.io/**.html' \
-        'gs://www.gigamesh.io/**.webmanifest'
+        "gs://$DOMAIN/**.html" \
+        "gs://$DOMAIN/**.webmanifest"
