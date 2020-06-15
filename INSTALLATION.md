@@ -50,8 +50,8 @@
       You should modify the environment variables as appropriate.
   - Continuous integration: This repository has a [GitHub action](https://github.com/stepchowfun/gigamesh/blob/master/.github/workflows/ci.yml) configured to build and deploy the service, with deploys only happening on the `master` branch. Follow the steps below to make this work.
     - Create a new Docker repository on [Docker Hub](https://hub.docker.com/). You'll need to create a Docker ID if you don't already have one.
-    - You'll need to change the `repo` field of the GitHub action in `.github/workflows/ci.yml` to point to the Docker repository you just created.
+    - You'll need to change the `repo` field(s) of the GitHub action in `.github/workflows/ci.yml` to point to the Docker repository you just created.
+    - You'll need to change the `env` field(s) of the GitHub action in `.github/workflows/ci.yml` to set the correct environment variables for the deploy step (see the deployment instructions above).
     - Set up two secrets in the repository settings on GitHub:
       - `DOCKER_PASSWORD`: This is your Docker ID password. Toast will use it to cache intermediate Docker images when performing builds.
       - `GCP_CREDENTIALS`: This should contain the contents of the credentials file for the GCP service account you created earlier. It's used to authorize the CI job to deploy the website.
-
