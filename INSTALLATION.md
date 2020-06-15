@@ -34,7 +34,7 @@
     - **Zone:** `Any` is fine.
     - **Database version:** Use `PostgreSQL 12`.
   - Clone this repository.
-  - Deploying manually:
+  - Manual deployment:
     - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey). Export the `GCP_CREDENTIALS` environment variable to the contents of the credentials file. Grant the `Owner` role; I was unable to determine a more granular set of roles that include the necessary permissions.
     - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
     - Once you have Toast installed, run the following command to build and deploy the service:
