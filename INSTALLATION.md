@@ -27,12 +27,20 @@
       - **Host and path rules:** Use an "Advanced host and path rule", and choose "Redirect the client to a different host/path". Set the "Host redirect" to the appropriate domain and configure an empty "Prefix redirect". Set the response code to 301 and enable "HTTPS redirect".
       - **Frontend configuration:** We'll set up two rules, one for HTTP and one for HTTPS. Create a new static IP address (different from the one you created earlier) and use it for both. For the HTTPS rule, use the certificate you created above for the first load balancer (1).
   - For the DNS configuration (e.g., in Google Domains): Create two A records, one for the root (`@`) and one for `www`. Use the appropriate IP addresses for the load balancers you created above.
-  - Set up a PostgreSQL database via the [Cloud Console](https://console.cloud.google.com/sql/create-instance-postgres).
+  - Set up a PostgreSQL database instance via the [Cloud Console](https://console.cloud.google.com/sql/create-instance-postgres).
     - **Instance ID:** Use `gigamesh`.
     - **Default password:** Choose a secure password (or let the Cloud Console generate one for you). Store it in your favorite password manager.
     - **Region:** Choose the same region as the Cloud Storage bucket you created above.
     - **Zone:** `Any` is fine.
     - **Database version:** Use `PostgreSQL 12`.
+  - Create a database.
+    - From the Cloud Console, navigate to the database instance created in the previous step and hit the `Connect using Cloud Shell` button.
+    - Log in using the password you created for the `postgres` user above.
+    - Enter the following:
+
+      ```sql
+      CREATE DATABASE gigamesh;
+      ```
   - Clone this repository.
   - Manual deployment:
     - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey). Export the `GCP_CREDENTIALS` environment variable to the contents of the credentials file. Grant the `Owner` role; I was unable to determine a more granular set of roles that include the necessary permissions.
