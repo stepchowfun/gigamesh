@@ -17,105 +17,57 @@ tasks:
       set -euo pipefail
       adduser --disabled-password --gecos '' user
 
-  npm_ci_backend:
+  install_dependencies:
     dependencies:
       - create_user
       - install_packages
     input_paths:
       - backend/package-lock.json
       - backend/package.json
-    user: user
-    command: |
-      set -euo pipefail
-      cd backend
-      npm ci
-
-  npm_ci_frontend:
-    dependencies:
-      - create_user
-      - install_packages
-    input_paths:
       - frontend/package-lock.json
       - frontend/package.json
     user: user
     command: |
       set -euo pipefail
-      cd frontend
-      npm ci
+      (cd backend && npm ci)
+      (cd frontend && npm ci)
 
-  npm_ci:
+  format:
     dependencies:
-      - npm_ci_backend
-      - npm_ci_frontend
-
-  format_backend:
-    dependencies:
-      - npm_ci_backend
+      - install_dependencies
     input_paths:
       - backend/.prettierignore
       - backend/prettier.config.json
       - backend/src
-    output_paths:
-      - backend
-    user: user
-    command: |
-      set -euo pipefail
-      cd backend
-      npm run format
-
-  format_frontend:
-    dependencies:
-      - npm_ci_frontend
-    input_paths:
       - frontend/.prettierignore
       - frontend/prettier.config.json
       - frontend/src
     output_paths:
+      - backend/src
       - frontend/src
     user: user
     command: |
       set -euo pipefail
-      cd frontend
-      npm run format
+      (cd backend && npm run format)
+      (cd frontend && npm run format)
 
-  format:
+  build:
     dependencies:
-      - format_backend
-      - format_frontend
-
-  build_backend:
-    dependencies:
-      - npm_ci_backend
+      - install_dependencies
     input_paths:
       - backend/src
       - backend/tsconfig.json
-    output_paths:
-      - backend/dist
-    user: user
-    command: |
-      set -euo pipefail
-      cd backend
-      npm run build
-
-  build_frontend:
-    dependencies:
-      - npm_ci_frontend
-    input_paths:
       - frontend/src
       - frontend/static
       - frontend/tsconfig.json
     output_paths:
+      - backend/dist
       - frontend/dist
     user: user
     command: |
       set -euo pipefail
-      cd frontend
-      npm run build
-
-  build:
-    dependencies:
-      - build_backend
-      - build_frontend
+      (cd backend && npm run build)
+      (cd frontend && npm run build)
 
   development:
     dependencies:
@@ -129,24 +81,14 @@ tasks:
       set -euo pipefail
       (cd frontend && npm run development) & (cd backend && npm run development)
 
-  check_backend:
+  check:
     dependencies:
-      - build_backend
+      - build
     input_paths:
       - backend/.eslintignore
       - backend/.eslintrc.js
       - backend/.prettierignore
       - backend/prettier.config.json
-    user: user
-    command: |
-      set -euo pipefail
-      cd backend
-      npm run check-without-building
-
-  check_frontend:
-    dependencies:
-      - build_frontend
-    input_paths:
       - frontend/.eslintignore
       - frontend/.eslintrc.js
       - frontend/.prettierignore
@@ -154,18 +96,13 @@ tasks:
     user: user
     command: |
       set -euo pipefail
-      cd frontend
-      npm run check-without-building
+      (cd backend && npm run check-without-building)
+      (cd frontend && npm run check-without-building)
 
-  check:
+  deploy:
     dependencies:
-      - check_backend
-      - check_frontend
-
-  deploy_backend:
-    dependencies:
-      - build_backend
-      - check_backend
+      - build
+      - check
       - create_user
       - install_packages
     cache: false
@@ -176,6 +113,8 @@ tasks:
     user: user
     command: |
       set -euo pipefail
+
+      # Authenticate with the Google Cloud SDK.
       export GOOGLE_APPLICATION_CREDENTIALS=~/gcp-credentials.json
       echo "$GCP_CREDENTIALS" > "$GOOGLE_APPLICATION_CREDENTIALS"
       gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
@@ -184,32 +123,15 @@ tasks:
       # seem to like the fact that the files are owned by `root` (even though `user` can read from
       # and write to them).
       cp -R backend /tmp/backend
-      cd /tmp/backend
       gcloud functions deploy helloWorld \
         --project gigamesh-279607 \
         --region us-east1 \
         --runtime nodejs10 \
-        --source . \
+        --source /tmp/backend \
         --trigger-http \
         --allow-unauthenticated
 
-  deploy_frontend:
-    dependencies:
-      - build_frontend
-      - check_frontend
-      - create_user
-      - install_packages
-    cache: false
-    environment:
-      GCP_CREDENTIALS: null
-    user: user
-    command: |
-      set -euo pipefail
-      export GOOGLE_APPLICATION_CREDENTIALS=~/gcp-credentials.json
-      echo "$GCP_CREDENTIALS" > "$GOOGLE_APPLICATION_CREDENTIALS"
-      gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
-
-      # Sync the files to Cloud Storage.
+      # Sync the frontend files to Cloud Storage.
       gsutil -m rsync -d -r -c frontend/dist gs://www.gigamesh.io
 
       # The command below tells browsers and proxies to always revalidate
@@ -223,8 +145,3 @@ tasks:
         -h 'Cache-Control:public, max-age=0, must-revalidate' \
         'gs://www.gigamesh.io/**.html' \
         'gs://www.gigamesh.io/**.webmanifest'
-
-  deploy:
-    dependencies:
-      - deploy_backend
-      - deploy_frontend
