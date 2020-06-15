@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "build": "cp -R static/. dist && parcel build src/index.html",
-    "check": "tsc --noEmit && npx eslint './**/*{.js,.jsx,.ts,.tsx}' && prettier --check .",
-    "dev": "cp -R static/. dist && parcel --no-autoinstall src/index.html",
+    "check-without-building": "tsc --noEmit && npx eslint './**/*{.js,.jsx,.ts,.tsx}' && prettier --check .",
+    "development": "cp -R static/. dist && parcel --no-autoinstall src/index.html",
     "format": "prettier --write ."
   },
   "author": "Stephan Boyer",
@@ -18,6 +18,7 @@
     "react-dom": "^16.13.1"
   },
   "devDependencies": {
+    "@types/node": "^14.0.13",
     "@types/react": "^16.9.35",
     "@types/react-dom": "^16.9.8",
     "@typescript-eslint/eslint-plugin": "^2.33.0",

@@ -1,5 +1,5 @@
 image: ubuntu:18.04
-default: build
+default: check
 tasks:
   install_packages:
     command: |
@@ -43,14 +43,50 @@ tasks:
       cd frontend
       npm ci
 
+  npm_ci:
+    dependencies:
+      - npm_ci_backend
+      - npm_ci_frontend
+
+  format_backend:
+    dependencies:
+      - npm_ci_backend
+    input_paths:
+      - backend/.prettierignore
+      - backend/prettier.config.json
+      - backend/src
+    output_paths:
+      - backend
+    user: user
+    command: |
+      set -euo pipefail
+      cd backend
+      npm run format
+
+  format_frontend:
+    dependencies:
+      - npm_ci_frontend
+    input_paths:
+      - frontend/.prettierignore
+      - frontend/prettier.config.json
+      - frontend/src
+    output_paths:
+      - frontend/src
+    user: user
+    command: |
+      set -euo pipefail
+      cd frontend
+      npm run format
+
+  format:
+    dependencies:
+      - format_backend
+      - format_frontend
+
   build_backend:
     dependencies:
       - npm_ci_backend
     input_paths:
-      - backend/.eslintignore
-      - backend/.eslintrc.js
-      - backend/.prettierignore
-      - backend/prettier.config.json
       - backend/src
       - backend/tsconfig.json
     output_paths:
@@ -59,17 +95,12 @@ tasks:
     command: |
       set -euo pipefail
       cd backend
-      npm run check
       npm run build
 
   build_frontend:
     dependencies:
       - npm_ci_frontend
     input_paths:
-      - frontend/.eslintignore
-      - frontend/.eslintrc.js
-      - frontend/.prettierignore
-      - frontend/prettier.config.json
       - frontend/src
       - frontend/static
       - frontend/tsconfig.json
@@ -79,7 +110,6 @@ tasks:
     command: |
       set -euo pipefail
       cd frontend
-      npm run check
       npm run build
 
   build:
@@ -87,9 +117,55 @@ tasks:
       - build_backend
       - build_frontend
 
+  development:
+    dependencies:
+      - build
+    cache: false
+    ports:
+      - 1234:1234
+      - 8080:8080
+    user: user
+    command: |
+      set -euo pipefail
+      (cd frontend && npm run development) & (cd backend && npm run development)
+
+  check_backend:
+    dependencies:
+      - build_backend
+    input_paths:
+      - backend/.eslintignore
+      - backend/.eslintrc.js
+      - backend/.prettierignore
+      - backend/prettier.config.json
+    user: user
+    command: |
+      set -euo pipefail
+      cd backend
+      npm run check-without-building
+
+  check_frontend:
+    dependencies:
+      - build_frontend
+    input_paths:
+      - frontend/.eslintignore
+      - frontend/.eslintrc.js
+      - frontend/.prettierignore
+      - frontend/prettier.config.json
+    user: user
+    command: |
+      set -euo pipefail
+      cd frontend
+      npm run check-without-building
+
+  check:
+    dependencies:
+      - check_backend
+      - check_frontend
+
   deploy_backend:
     dependencies:
       - build_backend
+      - check_backend
       - create_user
       - install_packages
     cache: false
@@ -120,6 +196,7 @@ tasks:
   deploy_frontend:
     dependencies:
       - build_frontend
+      - check_frontend
       - create_user
       - install_packages
     cache: false
