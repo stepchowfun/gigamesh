@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
-import * as React from "react";
+import React from "react";
 
-import * as ReactDOM from "react-dom";
+import ReactDOM from "react-dom";
 import { helloWorld } from "./endpoints";
 
 // eslint-disable-next-line no-unused-vars
