@@ -73,9 +73,14 @@ tasks:
     dependencies:
       - build
     cache: false
+    environment:
+      SENDGRID_API_KEY: null
+    mount_paths:
+      - frontend/src
     ports:
-      - 1234:1234
-      - 8080:8080
+      - 1234:1234 # The web server
+      - 1235:1235 # Hot module reloading websocket port
+      - 8080:8080 # The backend API
     user: user
     command: |
       set -euo pipefail

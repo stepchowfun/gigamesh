@@ -86,3 +86,4 @@
     - Set up two secrets in the repository settings on GitHub:
       - `DOCKER_PASSWORD`: This is your Docker ID password. Toast will use it to cache intermediate Docker images when performing builds.
       - `GCP_CREDENTIALS`: This should contain the contents of the credentials file for the GCP service account you created earlier. It's used to authorize the CI job to deploy the website.
+  - You will also need to change various constants in the source code pertaining to the domain name and GCP project ID. Search the source code for `gigamesh.io` and `gigamesh-279607`.

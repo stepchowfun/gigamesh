@@ -6,7 +6,7 @@
   "scripts": {
     "build": "cp -R static/. dist && parcel build src/index.html",
     "check-without-building": "tsc --noEmit && npx eslint './**/*{.js,.jsx,.ts,.tsx}' && prettier --check .",
-    "development": "cp -R static/. dist && parcel --no-autoinstall src/index.html",
+    "development": "cp -R static/. dist && parcel --hmr-port 1235 --no-autoinstall src/index.html",
     "format": "prettier --write ."
   },
   "author": "Stephan Boyer",
