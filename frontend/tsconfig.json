@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
+    "esModuleInterop": true,
+    "jsx": "react",
     "moduleResolution": "node",
     "strict": true,
-    "target": "ES6",
-    "jsx": "react"
+    "target": "ES6"
   },
   "files": ["src/script/main.tsx"]
 }

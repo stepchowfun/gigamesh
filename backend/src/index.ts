@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-unresolved, no-unused-vars
 import { Request, Response } from "express";
 
-import * as sendgrid from "@sendgrid/mail";
+import sendgrid from "@sendgrid/mail";
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 import { isProduction } from "./environment";
 
