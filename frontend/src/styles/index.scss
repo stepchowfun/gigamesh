@@ -1,5 +1,5 @@
 @import "./muli.scss";
-@import "./vendor/reset.css";
+@import "../vendor/reset.css";
 
 // This quantity will form the basis for our vertical rhythm.
 $line-height: 32px;
@@ -83,6 +83,13 @@ html {
 
       .title {
         font-weight: 700;
+
+        .logo {
+          width: 100px;
+          position: relative;
+          left: -6px;
+          top: 7px;
+        }
       }
 
       .authentication {

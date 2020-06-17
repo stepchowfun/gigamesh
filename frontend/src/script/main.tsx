@@ -2,7 +2,11 @@
 import React from "react";
 
 import ReactDOM from "react-dom";
+import attachFastClick from "fastclick";
 import { helloWorld } from "./endpoints";
+
+// @ts-ignore
+import logoPath from "../images/logo.svg";
 
 // eslint-disable-next-line no-unused-vars
 class Main extends React.Component<{}, { name: string }> {
@@ -31,7 +35,9 @@ class Main extends React.Component<{}, { name: string }> {
     return (
       <div className="main">
         <div className="header">
-          <div className="title">Gigamesh</div>
+          <div className="title">
+            <img className="logo" src={logoPath} alt="Gigamesh" />
+          </div>
           <div className="authentication">
             <a href="#" onClick={Main.getStarted}>
               Let’s go ›
@@ -51,4 +57,9 @@ class Main extends React.Component<{}, { name: string }> {
   }
 }
 
+// Render the main component.
 ReactDOM.render(<Main />, document.getElementById("main"));
+
+// FastClick eliminates the 300ms delay between a physical tap and the firing of a click event on
+// mobile browsers.
+attachFastClick(document.body);
