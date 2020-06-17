@@ -34,10 +34,7 @@ class Main extends React.Component<{}, { name: string }> {
           <div className="title">Gigamesh</div>
           <div className="authentication">
             <a href="#" onClick={Main.getStarted}>
-              Get started
-            </a>
-            <a href="#" onClick={Main.logIn}>
-              Log in
+              Let’s go ›
             </a>
           </div>
         </div>

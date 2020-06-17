@@ -1,4 +1,4 @@
-@import "./hind.scss";
+@import "./muli.scss";
 @import "./vendor/reset.css";
 
 // This quantity will form the basis for our vertical rhythm.
@@ -37,9 +37,9 @@ html {
     margin: 0 auto;
 
     // Set up a cool font.
-    font-family: "Bind", sans-serif;
+    font-family: "Muli", sans-serif;
     font-weight: 400;
-    font-size: 18px;
+    font-size: 17px;
     line-height: $line-height;
     color: #202020;
 
@@ -81,8 +81,13 @@ html {
         line-height: $line-height * 2 - 1px;
       }
 
+      .title {
+        font-weight: 700;
+      }
+
       .authentication {
         text-align: right;
+        font-size: 15px;
       }
     }
 
