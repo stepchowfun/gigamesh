@@ -42,14 +42,22 @@ tasks:
       - frontend/.prettierignore
       - frontend/prettier.config.json
       - frontend/src
+      - shared
     output_paths:
       - backend/src
       - frontend/src
+      - shared
     user: user
     command: |
       set -euo pipefail
       (cd backend && npm run format)
       (cd frontend && npm run format)
+
+      # These `rm` commands are needed to work around a bug in `docker container cp` related to
+      # symlinks. See https://stackoverflow.com/questions/35787702/docker-cp-a-folder-with-a-relative-symlink-invalid-symlink
+      # for details.
+      rm backend/src/shared
+      rm frontend/src/script/shared
 
   build:
     dependencies:
@@ -60,6 +68,7 @@ tasks:
       - frontend/src
       - frontend/static
       - frontend/tsconfig.json
+      - shared
     output_paths:
       - backend/dist
       - frontend/dist
@@ -77,6 +86,7 @@ tasks:
       SENDGRID_API_KEY: null
     mount_paths:
       - frontend/src
+      - shared
     ports:
       - 1234:1234 # The web server
       - 1235:1235 # Hot module reloading websocket port
