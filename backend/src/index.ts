@@ -3,7 +3,13 @@ import { Request, Response } from "express";
 
 import sendgrid from "@sendgrid/mail";
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
-import { isProduction } from "./environment";
+import {
+  authenticationEmailSender,
+  originDevelopment,
+  originProduction,
+  sendgridApiKeySecretName,
+} from "./shared/constants";
+import { isProduction } from "./shared/environment";
 
 // Instantiate a secret manager once rather than in every request.
 const secretManager = new SecretManagerServiceClient();
@@ -12,7 +18,7 @@ const secretManager = new SecretManagerServiceClient();
 export async function helloWorld(req: Request, res: Response) {
   res.set(
     "Access-Control-Allow-Origin",
-    isProduction() ? "https://www.gigamesh.io" : "http://localhost:1234"
+    isProduction() ? originProduction : originDevelopment
   );
 
   if (req.method === "OPTIONS") {
@@ -24,7 +30,7 @@ export async function helloWorld(req: Request, res: Response) {
     const sendgridApiKey = await (async () => {
       if (isProduction()) {
         const [accessResponse] = await secretManager.accessSecretVersion({
-          name: "projects/gigamesh-279607/secrets/sendgrid/versions/latest",
+          name: sendgridApiKeySecretName,
         });
 
         return accessResponse.payload!.data!.toString();
@@ -37,7 +43,7 @@ export async function helloWorld(req: Request, res: Response) {
 
     await sendgrid.send({
       to: "boyerstephan@gmail.com",
-      from: "automated@gigamesh.io",
+      from: authenticationEmailSender,
       subject: "Sending with Twilio SendGrid is Fun",
       text: "and easy to do anywhere, even with Node.js",
       html: "<strong>and easy to do anywhere, even with Node.js</strong>",
