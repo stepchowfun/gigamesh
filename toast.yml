@@ -141,7 +141,7 @@ tasks:
       # Deploy the Cloud Functions. We copy the code into a new directory because `gcloud` doesn't
       # seem to like the fact that the files are owned by `root` (even though `user` can read from
       # and write to them).
-      cp -R backend /tmp/backend
+      cp -LR backend /tmp/backend
       gcloud functions deploy helloWorld \
         --project "$GCP_PROJECT_ID" \
         --region "$GCP_REGION" \
