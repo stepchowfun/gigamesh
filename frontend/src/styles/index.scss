@@ -13,6 +13,9 @@ $min-width: 320px;
 // This is the largest width.
 $max-width: 720px;
 
+// This is the transition duration for hover states.
+$hover-transition-duration: 0.1s;
+
 // I find this box sizing model to be easier to reason about.
 *,
 *::before,
@@ -46,7 +49,7 @@ html {
 
     // Style links.
     a {
-      color: #2293f7;
+      color: #0e8eff;
       text-decoration-line: none;
 
       &:hover {
@@ -71,10 +74,10 @@ html {
       .title {
         .logo {
           $display-width: 80px;
-          $original-width: 868px;
-          $original-height: 242px;
-          $offset-x: 16px;
-          $offset-y: 190px;
+          $original-width: 80px;
+          $original-height: 22px;
+          $offset-x: 3px;
+          $offset-y: 17px;
           width: $display-width;
           position: relative;
           left: -$offset-x * $display-width / $original-width;
@@ -88,10 +91,16 @@ html {
         font-size: 14px;
 
         a {
+          transition: color $hover-transition-duration;
           margin-left: 32px;
 
           &:first-child {
             margin-left: 0;
+          }
+
+          &:hover {
+            color: #00c12a;
+            text-decoration-line: none;
           }
         }
       }
