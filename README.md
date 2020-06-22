@@ -16,4 +16,4 @@ For information about how to contribute to Gigamesh, see our [contributing guide
 ## Licensing
 
 - Gigamesh is released under the MIT license, which can be found [here](https://github.com/stepchowfun/gigamesh/blob/master/LICENSE.md).
-- The Muli font was created by Vernon Adams. It was obtained from [here](https://www.fontsquirrel.com/fonts/muli), was converted to the WOFF 2 format using the [Font Squirrel Webfont Generator](https://www.fontsquirrel.com/tools/webfont-generator), and is used in compliance with the [SIL Open Font License](https://www.fontsquirrel.com/license/muli).
+- The Poppins font was created by [Indian Type Foundry](https://www.indiantypefoundry.com/). It was obtained from [here](https://fonts.google.com/specimen/Poppins) and is used in compliance with the [SIL Open Font License](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).
