@@ -1,17 +1,17 @@
 @import "../vendor/reset.css";
-@import "./muli.scss";
+@import "./poppins.scss";
+
+// This is the size of the body text.
+$font-size: 16px;
 
 // This quantity will form the basis for our vertical rhythm.
-$line-height: 32px;
+$line-height: 24px;
 
 // This is the smallest layout viewport width we support. It's the width of the iPhone 5/SE screen.
 $min-width: 320px;
 
 // This is the largest width.
-$max-width: 800px;
-
-// This is the transition duration for hover states.
-$hover-transition-duration: 0.2s;
+$max-width: 720px;
 
 // I find this box sizing model to be easier to reason about.
 *,
@@ -35,18 +35,18 @@ html {
     // Set up a container in the middle of the page.
     max-width: $max-width;
     margin: 0 auto;
+    padding: 0 24px;
 
     // Set up a cool font.
-    font-family: "Muli", sans-serif;
-    font-weight: 400;
-    font-size: 17px;
+    font-family: "Poppins", sans-serif;
+    font-weight: 300;
+    font-size: $font-size;
     line-height: $line-height;
     color: #202020;
 
     // Style links.
     a {
       color: #e8559b;
-      transition: color $hover-transition-duration;
       text-decoration-line: none;
       margin-left: 32px;
 
@@ -55,15 +55,7 @@ html {
       }
 
       &:hover {
-        color: #ff8dc3;
-      }
-
-      &:active {
-        color: #d92e80;
-
-        // When a user clicks on a link, skip the transition and give immediate feedback since
-        // clicks tend to be quick.
-        transition-duration: 0s;
+        text-decoration-line: underline;
       }
     }
 
@@ -85,10 +77,15 @@ html {
         font-weight: 700;
 
         .logo {
-          width: 100px;
+          $display-width: 100px;
+          $original-width: 944px;
+          $original-height: 276px;
+          $offset-x: 20px;
+          $offset-y: 201px;
+          width: $display-width;
           position: relative;
-          left: -6px;
-          top: 7px;
+          left: -$offset-x * $display-width / $original-width;
+          top: ($original-height - $offset-y) * $display-width / $original-width;
         }
       }
 
@@ -102,6 +99,14 @@ html {
     .editor {
       outline: none;
       padding: $line-height * 0.5 0;
+
+      p {
+        margin-top: $line-height;
+
+        &:first-child {
+          margin-top: 0;
+        }
+      }
     }
   }
 }
