@@ -1,5 +1,5 @@
 @import "../vendor/reset.css";
-@import "./poppins.scss";
+@import "./manrope.scss";
 
 // This is the size of the body text.
 $font-size: 16px;
@@ -37,22 +37,17 @@ html {
     margin: 0 auto;
     padding: 0 24px;
 
-    // Set up a cool font.
-    font-family: "Poppins", sans-serif;
-    font-weight: 300;
+    // Set up the main font.
+    font-family: "Manrope", sans-serif;
+    font-weight: 400;
     font-size: $font-size;
     line-height: $line-height;
     color: #202020;
 
     // Style links.
     a {
-      color: #e8559b;
+      color: #2293f7;
       text-decoration-line: none;
-      margin-left: 32px;
-
-      &:first-child {
-        margin-left: 0;
-      }
 
       &:hover {
         text-decoration-line: underline;
@@ -74,14 +69,12 @@ html {
       }
 
       .title {
-        font-weight: 700;
-
         .logo {
-          $display-width: 100px;
-          $original-width: 944px;
-          $original-height: 276px;
-          $offset-x: 20px;
-          $offset-y: 201px;
+          $display-width: 80px;
+          $original-width: 868px;
+          $original-height: 242px;
+          $offset-x: 16px;
+          $offset-y: 190px;
           width: $display-width;
           position: relative;
           left: -$offset-x * $display-width / $original-width;
@@ -91,7 +84,16 @@ html {
 
       .authentication {
         text-align: right;
-        font-size: 15px;
+        font-weight: 500;
+        font-size: 14px;
+
+        a {
+          margin-left: 32px;
+
+          &:first-child {
+            margin-left: 0;
+          }
+        }
       }
     }
 
