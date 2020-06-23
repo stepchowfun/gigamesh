@@ -53,7 +53,7 @@ html {
       height: $header-height;
       line-height: $header-height - $border-width;
       border-bottom: $border-width solid #dddddd;
-      background-color: #ffffff;
+      background-color: #fcfcfc;
       text-align: right;
       user-select: none;
       cursor: default;
@@ -77,7 +77,10 @@ html {
           background-image: url("../icons/home.svg");
 
           &:hover {
-            background-image: url("../icons/home-hover.svg");
+            // We still keep the old background behind the new one, because otherwise while the new
+            // background is loading there would be a temporary moment of no background at all.
+            background-image: url("../icons/home-hover.svg"),
+              url("../icons/home.svg");
           }
         }
 
@@ -85,7 +88,10 @@ html {
           background-image: url("../icons/log-in.svg");
 
           &:hover {
-            background-image: url("../icons/log-in-hover.svg");
+            // We still keep the old background behind the new one, because otherwise while the new
+            // background is loading there would be a temporary moment of no background at all.
+            background-image: url("../icons/log-in-hover.svg"),
+              url("../icons/log-in.svg");
           }
         }
       }
