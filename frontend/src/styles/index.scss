@@ -1,11 +1,12 @@
 @import "../vendor/reset.css";
 @import "./manrope.scss";
+@import "./source-serif-pro.scss";
 
 // This is the size of the body text.
-$font-size: 16px;
+$font-size: 20px;
 
 // This quantity will form the basis for our vertical rhythm.
-$line-height: 24px;
+$line-height: 32px;
 
 // This is the smallest layout viewport width we support. It's the width of the iPhone 5/SE screen.
 $min-width: 320px;
@@ -40,35 +41,20 @@ html {
     margin: 0 auto;
     padding: 0 24px;
 
-    // Set up the main font.
-    font-family: "Manrope", sans-serif;
-    font-weight: 400;
-    font-size: $font-size;
-    line-height: $line-height;
-    color: #202020;
-
-    // Style links.
-    a {
-      color: #0e8eff;
-      text-decoration-line: none;
-
-      &:hover {
-        text-decoration-line: underline;
-      }
-    }
-
     // Style the header.
     .header {
+      $border-width: 1px;
+
       display: flex;
-      border-bottom: 1px solid #dddddd;
+      border-bottom: $border-width solid #dddddd;
       user-select: none;
       cursor: default;
 
       .title,
       .authentication {
         width: 50%;
-        height: $line-height * 2 - 1;
-        line-height: $line-height * 2 - 1px;
+        height: $line-height * 2 - $border-width;
+        line-height: $line-height * 2 - $border-width;
       }
 
       .title {
@@ -87,10 +73,14 @@ html {
 
       .authentication {
         text-align: right;
+
+        font-family: "Manrope", sans-serif;
         font-weight: 500;
-        font-size: 14px;
+        font-size: 16px;
 
         a {
+          color: #0e8eff;
+          text-decoration-line: none;
           transition: color $hover-transition-duration;
           margin-left: 32px;
 
@@ -108,14 +98,28 @@ html {
 
     // Style the editor.
     .editor {
-      outline: none;
-      padding: $line-height * 0.5 0;
+      padding: $line-height 0;
+
+      font-family: "Source Serif Pro", serif;
+      font-weight: 400;
+      font-size: $font-size;
+      line-height: $line-height;
+      color: #202020;
 
       p {
         margin-top: $line-height;
 
         &:first-child {
           margin-top: 0;
+        }
+
+        a {
+          color: #0e8eff;
+          text-decoration-line: none;
+
+          &:hover {
+            text-decoration-line: underline;
+          }
         }
       }
     }
