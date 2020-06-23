@@ -66,6 +66,7 @@ html {
         margin: ($header-height - $border-width - $button-size) / 2 0;
         border: 0;
         background-color: transparent;
+        background-image: url("../icons/icons.svg");
         cursor: pointer;
 
         .button-alt-text {
@@ -74,24 +75,18 @@ html {
 
         &.home-button {
           float: left;
-          background-image: url("../icons/home.svg");
+          background-position: 0 0;
 
           &:hover {
-            // We still keep the old background behind the new one, because otherwise while the new
-            // background is loading there would be a temporary moment of no background at all.
-            background-image: url("../icons/home-hover.svg"),
-              url("../icons/home.svg");
+            background-position: 0 -24px;
           }
         }
 
         &.log-in-button {
-          background-image: url("../icons/log-in.svg");
+          background-position: -24px 0;
 
           &:hover {
-            // We still keep the old background behind the new one, because otherwise while the new
-            // background is loading there would be a temporary moment of no background at all.
-            background-image: url("../icons/log-in-hover.svg"),
-              url("../icons/log-in.svg");
+            background-position: -24px -24px;
           }
         }
       }
