@@ -11,7 +11,7 @@ $line-height: 32px;
 // This is the smallest layout viewport width we support. It's the width of the iPhone 5/SE screen.
 $min-width: 320px;
 
-// This is the largest width.
+// The content will not extend past this maximum width.
 $max-width: 720px;
 
 // This is the transition duration for hover states.
@@ -36,61 +36,56 @@ html {
 
   // Style the body and its contents.
   body #main .main {
-    // Set up a container in the middle of the page.
-    max-width: $max-width;
-    margin: 0 auto;
-    padding: 0 24px;
+    // The contents of the header and the editor will be placed in a `max-width` container to limit
+    // their maximum width. This also adds some padding.
+    .max-width {
+      max-width: $max-width;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
 
     // Style the header.
     .header {
       $border-width: 1px;
-
-      display: flex;
+      $header-height: $line-height * 1.75;
+      position: sticky;
+      top: 0;
+      height: $header-height;
+      line-height: $header-height - $border-width;
       border-bottom: $border-width solid #dddddd;
+      background-color: #ffffff;
+      text-align: right;
       user-select: none;
       cursor: default;
 
-      .title,
-      .authentication {
-        width: 50%;
-        height: $line-height * 2 - $border-width;
-        line-height: $line-height * 2 - $border-width;
-      }
+      button {
+        $button-size: 24px;
+        display: inline-block;
+        width: $button-size;
+        height: $button-size;
+        margin: ($header-height - $border-width - $button-size) / 2 0;
+        border: 0;
+        background-color: transparent;
+        cursor: pointer;
 
-      .title {
-        .logo {
-          $display-width: 80px;
-          $original-width: 80px;
-          $original-height: 22px;
-          $offset-x: 3px;
-          $offset-y: 17px;
-          width: $display-width;
-          position: relative;
-          left: -$offset-x * $display-width / $original-width;
-          top: ($original-height - $offset-y) * $display-width / $original-width;
+        .button-alt-text {
+          display: none;
         }
-      }
 
-      .authentication {
-        text-align: right;
-
-        font-family: "Manrope", sans-serif;
-        font-weight: 500;
-        font-size: 16px;
-
-        a {
-          color: #0e8eff;
-          text-decoration-line: none;
-          transition: color $hover-transition-duration;
-          margin-left: 32px;
-
-          &:first-child {
-            margin-left: 0;
-          }
+        &.home-button {
+          float: left;
+          background-image: url("../icons/home.svg");
 
           &:hover {
-            color: #00c12a;
-            text-decoration-line: none;
+            background-image: url("../icons/home-hover.svg");
+          }
+        }
+
+        &.log-in-button {
+          background-image: url("../icons/log-in.svg");
+
+          &:hover {
+            background-image: url("../icons/log-in-hover.svg");
           }
         }
       }
