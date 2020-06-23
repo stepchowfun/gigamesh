@@ -52,8 +52,8 @@ html {
       top: 0;
       height: $header-height;
       line-height: $header-height - $border-width;
-      border-bottom: $border-width solid #dddddd;
-      background-color: #fcfcfc;
+      border-bottom: $border-width solid #eeeeee;
+      background: linear-gradient(#fcfcfc, #fafafa);
       text-align: right;
       user-select: none;
       cursor: default;
