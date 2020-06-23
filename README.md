@@ -18,4 +18,4 @@ For information about how to contribute to Gigamesh, see our [contributing guide
 - Gigamesh is released under the MIT license, which can be found [here](https://github.com/stepchowfun/gigamesh/blob/master/LICENSE.md).
 - The Manrope font was designed by Mikhail Sharanda. It was obtained from [here](https://github.com/sharanda/manrope) and is used in compliance with the [SIL Open Font License](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).
 - The Source Serif Pro font was designed by Adobe. It was obtained from [here](https://github.com/adobe-fonts/source-serif-pro) and is used in compliance with the [SIL Open Font License](https://github.com/adobe-fonts/source-serif-pro/blob/release/LICENSE.md).
-- The icons are from the [Feather collection](https://feathericons.com/) and are used in compliance with the [MIT license](https://github.com/feathericons/feather/blob/master/LICENSE).
+- The [icons](https://jam-icons.com/) were designed by Michael Amprimo and are used in compliance with the [MIT license](https://github.com/michaelampr/jam/blob/master/LICENSE).
