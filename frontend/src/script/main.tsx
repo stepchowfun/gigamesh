@@ -3,33 +3,22 @@ import React from "react";
 
 import ReactDOM from "react-dom";
 import attachFastClick from "fastclick";
-import { fromByteArray } from "base64-js";
 import { helloWorld } from "./endpoints";
 
 // eslint-disable-next-line no-unused-vars
 import Modal from "./modal";
 
 // eslint-disable-next-line no-unused-vars
-class Main extends React.Component<
-  {},
-  { sessionId: string; authenticationFormVisible: boolean }
-> {
+class Main extends React.Component<{}, { authenticationFormVisible: boolean }> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      sessionId: Main.generateSessionId(),
       authenticationFormVisible: false,
     };
 
     // The traditional React component method binding ceremony.
     this.openAuthenticationModal = this.openAuthenticationModal.bind(this);
     this.closeAuthenticationModal = this.closeAuthenticationModal.bind(this);
-  }
-
-  static generateSessionId(): string {
-    const randomData = new Uint8Array(32);
-    window.crypto.getRandomValues(randomData);
-    return fromByteArray(randomData);
   }
 
   static home() {
@@ -78,7 +67,6 @@ class Main extends React.Component<
         <div className="max-width">
           <div className="editor">
             <p>
-              Your session ID is {this.state.sessionId}.{" "}
               <a href="#" onClick={Main.handleClick}>
                 Click here!
               </a>
