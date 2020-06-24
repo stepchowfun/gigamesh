@@ -1,5 +1,6 @@
 @import "../vendor/reset.css";
 @import "./manrope.scss";
+@import "./modal.scss";
 @import "./source-serif-pro.scss";
 
 // This is the size of the body text.
@@ -11,7 +12,7 @@ $line-height: 32px;
 // This is the smallest layout viewport width we support. It's the width of the iPhone 5/SE screen.
 $min-width: 320px;
 
-// The content will not extend past this maximum width.
+// Cap the content width to help readability on larger screens.
 $max-width: 720px;
 
 // This is the transition duration for hover states.
@@ -24,108 +25,115 @@ $hover-transition-duration: 0.1s;
   box-sizing: border-box;
 }
 
-html {
-  // Use up the full layout viewport.
-  &,
-  body,
-  .layer {
-    width: 100%;
-    min-width: $min-width;
-    height: 100%;
-    overscroll-behavior: none; // This doesn't work in Safari, unfortunately.
+// Use up the full layout viewport.
+html,
+body {
+  width: 100%;
+  min-width: $min-width;
+  height: 100%;
+  overscroll-behavior: none; // This doesn't work in Safari, unfortunately.
+}
+
+// Set up the typography for UI elements.
+body {
+  font-family: "Manrope", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  color: #202020;
+}
+
+// The contents of the header and the editor will be placed in a `max-width` container to limit
+// their maximum width. This also adds some padding.
+.max-width {
+  max-width: $max-width;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+// This class can be used to add some padding, e.g., in modals.
+.padding {
+  padding: 24px;
+}
+
+// Style the header.
+.header {
+  $border-width: 1px;
+  $header-height: $line-height * 1.5;
+  position: sticky;
+  top: 0;
+  height: $header-height;
+  line-height: $header-height - $border-width;
+  border-bottom: $border-width solid #eeeeee;
+  user-select: none;
+  cursor: default;
+
+  background: linear-gradient(#fcfcfc, #fafafa);
+  @supports (backdrop-filter: blur(8px)) {
+    backdrop-filter: blur(8px);
+    background: linear-gradient(
+      rgba(252, 252, 252, 0.8),
+      rgba(250, 250, 250, 0.8)
+    );
   }
 
-  // Style the body and its contents.
-  body #main .main {
-    // The contents of the header and the editor will be placed in a `max-width` container to limit
-    // their maximum width. This also adds some padding.
-    .max-width {
-      max-width: $max-width;
-      margin: 0 auto;
-      padding: 0 24px;
+  button {
+    $button-size: 24px;
+    display: block;
+    width: $button-size;
+    height: $button-size;
+    margin: ($header-height - $border-width - $button-size) / 2 0;
+    border: 0;
+    background-color: transparent;
+    background-image: url("../icons/icons.svg");
+    cursor: pointer;
+
+    .button-alt-text {
+      display: none;
     }
 
-    // Style the header.
-    .header {
-      $border-width: 1px;
-      $header-height: $line-height * 1.5;
-      position: sticky;
-      top: 0;
-      height: $header-height;
-      line-height: $header-height - $border-width;
-      border-bottom: $border-width solid #eeeeee;
-      user-select: none;
-      cursor: default;
+    &.home-button {
+      float: left;
+      background-position: 0 0;
 
-      background: linear-gradient(#fcfcfc, #fafafa);
-      @supports (backdrop-filter: blur(8px)) {
-        backdrop-filter: blur(8px);
-        background: linear-gradient(
-          rgba(252, 252, 252, 0.8),
-          rgba(250, 250, 250, 0.8)
-        );
-      }
-
-      button {
-        $button-size: 24px;
-        display: block;
-        width: $button-size;
-        height: $button-size;
-        margin: ($header-height - $border-width - $button-size) / 2 0;
-        border: 0;
-        background-color: transparent;
-        background-image: url("../icons/icons.svg");
-        cursor: pointer;
-
-        .button-alt-text {
-          display: none;
-        }
-
-        &.home-button {
-          float: left;
-          background-position: 0 0;
-
-          &:hover {
-            background-position: 0 -24px;
-          }
-        }
-
-        &.log-in-button {
-          float: right;
-          background-position: -24px 0;
-
-          &:hover {
-            background-position: -24px -24px;
-          }
-        }
+      &:hover {
+        background-position: 0 -24px;
       }
     }
 
-    // Style the editor.
-    .editor {
-      padding: $line-height 0;
+    &.log-in-button {
+      float: right;
+      background-position: -24px 0;
 
-      font-family: "Source Serif Pro", serif;
-      font-weight: 400;
-      font-size: $font-size;
-      line-height: $line-height;
-      color: #202020;
+      &:hover {
+        background-position: -24px -24px;
+      }
+    }
+  }
+}
 
-      p {
-        margin-top: $line-height;
+// Style the editor.
+.editor {
+  padding: $line-height 0;
 
-        &:first-child {
-          margin-top: 0;
-        }
+  font-family: "Source Serif Pro", serif;
+  font-weight: 400;
+  font-size: $font-size;
+  line-height: $line-height;
 
-        a {
-          color: #0e8eff;
-          text-decoration-line: none;
+  p {
+    margin-top: $line-height;
 
-          &:hover {
-            text-decoration-line: underline;
-          }
-        }
+    &:first-child {
+      margin-top: 0;
+    }
+
+    a {
+      color: #0e8eff;
+      text-decoration-line: none;
+
+      &:hover {
+        text-decoration-line: underline;
       }
     }
   }
