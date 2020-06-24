@@ -87,6 +87,7 @@ body {
     background-color: transparent;
     background-image: url("../icons/icons.svg");
     cursor: pointer;
+    outline: none;
 
     .button-alt-text {
       display: none;
@@ -96,7 +97,9 @@ body {
       float: left;
       background-position: 0 0;
 
-      &:hover {
+      &:active,
+      &:hover,
+      &:focus {
         background-position: 0 -24px;
       }
     }
@@ -105,7 +108,9 @@ body {
       float: right;
       background-position: -24px 0;
 
-      &:hover {
+      &:active,
+      &:hover,
+      &:focus {
         background-position: -24px -24px;
       }
     }
@@ -132,6 +137,7 @@ body {
       color: #0e8eff;
       text-decoration-line: none;
 
+      &:active,
       &:hover {
         text-decoration-line: underline;
       }
