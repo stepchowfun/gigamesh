@@ -20,7 +20,7 @@ $transition-duration: 0.2s;
   height: 100%;
 
   // Set up a partially transparent overlay background.
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.4);
 
   // We'll use `opacity` to animate the modal transition. When a modal is completely hidden,
   // we'll set `visibility: hidden` to prevent that element from blocking interaction with lower
@@ -64,7 +64,7 @@ $transition-duration: 0.2s;
     .modal-content {
       border-radius: 8px;
       background: #ffffff;
-      box-shadow: 0px 0px 144px rgba(0, 0, 0, 0.2);
+      box-shadow: 0px 0px 64px rgba(0, 0, 0, 0.2);
     }
   }
 }
