@@ -32,6 +32,7 @@ html {
     width: 100%;
     min-width: $min-width;
     height: 100%;
+    overscroll-behavior: none; // This doesn't work in Safari, unfortunately.
   }
 
   // Style the body and its contents.
