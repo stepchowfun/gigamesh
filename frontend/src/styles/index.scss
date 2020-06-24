@@ -54,7 +54,6 @@ html {
       height: $header-height;
       line-height: $header-height - $border-width;
       border-bottom: $border-width solid #eeeeee;
-      text-align: right;
       user-select: none;
       cursor: default;
 
@@ -69,7 +68,7 @@ html {
 
       button {
         $button-size: 24px;
-        display: inline-block;
+        display: block;
         width: $button-size;
         height: $button-size;
         margin: ($header-height - $border-width - $button-size) / 2 0;
@@ -92,6 +91,7 @@ html {
         }
 
         &.log-in-button {
+          float: right;
           background-position: -24px 0;
 
           &:hover {
