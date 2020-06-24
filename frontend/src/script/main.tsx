@@ -3,13 +3,20 @@ import React from "react";
 
 import ReactDOM from "react-dom";
 import attachFastClick from "fastclick";
+import { fromByteArray } from "base64-js";
 import { helloWorld } from "./endpoints";
 
 // eslint-disable-next-line no-unused-vars
-class Main extends React.Component<{}, { name: string }> {
+class Main extends React.Component<{}, { sessionId: string }> {
   constructor(props: {}) {
     super(props);
-    this.state = { name: "Visitor" };
+    this.state = { sessionId: Main.generateSessionId() };
+  }
+
+  static generateSessionId(): string {
+    const randomData = new Uint8Array(32);
+    window.crypto.getRandomValues(randomData);
+    return fromByteArray(randomData);
   }
 
   static home() {
@@ -48,7 +55,7 @@ class Main extends React.Component<{}, { name: string }> {
         <div className="editor">
           <div className="max-width">
             <p>
-              Hello, {this.state.name}!{" "}
+              Your session ID is {this.state.sessionId}.{" "}
               <a href="#" onClick={Main.handleClick}>
                 Click here!
               </a>
