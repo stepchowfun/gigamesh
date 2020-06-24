@@ -63,15 +63,16 @@ class Main extends React.Component<
       <div className="main">
         <div className="header">
           <div className="max-width">
-            <button className="home-button" onClick={Main.home}>
-              <span className="button-alt-text">Home</span>
-            </button>
+            <button
+              className="home-button"
+              onClick={Main.home}
+              aria-label="Home"
+            ></button>
             <button
               className="log-in-button"
               onClick={this.openAuthenticationModal}
-            >
-              <span className="button-alt-text">Log in</span>
-            </button>
+              aria-label="Account"
+            ></button>
           </div>
         </div>
         <div className="max-width">
