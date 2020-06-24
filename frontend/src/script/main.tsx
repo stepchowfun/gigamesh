@@ -7,10 +7,23 @@ import { fromByteArray } from "base64-js";
 import { helloWorld } from "./endpoints";
 
 // eslint-disable-next-line no-unused-vars
-class Main extends React.Component<{}, { sessionId: string }> {
+import Modal from "./modal";
+
+// eslint-disable-next-line no-unused-vars
+class Main extends React.Component<
+  {},
+  { sessionId: string; authenticationFormVisible: boolean }
+> {
   constructor(props: {}) {
     super(props);
-    this.state = { sessionId: Main.generateSessionId() };
+    this.state = {
+      sessionId: Main.generateSessionId(),
+      authenticationFormVisible: false,
+    };
+
+    // The traditional React component method binding ceremony.
+    this.openAuthenticationModal = this.openAuthenticationModal.bind(this);
+    this.closeAuthenticationModal = this.closeAuthenticationModal.bind(this);
   }
 
   static generateSessionId(): string {
@@ -25,10 +38,16 @@ class Main extends React.Component<{}, { sessionId: string }> {
     }
   }
 
-  static logIn() {
+  openAuthenticationModal() {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
+
+    this.setState({ authenticationFormVisible: true });
+  }
+
+  closeAuthenticationModal() {
+    this.setState({ authenticationFormVisible: false });
   }
 
   static handleClick(e: React.MouseEvent) {
@@ -47,13 +66,16 @@ class Main extends React.Component<{}, { sessionId: string }> {
             <button className="home-button" onClick={Main.home}>
               <span className="button-alt-text">Home</span>
             </button>
-            <button className="log-in-button" onClick={Main.logIn}>
+            <button
+              className="log-in-button"
+              onClick={this.openAuthenticationModal}
+            >
               <span className="button-alt-text">Log in</span>
             </button>
           </div>
         </div>
-        <div className="editor">
-          <div className="max-width">
+        <div className="max-width">
+          <div className="editor">
             <p>
               Your session ID is {this.state.sessionId}.{" "}
               <a href="#" onClick={Main.handleClick}>
@@ -148,6 +170,12 @@ class Main extends React.Component<{}, { sessionId: string }> {
             </p>
           </div>
         </div>
+        <Modal
+          visible={this.state.authenticationFormVisible}
+          onClose={this.closeAuthenticationModal}
+        >
+          <div className="padding">Hello!</div>
+        </Modal>
       </div>
     );
   }

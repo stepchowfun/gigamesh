@@ -1,0 +1,70 @@
+// Cap the content width to help readability on larger screens.
+$max-width: 512px;
+
+// This is the duration for modal opening and closing animations.
+$transition-duration: 0.4s;
+
+.modal-background {
+  // Center the content horizontally and vertically. See [ref:content-overflow] for how we
+  // handle vertical overflow.
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+
+  // Make the element take up the full layout viewport.
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+
+  // Set up a partially transparent overlay background.
+  background: rgba(0, 0, 0, 0.1);
+
+  // We'll use `opacity` to animate the modal transition. When a modal is completely hidden,
+  // we'll set `visibility: hidden` to prevent that element from blocking interaction with lower
+  // elements. Notes:
+  // - For time intervals, we can't just specify `0` for some reason; they needs to have units
+  //   like `0s` or else the declaration is ignored (at least on Chrome and Firefox). This
+  //   StackOverflow question seems to corroborate this observation:
+  //   https://stackoverflow.com/questions/13145352/units-on-0s-transition-in-firefox
+  // - For the `visibility` property, we specify a delay rather than a duration since it takes
+  //   on discrete values. When transitioning from `hidden` to `visible`, we set the delay to 0s
+  //   so we can see the element fading in as the opacity gradually transitions. For the same
+  //   reason, when transitioning from `visible` to `hidden`, we set the delay equal to the
+  //   duration of the `opacity` transition.
+  transition: opacity $transition-duration 0s, visibility 0s 0s;
+
+  // Modals that are hidden will have this class.
+  &.hidden {
+    transition: opacity $transition-duration 0s,
+      visibility 0s $transition-duration;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  // This class is used for the modal itself.
+  .modal-container {
+    // Cap the width to make text easier to read on wide screens.
+    max-width: $max-width;
+
+    // If the height is allowed to extend past the height of the parent, then only the bottom
+    // half will be reachable via scrolling due to the combination of the fact that we center
+    // the content with `align-items: center` on the parent and the fact that scrolling offsets
+    // can't be negative. The inability to access content like this is known as "data loss" in
+    // the CSS world. It seems the proper way to fix this is to use `align-items: center safe`
+    // on the parent, but `safe` isn't widely supported by browsers at the time of this writing.
+    // So our solution is to cap the height to 100% of the parent, so then the overflow will be
+    // entirely downward and reachable by scrolling the parent by non-negative amounts.
+    // [tag:content-overflow]
+    max-height: 100%;
+
+    // Modal content will be placed in containers with this class.
+    .modal-content {
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0px 0px 144px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
