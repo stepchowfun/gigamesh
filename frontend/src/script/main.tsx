@@ -63,7 +63,7 @@ class Main extends React.Component<{}, { authenticationFormVisible: boolean }> {
               className="account-button"
               onClick={this.openAuthenticationModal}
             >
-              <div className="button-label">Account</div>
+              <div className="button-label">I’m ready</div>
             </button>
           </div>
         </div>
