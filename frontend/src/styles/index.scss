@@ -47,18 +47,18 @@ body {
 // Style the header.
 .header {
   $border-width: 1px;
-  $header-height: $line-height * 2.8;
+  $header-height: $line-height * 2;
   position: sticky;
   top: 0;
   height: $header-height;
   line-height: $header-height - $border-width;
   border-bottom: $border-width solid #eeeeee;
-  background: #ffffff;
   user-select: none;
   cursor: default;
+  background: #ffffff;
 
   button {
-    $button-size: $line-height * 1.4;
+    $button-size: 40px;
     $icon-size: 24px;
     display: inline-block;
     height: $button-size;
