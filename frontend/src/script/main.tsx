@@ -56,27 +56,28 @@ class Main extends React.Component<{}, { authenticationFormVisible: boolean }> {
               className="home-button"
               onClick={Main.home}
               aria-label="Home"
-            ></button>
+            >
+              <div className="icon home-icon"></div>
+            </button>
             <button
-              className="log-in-button"
+              className="account-button"
               onClick={this.openAuthenticationModal}
-              aria-label="Account"
-            ></button>
+            >
+              <div className="button-label">Account</div>
+            </button>
           </div>
         </div>
         <div className="max-width">
           <div className="editor">
-            <p>
-              <a href="#" onClick={Main.handleClick}>
-                Click here!
-              </a>
-            </p>
-
+            <h1>A home for all your notes.</h1>
             <p>
               Lorem ipsum dolor sit amet, no consul legere iracundia nec, eum id
               homero aeterno percipitur. Mel vulputate inciderint in. Novum
               graeco ne pri. Clita consul persequeris at vix, iudico vidisse
-              suavitate vix ex, ei mea dicit ceteros vivendo.
+              suavitate vix ex, ei mea dicit ceteros vivendo.{" "}
+              <a href="#" onClick={Main.handleClick}>
+                Click here!
+              </a>
             </p>
 
             <p>
