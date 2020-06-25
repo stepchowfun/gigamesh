@@ -47,7 +47,7 @@ body {
 // Style the header.
 .header {
   $border-width: 1px;
-  $header-height: $line-height * 2.5;
+  $header-height: $line-height * 2.8;
   position: sticky;
   top: 0;
   height: $header-height;
@@ -58,7 +58,7 @@ body {
   cursor: default;
 
   button {
-    $button-size: 48px;
+    $button-size: $line-height * 1.4;
     $icon-size: 24px;
     display: inline-block;
     height: $button-size;
@@ -73,14 +73,6 @@ body {
       width: $icon-size;
       height: $icon-size;
       background-image: url("../icons/icons.svg");
-
-      &.home-icon {
-        background-position: 0 0;
-      }
-
-      &.account-icon {
-        background-position: -24px 0;
-      }
     }
 
     .button-label {
