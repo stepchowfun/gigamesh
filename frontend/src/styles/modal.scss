@@ -67,7 +67,7 @@ $transition-duration: 0.2s;
       border-radius: 8px;
       background: #ffffff;
       box-shadow: 0px 0px 64px rgba(0, 0, 0, 0.2);
-      @include typography("Manrope", 500, 20px, $line-height, #333333);
+      @include typography("Manrope", 500, 18px, $line-height, #222222);
     }
   }
 }
