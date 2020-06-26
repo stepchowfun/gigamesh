@@ -1,3 +1,4 @@
+@use "sass:color";
 @import "../vendor/reset.css";
 @import "./manrope";
 @import "./modal";
@@ -77,26 +78,27 @@ body {
       @include typography("Manrope", 600, 14px, $icon-size, #ffffff);
     }
 
-    &.home-button {
-      float: left;
-      background: #7ac133;
+    @mixin button-background($background-color) {
+      background: $background-color;
 
-      &:active,
       &:hover,
       &:focus {
-        background: #93d156;
+        background: color.scale($background-color, $lightness: 25%);
       }
+
+      &:active {
+        background: color.scale($background-color, $lightness: -10%);
+      }
+    }
+
+    &.home-button {
+      float: left;
+      @include button-background(#7ac133);
     }
 
     &.account-button {
       float: right;
-      background: #fe7a77;
-
-      &:active,
-      &:hover,
-      &:focus {
-        background: #ff9e9c;
-      }
+      @include button-background(#fe7a77);
     }
   }
 }
