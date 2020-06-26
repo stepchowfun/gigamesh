@@ -172,7 +172,7 @@ class Main extends React.Component<{}, { authenticationFormVisible: boolean }> {
 }
 
 // Render the main component.
-ReactDOM.render(<Main />, document.getElementById("main"));
+ReactDOM.render(<Main />, document.getElementById("react-root"));
 
 // FastClick eliminates the 300ms delay between a physical tap and the firing of a click event on
 // mobile browsers.
