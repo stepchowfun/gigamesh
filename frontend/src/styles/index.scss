@@ -1,15 +1,15 @@
 @use "sass:color";
-@import "../vendor/reset.css";
+@import "../vendor/reset";
 @import "./manrope";
 @import "./modal";
-@import "./source-serif-pro";
+@import "./crimson-pro";
 @import "./typography";
 
 // This is the smallest layout viewport width we support. It's the width of the iPhone 5/SE screen.
 $min-width: 320px;
 
 // Cap the content width to help readability on larger screens.
-$max-width: 800px;
+$max-width: 760px;
 
 // I find this box sizing model to be easier to reason about.
 *,
@@ -108,7 +108,7 @@ body {
   padding: ($line-height * 2) 0;
 
   h1 {
-    @include typography("Manrope", 800, 52px, $line-height * 2, #000000);
+    @include typography("Manrope", 800, 48px, $line-height * 2, #000000);
 
     margin-top: $line-height;
 
@@ -119,7 +119,7 @@ body {
 
   p {
     margin-top: $line-height;
-    @include typography("Source Serif Pro", 400, 20px, $line-height, #333333);
+    @include typography("Crimson Pro", 300, 22px, $line-height, #222222);
 
     &:first-child {
       margin-top: 0;
