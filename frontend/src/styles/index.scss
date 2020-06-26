@@ -1,19 +1,14 @@
 @import "../vendor/reset.css";
-@import "./manrope.scss";
-@import "./modal.scss";
-@import "./source-serif-pro.scss";
-
-// This quantity will form the basis for our vertical rhythm.
-$line-height: 32px;
+@import "./manrope";
+@import "./modal";
+@import "./source-serif-pro";
+@import "./typography";
 
 // This is the smallest layout viewport width we support. It's the width of the iPhone 5/SE screen.
 $min-width: 320px;
 
 // Cap the content width to help readability on larger screens.
 $max-width: 800px;
-
-// This is the transition duration for hover states.
-$hover-transition-duration: 0.1s;
 
 // I find this box sizing model to be easier to reason about.
 *,
@@ -79,12 +74,7 @@ body {
       display: inline-block;
       height: $icon-size;
       padding: 0 16px;
-
-      font-family: "Manrope", sans-serif;
-      font-weight: 600;
-      font-size: 14px;
-      line-height: $icon-size;
-      color: #ffffff;
+      @include typography("Manrope", 600, 14px, $icon-size, #ffffff);
     }
 
     &.home-button {
@@ -116,11 +106,7 @@ body {
   padding: ($line-height * 2) 0;
 
   h1 {
-    font-family: "Manrope", sans-serif;
-    font-weight: 800;
-    font-size: 52px;
-    line-height: $line-height * 2;
-    color: #000000;
+    @include typography("Manrope", 800, 52px, $line-height * 2, #000000);
 
     margin-top: $line-height;
 
@@ -130,13 +116,8 @@ body {
   }
 
   p {
-    font-family: "Source Serif Pro", serif;
-    font-weight: 400;
-    font-size: 20px;
-    line-height: $line-height;
-    color: #333333;
-
     margin-top: $line-height;
+    @include typography("Source Serif Pro", 400, 20px, $line-height, #333333);
 
     &:first-child {
       margin-top: 0;
