@@ -1,12 +1,12 @@
 {
   "name": "gigamesh-backend",
   "version": "1.0.0",
-  "description": "A place for all your notes.",
+  "description": "A home for all your notes.",
   "private": true,
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "check-without-building": "tsc --noEmit && npx eslint 'src/**/*{.js,.ts}' && prettier --check .",
+    "check-without-building": "tsc --noEmit && eslint 'src/**/*{.js,.ts}' && prettier --check .",
     "development": "tsc && NODE_ENV=development functions-framework --target=helloWorld",
     "format": "prettier --write ."
   },

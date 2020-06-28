@@ -1,11 +1,11 @@
 {
   "name": "gigamesh-frontend",
   "version": "1.0.0",
-  "description": "A place for all your notes.",
+  "description": "A home for all your notes.",
   "private": true,
   "scripts": {
     "build": "cp -R static/. dist && parcel build src/index.html",
-    "check-without-building": "tsc --noEmit && npx eslint './**/*{.js,.jsx,.ts,.tsx}' && prettier --check .",
+    "check-without-building": "tsc --noEmit && eslint './**/*{.js,.jsx,.ts,.tsx}' && prettier --check .",
     "development": "cp -R static/. dist && parcel --hmr-port 1235 --no-autoinstall src/index.html",
     "format": "prettier --write ."
   },
