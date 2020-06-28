@@ -2,7 +2,7 @@
 
 [![Build status](https://github.com/stepchowfun/gigamesh/workflows/Continuous%20integration/badge.svg?branch=master)](https://github.com/stepchowfun/gigamesh/actions?query=branch%3Amaster)
 
-_Gigamesh_ is a place for all your notes.
+_Gigamesh_ is a home for all your notes.
 
 ## Installation
 
