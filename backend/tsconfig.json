@@ -4,6 +4,7 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "outDir": "dist",
+    "sourceMap": true,
     "strict": true,
     "target": "ES2018"
   },
