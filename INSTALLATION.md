@@ -9,7 +9,7 @@
 
       ```sh
       export DOMAIN=www.gigamesh.io # Change this to your domain.
-      gsutil mb -b on -c standard -l us-east1 "gs://$DOMAIN" # Feel free to change `us-east1` to something else.
+      gsutil mb -b on -c standard -l us "gs://$DOMAIN" # Feel free to change `us` to a different location.
       gsutil iam ch allUsers:objectViewer "gs://$DOMAIN"
       gsutil web set -m index.html "gs://$DOMAIN"
       ```
