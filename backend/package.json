@@ -3,24 +3,30 @@
   "version": "1.0.0",
   "description": "A home for all your notes.",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/api/api.js",
   "scripts": {
     "build": "tsc",
-    "check-without-building": "tsc --noEmit && eslint 'src/**/*{.js,.ts}' && prettier --check .",
-    "development": "tsc && NODE_ENV=development functions-framework --target=helloWorld",
-    "format": "prettier --write ."
+    "check": "jest --config jest.config.js && tsc --project tsconfig.json && eslint --config .eslintrc.js --ignore-path .gitignore --report-unused-disable-directives --max-warnings 0 './**/*{.js,.ts}' && prettier --config .prettierrc.json --ignore-path .gitignore --check .",
+    "development": "tsc && NODE_ENV=development functions-framework --port 8081 --target=helloWorld",
+    "format": "prettier --config .prettierrc.json --ignore-path .gitignore --write ."
   },
   "author": "Stephan Boyer",
   "license": "MIT",
   "devDependencies": {
     "@types/express": "^4.17.1",
+    "@types/jest": "^26.0.10",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
     "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-config-airbnb": "^18.2.0",
     "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jest": "^23.20.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-react": "^7.20.6",
+    "jest": "^26.4.2",
     "prettier": "^2.0.5",
+    "ts-jest": "^26.2.0",
     "typescript": "^3.9.2"
   },
   "dependencies": {

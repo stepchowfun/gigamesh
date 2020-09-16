@@ -1,9 +1,7 @@
-.eslintignore
 .eslintrc.js
 .gcloudignore
 .gitignore
-.prettierignore
 /node_modules/
 /src/
-prettier.config.json
+jest.config.js
 tsconfig.json
