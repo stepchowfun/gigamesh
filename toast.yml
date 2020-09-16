@@ -252,5 +252,5 @@ tasks:
       # fingerprinted, and stale versions may refer to fingerprinted assets
       # which no longer exist.
       gsutil -m setmeta \
-        -h 'Cache-Control:public, max-age=0, must-revalidate'
+        -h 'Cache-Control:public, max-age=0, must-revalidate' \
         'gs://$DOMAIN/**.html'
