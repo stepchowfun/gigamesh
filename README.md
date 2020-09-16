@@ -15,7 +15,4 @@ For information about how to contribute to Gigamesh, see our [contributing guide
 
 ## Licensing
 
-- Gigamesh is released under the MIT license, which can be found [here](https://github.com/stepchowfun/gigamesh/blob/master/LICENSE.md).
-- The Manrope font was designed by Mikhail Sharanda. It was obtained from [here](https://github.com/sharanda/manrope) and is used in compliance with the [SIL Open Font License](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).
-- The Crimson Pro font was designed by Jacques Le Bailly based on Sebastian Kosch's Crimson and Crimson Prime. It was obtained from [here](https://github.com/Fonthausen/CrimsonPro) and is used in compliance with the [SIL Open Font License](https://github.com/Fonthausen/CrimsonPro/blob/master/OFL.txt).
-- The [icons](https://jam-icons.com/) were designed by Michael Amprimo and are used in compliance with the [MIT license](https://github.com/michaelampr/jam/blob/master/LICENSE).
+Gigamesh is released under the MIT license, which can be found [here](https://github.com/stepchowfun/gigamesh/blob/master/LICENSE.md).
