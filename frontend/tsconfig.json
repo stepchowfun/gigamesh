@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "jsx": "react",
+    "jsx": "preserve",
     "moduleResolution": "node",
+    "noEmit": true,
     "strict": true,
-    "target": "ES6"
+    "types": ["jest", "node", "react", "react-dom", "styled-components"]
   },
-  "files": ["src/script/main.tsx"]
+  "files": ["images.d.ts", "src/index/index.tsx"]
 }
