@@ -253,4 +253,4 @@ tasks:
       # which no longer exist.
       gsutil -m setmeta \
         -h 'Cache-Control:public, max-age=0, must-revalidate' \
-        'gs://$DOMAIN/**.html'
+        'gs://'"$DOMAIN"'/**.html'
