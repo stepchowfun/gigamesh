@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A home for all your notes.",
   "private": true,
-  "main": "dist/api/api.js",
+  "main": "dist/entry/entry.js",
   "scripts": {
     "build": "tsc",
     "check": "jest --config jest.config.js && tsc --project tsconfig.json && eslint --config .eslintrc.js --ignore-path .gitignore --report-unused-disable-directives --max-warnings 0 './**/*{.js,.ts}' && prettier --config .prettierrc.json --ignore-path .gitignore --check .",

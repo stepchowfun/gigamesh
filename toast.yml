@@ -45,6 +45,7 @@ tasks:
       - backend/package-lock.json
       - backend/package.json
       - backend/src/
+      - backend/tsconfig.eslint.json
       - backend/tsconfig.json
 
       # All the top-level paths in `frontend/` except those in `.gitignore`
@@ -59,6 +60,7 @@ tasks:
       - frontend/postcss.config.js
       - frontend/src/
       - frontend/static/
+      - frontend/tsconfig.eslint.json
       - frontend/tsconfig.json
       - frontend/webpack.common.js
       - frontend/webpack.development.js
@@ -97,6 +99,7 @@ tasks:
       - backend/package-lock.json
       - backend/package.json
       - backend/src/
+      - backend/tsconfig.eslint.json
       - backend/tsconfig.json
 
       # All the top-level paths in `frontend/` except those in `.gitignore`
@@ -111,6 +114,7 @@ tasks:
       - frontend/postcss.config.js
       - frontend/src/
       - frontend/static/
+      - frontend/tsconfig.eslint.json
       - frontend/tsconfig.json
       - frontend/webpack.common.js
       - frontend/webpack.development.js
@@ -127,6 +131,7 @@ tasks:
       - backend/package-lock.json
       - backend/package.json
       - backend/src/
+      - backend/tsconfig.eslint.json
       - backend/tsconfig.json
 
       # All the top-level paths in `frontend/` except those in `.gitignore` and except symlinks
@@ -140,6 +145,7 @@ tasks:
       - frontend/postcss.config.js
       - frontend/src/
       - frontend/static/
+      - frontend/tsconfig.eslint.json
       - frontend/tsconfig.json
       - frontend/webpack.common.js
       - frontend/webpack.development.js
@@ -177,6 +183,7 @@ tasks:
       - backend/jest.config.js
       - backend/package-lock.json
       - backend/package.json
+      - backend/tsconfig.eslint.json
       - backend/tsconfig.json
 
       # All the top-level paths in `frontend/` except those in `.gitignore` and those in
@@ -191,6 +198,7 @@ tasks:
       - frontend/package.json
       - frontend/postcss.config.js
       - frontend/static/
+      - frontend/tsconfig.eslint.json
       - frontend/tsconfig.json
       - frontend/webpack.common.js
       - frontend/webpack.development.js
