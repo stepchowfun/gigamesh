@@ -8,5 +8,5 @@
     "strict": true,
     "target": "ES2018"
   },
-  "files": ["src/api/api.ts"]
+  "files": ["src/entry/entry.ts"]
 }

@@ -1,55 +1,46 @@
-// eslint-disable-next-line no-unused-vars
-import { Request, Response } from 'express';
-
 import sendgrid from '@sendgrid/mail';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import {
   authenticationEmailSender,
-  originDevelopment,
-  originProduction,
   sendgridApiKeySecretName,
-} from '../shared/constants';
-import { isProduction } from '../shared/environment';
+} from '../shared/constants/constants';
+import { HelloWorldRequest, HelloWorldResponse } from '../shared/api/api';
+import { isProduction } from '../shared/environment/environment';
 
-// Instantiate a secret manager once rather than in every request.
+// Create a secret manager once rather than in every request.
 const secretManager = new SecretManagerServiceClient();
 
 // eslint-disable-next-line import/prefer-default-export
-export async function helloWorld(req: Request, res: Response) {
-  res.set(
-    'Access-Control-Allow-Origin',
-    isProduction() ? originProduction : originDevelopment,
-  );
+export async function helloWorldInternal(
+  request: HelloWorldRequest,
+): Promise<HelloWorldResponse> {
+  // Fetch the SendGrid API key.
+  const sendgridApiKey = await (async (): Promise<string> => {
+    if (isProduction()) {
+      const [accessResponse] = await secretManager.accessSecretVersion({
+        name: sendgridApiKeySecretName,
+      });
 
-  if (req.method === 'OPTIONS') {
-    res.set('Access-Control-Allow-Methods', 'GET, POST');
-    res.set('Access-Control-Allow-Headers', 'Content-Type');
-    res.set('Access-Control-Max-Age', '3600');
-    res.status(204).send('');
-  } else {
-    const sendgridApiKey = await (async () => {
-      if (isProduction()) {
-        const [accessResponse] = await secretManager.accessSecretVersion({
-          name: sendgridApiKeySecretName,
-        });
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return accessResponse.payload!.data!.toString();
+    }
 
-        return accessResponse.payload!.data!.toString();
-      }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return process.env.SENDGRID_API_KEY!;
+  })();
 
-      return process.env.SENDGRID_API_KEY!;
-    })();
+  // Configure SendGrid.
+  sendgrid.setApiKey(sendgridApiKey);
 
-    sendgrid.setApiKey(sendgridApiKey);
+  // Send an email.
+  await sendgrid.send({
+    to: 'boyerstephan@gmail.com',
+    from: authenticationEmailSender,
+    subject: 'Sending with Twilio SendGrid is Fun',
+    text: 'and easy to do anywhere, even with Node.js',
+    html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+  });
 
-    await sendgrid.send({
-      to: 'boyerstephan@gmail.com',
-      from: authenticationEmailSender,
-      subject: 'Sending with Twilio SendGrid is Fun',
-      text: 'and easy to do anywhere, even with Node.js',
-      html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-    });
-
-    const message = req.query.message || 'No message was provided.';
-    res.status(200).send(message);
-  }
+  // Return a response to the client.
+  return Promise.resolve({ newAge: request.age * 2 });
 }
