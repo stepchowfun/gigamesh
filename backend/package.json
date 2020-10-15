@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "check": "jest --config jest.config.js && tsc --project tsconfig.json && eslint --config .eslintrc.js --ignore-path .gitignore --report-unused-disable-directives --max-warnings 0 './**/*{.js,.ts}' && prettier --config .prettierrc.json --ignore-path .gitignore --check .",
-    "development": "tsc && NODE_ENV=development functions-framework --port 8081 --target=helloWorld",
+    "development": "tsc && NODE_ENV=development functions-framework --port 8081 --target=api",
     "format": "prettier --config .prettierrc.json --ignore-path .gitignore --write ."
   },
   "author": "Stephan Boyer",

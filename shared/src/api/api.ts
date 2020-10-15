@@ -1,7 +1,7 @@
-export type HelloWorldRequest = {
+export type ApiRequest = {
   age: number;
 };
 
-export type HelloWorldResponse = {
+export type ApiResponse = {
   newAge: number;
 };
