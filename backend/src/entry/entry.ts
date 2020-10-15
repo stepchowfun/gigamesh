@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import apiInternal from '../api/api';
+import api from '../api/api';
 import { ApiRequest } from '../shared/api/api';
 import {
   originDevelopment,
@@ -7,7 +7,8 @@ import {
 } from '../shared/constants/constants';
 import { isProduction } from '../shared/environment/environment';
 
-export default async function api(
+// eslint-disable-next-line import/prefer-default-export
+export async function entry(
   request: Request,
   response: Response,
 ): Promise<void> {
@@ -22,9 +23,7 @@ export default async function api(
     response.set('Access-Control-Max-Age', '3600');
     response.status(204).send('');
   } else {
-    const apiResponse = await apiInternal(
-      (request.body as unknown) as ApiRequest,
-    );
+    const apiResponse = await api((request.body as unknown) as ApiRequest);
 
     response.status(200).send(apiResponse);
   }
