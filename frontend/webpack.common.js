@@ -58,13 +58,16 @@ module.exports = {
     }),
   ],
   optimization: {
-    minimizer: [new TerserJSPlugin({})],
+    minimizer: [
+      new TerserJSPlugin({
+        extractComments: false,
+      }),
+    ],
   },
   output: {
     filename: '[contenthash].js',
     path: path.resolve(__dirname, 'dist'),
   },
-  devtool: 'source-map',
   devServer: {
     contentBase: './dist',
   },
