@@ -10,9 +10,7 @@ import { isProduction } from '../shared/environment/environment';
 // Create a secret manager once rather than in every request.
 const secretManager = new SecretManagerServiceClient();
 
-export default async function apiInternal(
-  request: ApiRequest,
-): Promise<ApiResponse> {
+export default async function api(request: ApiRequest): Promise<ApiResponse> {
   // Fetch the SendGrid API key.
   const sendgridApiKey = await (async (): Promise<string> => {
     if (isProduction()) {

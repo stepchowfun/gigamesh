@@ -248,6 +248,7 @@ tasks:
         --region "$GCP_REGION" \
         --runtime nodejs10 \
         --source /tmp/backend \
+        --entry-point entry \
         --service-account "$GCP_PRODUCTION_SERVICE_ACCOUNT_EMAIL" \
         --trigger-http \
         --allow-unauthenticated
