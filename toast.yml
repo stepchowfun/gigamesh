@@ -243,7 +243,7 @@ tasks:
       # seem to like the fact that the files are owned by `root` (even though `user` can read from
       # and write to them).
       cp -LR backend /tmp/backend
-      gcloud functions deploy helloWorld \
+      gcloud functions deploy api \
         --project "$GCP_PROJECT_ID" \
         --region "$GCP_REGION" \
         --runtime nodejs10 \

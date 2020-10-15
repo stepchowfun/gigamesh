@@ -4,16 +4,15 @@ import {
   authenticationEmailSender,
   sendgridApiKeySecretName,
 } from '../shared/constants/constants';
-import { HelloWorldRequest, HelloWorldResponse } from '../shared/api/api';
+import { ApiRequest, ApiResponse } from '../shared/api/api';
 import { isProduction } from '../shared/environment/environment';
 
 // Create a secret manager once rather than in every request.
 const secretManager = new SecretManagerServiceClient();
 
-// eslint-disable-next-line import/prefer-default-export
-export async function helloWorldInternal(
-  request: HelloWorldRequest,
-): Promise<HelloWorldResponse> {
+export default async function apiInternal(
+  request: ApiRequest,
+): Promise<ApiResponse> {
   // Fetch the SendGrid API key.
   const sendgridApiKey = await (async (): Promise<string> => {
     if (isProduction()) {

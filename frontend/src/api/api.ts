@@ -1,19 +1,16 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { HelloWorldRequest, HelloWorldResponse } from '../shared/api/api';
+import { ApiRequest, ApiResponse } from '../shared/api/api';
 import {
   cloudFunctionsBaseUrlDevelopment,
   cloudFunctionsBaseUrlProduction,
 } from '../shared/constants/constants';
 import { isProduction } from '../shared/environment/environment';
 
-// eslint-disable-next-line import/prefer-default-export
-export async function helloWorld(
-  request: HelloWorldRequest,
-): Promise<HelloWorldResponse> {
-  const axiosResponse: AxiosResponse<HelloWorldResponse> = await axios.post(
+export default async function api(request: ApiRequest): Promise<ApiResponse> {
+  const axiosResponse: AxiosResponse<ApiResponse> = await axios.post(
     isProduction()
-      ? `${cloudFunctionsBaseUrlProduction}/helloWorld`
+      ? `${cloudFunctionsBaseUrlProduction}/api`
       : `${cloudFunctionsBaseUrlDevelopment}/`,
     request,
   );

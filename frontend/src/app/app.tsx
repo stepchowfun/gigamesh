@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import smiley from './smiley.svg';
 import sum from '../sum/sum';
-import { helloWorld } from '../api/api';
+import api from '../api/api';
 
 const AppContainer = styled.div`
   color: #333333;
@@ -17,7 +17,7 @@ class App extends React.Component {
   static handleClick(e: React.MouseEvent): void {
     e.preventDefault();
 
-    helloWorld({ age: 42 })
+    api({ age: 42 })
       .then((response) => {
         // eslint-disable-next-line no-alert
         alert(response.newAge);
