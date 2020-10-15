@@ -23,8 +23,13 @@ export async function entry(
     response.set('Access-Control-Max-Age', '3600');
     response.status(204).send('');
   } else {
-    const apiResponse = await api((request.body as unknown) as ApiRequest);
+    const payload = request.body;
 
-    response.status(200).send(apiResponse);
+    if (ApiRequest.guard(payload)) {
+      const apiResponse = await api(payload);
+      response.status(200).send(apiResponse);
+    } else {
+      response.status(400).send('');
+    }
   }
 }
