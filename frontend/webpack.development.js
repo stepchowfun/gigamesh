@@ -4,7 +4,7 @@
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
 
-// Enable source maps. We disable source maps in production because
+// Enable source maps for styles. We disable source maps in production because
 // `style-loader` only supports inline source maps, which lead to bloat.
 // However, that bloat is not as much of a concern in development.
 const cssLoader = common.module.rules[1].use[1];
@@ -28,5 +28,9 @@ if (styleLoader.loader === 'style-loader') {
 }
 
 module.exports = merge(common, {
+  // Development mode
   mode: 'development',
+
+  // Enable source maps for scripts.
+  devtool: 'source-map',
 });
