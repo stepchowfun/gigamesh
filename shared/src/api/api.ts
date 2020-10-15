@@ -1,7 +1,9 @@
-export type ApiRequest = {
-  age: number;
-};
+import { Number, Record } from 'runtypes';
 
-export type ApiResponse = {
-  newAge: number;
-};
+export const ApiRequest = Record({
+  age: Number,
+});
+
+export const ApiResponse = Record({
+  newAge: Number,
+});
