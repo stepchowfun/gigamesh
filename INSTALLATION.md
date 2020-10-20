@@ -80,11 +80,11 @@
     - Once you have Toast installed, run the following command to build and deploy the service:
 
       ```sh
-      DOMAIN: www.gigamesh.io \
-        GCF_REGION: us-central1 \
-        GCF_SERVICE_ACCOUNT: gigamesh-api@gigamesh-293109.iam.gserviceaccount.com \
-        GCP_DEPLOY_CREDENTIALS: "$(cat credentials.json)" \
-        GCP_PROJECT: gigamesh-293109 \
+      DOMAIN=www.gigamesh.io \
+        GCF_REGION=us-central1 \
+        GCF_SERVICE_ACCOUNT=gigamesh-api@gigamesh-293109.iam.gserviceaccount.com \
+        GCP_DEPLOY_CREDENTIALS="$(cat credentials.json)" \
+        GCP_PROJECT=gigamesh-293109 \
         toast deploy
       ```
 
