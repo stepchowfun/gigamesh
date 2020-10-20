@@ -5,11 +5,13 @@
   - Sign into the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
   - Install the [Google Cloud SDK](https://cloud.google.com/sdk/install) and run `gcloud init` to configure and authorize the SDK tools.
   - Set up the frontend.
-    - Set up a Cloud Storage bucket for serving the website.
+    - Create up a Cloud Storage bucket for serving the website. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
 
       ```sh
+      export GCP_PROJECT=my-project-id # Change this to your project ID.
       export DOMAIN=www.gigamesh.io # Change this to your domain.
-      gsutil mb -b on -c standard -l us "gs://$DOMAIN" # Feel free to change `us` to a different location.
+      export GCS_LOCATION=us # Feel free to change this to a different location.
+      gsutil mb -p "$GCP_PROJECT" -b on -c standard -l "$GCS_LOCATION" "gs://$DOMAIN"
       gsutil iam ch allUsers:objectViewer "gs://$DOMAIN"
       gsutil web set -m index.html "gs://$DOMAIN"
       ```
@@ -70,11 +72,11 @@
     - Once you have Toast installed, run the following command to build and deploy the service:
 
       ```sh
-      DOMAIN=www.gigamesh.io \
-        GCP_CREDENTIALS="$(cat credentials.json)" \
-        GCP_PROJECT_ID=gigamesh-279607 \
-        GCP_REGION=us-central1 \
-        GCP_PRODUCTION_SERVICE_ACCOUNT_EMAIL=production@gigamesh-279607.iam.gserviceaccount.com \
+      DOMAIN: www.gigamesh.io \
+        GCF_REGION: us-central1 \
+        GCF_SERVICE_ACCOUNT: production@gigamesh-279607.iam.gserviceaccount.com \
+        GCP_DEPLOY_CREDENTIALS: "$(cat credentials.json)" \
+        GCP_PROJECT: gigamesh-279607 \
         toast deploy
       ```
 

@@ -225,27 +225,27 @@ tasks:
     input_paths:
       - backend/.gcloudignore
     environment:
-      GCP_CREDENTIALS: null
-      GCP_PROJECT_ID: gigamesh-279607
-      GCP_REGION: us-central1
-      GCP_PRODUCTION_SERVICE_ACCOUNT_EMAIL: production@gigamesh-279607.iam.gserviceaccount.com
+      GCF_REGION: us-central1
+      GCF_SERVICE_ACCOUNT: production@gigamesh-279607.iam.gserviceaccount.com
+      GCP_DEPLOY_CREDENTIALS: null
+      GCP_PROJECT: gigamesh-279607
     user: user
     command: |
       set -euo pipefail
 
       # Authenticate with the Google Cloud SDK.
-      GOOGLE_APPLICATION_CREDENTIALS=~/gcp-credentials.json
-      echo "$GCP_CREDENTIALS" > "$GOOGLE_APPLICATION_CREDENTIALS"
-      gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
+      GOOGLE_KEY_FILE=~/gcp-credentials.json
+      echo "$GCP_DEPLOY_CREDENTIALS" > "$GOOGLE_KEY_FILE"
+      gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
 
       # Deploy the Cloud Functions.
       gcloud functions deploy api \
-        --project "$GCP_PROJECT_ID" \
-        --region "$GCP_REGION" \
+        --project "$GCP_PROJECT" \
+        --region "$GCF_REGION" \
         --runtime nodejs10 \
         --source backend \
         --entry-point entry \
-        --service-account "$GCP_PRODUCTION_SERVICE_ACCOUNT_EMAIL" \
+        --service-account "$GCF_SERVICE_ACCOUNT" \
         --trigger-http \
         --allow-unauthenticated
 
@@ -258,15 +258,16 @@ tasks:
     cache: false
     environment:
       DOMAIN: www.gigamesh.io
-      GCP_CREDENTIALS: null
+      GCP_DEPLOY_CREDENTIALS: null
+      GCP_PROJECT: gigamesh-279607
     user: user
     command: |
       set -euo pipefail
 
       # Authenticate with the Google Cloud SDK.
-      GOOGLE_APPLICATION_CREDENTIALS=~/gcp-credentials.json
-      echo "$GCP_CREDENTIALS" > "$GOOGLE_APPLICATION_CREDENTIALS"
-      gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
+      GOOGLE_KEY_FILE=~/gcp-credentials.json
+      echo "$GCP_DEPLOY_CREDENTIALS" > "$GOOGLE_KEY_FILE"
+      gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
 
       # Sync the frontend files to Cloud Storage.
       gsutil -m rsync -d -r -c frontend/dist "gs://$DOMAIN"
