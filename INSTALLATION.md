@@ -73,7 +73,7 @@
       DOMAIN=www.gigamesh.io \
         GCP_CREDENTIALS="$(cat credentials.json)" \
         GCP_PROJECT_ID=gigamesh-279607 \
-        GCP_REGION=us-east1 \
+        GCP_REGION=us-central1 \
         GCP_PRODUCTION_SERVICE_ACCOUNT_EMAIL=production@gigamesh-279607.iam.gserviceaccount.com \
         toast deploy
       ```
