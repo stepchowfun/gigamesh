@@ -239,9 +239,7 @@ tasks:
       echo "$GCP_CREDENTIALS" > "$GOOGLE_APPLICATION_CREDENTIALS"
       gcloud auth activate-service-account --key-file "$GOOGLE_APPLICATION_CREDENTIALS"
 
-      # Deploy the Cloud Functions. We copy the code into a new directory because `gcloud` doesn't
-      # seem to like the fact that the files are owned by `root` (even though `user` can read from
-      # and write to them).
+      # Deploy the Cloud Functions.
       cp -LR backend /tmp/backend
       gcloud functions deploy api \
         --project "$GCP_PROJECT_ID" \
