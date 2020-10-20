@@ -8,9 +8,10 @@
     - Create up a Cloud Storage bucket for serving the website. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
 
       ```sh
-      export GCP_PROJECT=my-project-id # Change this to your project ID.
       export DOMAIN=www.gigamesh.io # Change this to your domain.
+      export GCP_PROJECT=gigamesh-293109 # Change this to your project ID.
       export GCS_LOCATION=us # Feel free to change this to a different location.
+
       gsutil mb -p "$GCP_PROJECT" -b on -c standard -l "$GCS_LOCATION" "gs://$DOMAIN"
       gsutil iam ch allUsers:objectViewer "gs://$DOMAIN"
       gsutil web set -m index.html "gs://$DOMAIN"
@@ -27,15 +28,14 @@
         - **Frontend configuration:** Choose the IP address created for the previous load balancer (1).
       - Set up a load balancer (2) to redirect apex traffic to `www`.
         - **Backend configuration:** None.
-        - **Host and path rules:** Use an "Advanced host and path rule", and choose "Redirect the client to a different host/path". Set the "Host redirect" to the appropriate domain and configure an empty "Prefix redirect". Set the response code to 301 and enable "HTTPS redirect".
+        - **Host and path rules:** Use an "Advanced host and path rule", and choose "Redirect the client to a different host/path". Set the "Host redirect" to the appropriate domain (with `www`) and configure an empty "Prefix redirect". Set the response code to 301 and enable "HTTPS redirect".
         - **Frontend configuration:** We'll set up two rules, one for HTTP and one for HTTPS. Create a new static IP address (different from the one you created earlier) and use it for both. For the HTTPS rule, use the certificate you created above for the first load balancer (1).
     - For the DNS configuration (e.g., in Google Domains): Create two A records, one for the root (`@`) and one for `www`. Use the appropriate IP addresses for the load balancers you created above.
   - Set up the backend.
-    - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for production. Grant the `Owner` role.
     - Enable Secrets Manager.
 
       ```sh
-      gcloud services enable secretmanager.googleapis.com
+      gcloud services enable --project "$GCP_PROJECT" secretmanager.googleapis.com
       ```
     - Set up a PostgreSQL database instance via the [Cloud Console](https://console.cloud.google.com/sql/create-instance-postgres).
       - **Instance ID:** Use `gigamesh`.
@@ -43,10 +43,11 @@
 
         ```sh
         echo -n 'THE SECRET' | gcloud secrets create postgres \
+          --project "$GCP_PROJECT" \
           --replication-policy=automatic \
           --data-file=-
         ```
-      - **Region:** Choose the same region as the Cloud Storage bucket you created above.
+      - **Region:** Choose a region that corresponds to the location of the Cloud Storage bucket you created above.
       - **Zone:** `Any` is fine.
       - **Database version:** Use `PostgreSQL 12`.
     - Create a database.
@@ -61,22 +62,29 @@
 
       ```sh
       echo -n 'THE SECRET' | gcloud secrets create sendgrid \
+        --project "$GCP_PROJECT" \
         --replication-policy=automatic \
         --data-file=-
       ```
+    - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for the API. On the secrets created above, add the service account as a member with the `Secret Manager Secret Accessor` role.
   - Set up manual deployment.
     - Clone this repository.
-    - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for deployment (e.g., to be used by the CI system). Store the credentials file for the next step. Grant the `Owner` role.
-    - Export the `GCP_CREDENTIALS` environment variable to the contents of the credentials file for the service account you created in the previous step.
+    - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for deployment (e.g., to be used by the CI system). Store the credentials file for the next step.
+      - On the project, add the service account as a member with the `Cloud Functions Admin` role.
+      - On the Cloud Storage bucket created earlier, add the deployment service account as a member with the `Storage Object Admin` role.
+      - On the API service account, add the deployment service account as a member with the `Service Account User` role.
+    - Export the `GCP_DEPLOY_CREDENTIALS` environment variable to the contents of the credentials file for the service account you created in the previous step.
+    - Enable the Cloud Functions API (e.g., by visiting the Cloud Functions area of the Cloud Console).
+    - Enable the Cloud Build API (e.g., by visiting the Cloud Build area of the Cloud Console).
     - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
     - Once you have Toast installed, run the following command to build and deploy the service:
 
       ```sh
       DOMAIN: www.gigamesh.io \
         GCF_REGION: us-central1 \
-        GCF_SERVICE_ACCOUNT: production@gigamesh-279607.iam.gserviceaccount.com \
+        GCF_SERVICE_ACCOUNT: gigamesh-api@gigamesh-293109.iam.gserviceaccount.com \
         GCP_DEPLOY_CREDENTIALS: "$(cat credentials.json)" \
-        GCP_PROJECT: gigamesh-279607 \
+        GCP_PROJECT: gigamesh-293109 \
         toast deploy
       ```
 
@@ -87,5 +95,5 @@
     - You'll need to change the `env` field(s) of the GitHub action in `.github/workflows/ci.yml` to set the correct environment variables for the deploy step (see the deployment instructions above).
     - Set up two secrets in the repository settings on GitHub:
       - `DOCKER_PASSWORD`: This is your Docker ID password. Toast will use it to cache intermediate Docker images when performing builds.
-      - `GCP_CREDENTIALS`: This should contain the contents of the credentials file for the GCP service account you created earlier. It's used to authorize the CI job to deploy the website.
+      - `GCP_DEPLOY_CREDENTIALS`: This should contain the contents of the credentials file for the deployment service account you created earlier. It's used to authorize the CI job to deploy the website.
   - You will also need to update the constants in [`shared/constants.ts`](https://github.com/stepchowfun/gigamesh/blob/master/shared/constants.ts) as appropriate.

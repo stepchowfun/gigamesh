@@ -226,9 +226,9 @@ tasks:
       - backend/.gcloudignore
     environment:
       GCF_REGION: us-central1
-      GCF_SERVICE_ACCOUNT: production@gigamesh-279607.iam.gserviceaccount.com
+      GCF_SERVICE_ACCOUNT: gigamesh-api@gigamesh-293109.iam.gserviceaccount.com
       GCP_DEPLOY_CREDENTIALS: null
-      GCP_PROJECT: gigamesh-279607
+      GCP_PROJECT: gigamesh-293109
     user: user
     command: |
       set -euo pipefail
@@ -259,7 +259,7 @@ tasks:
     environment:
       DOMAIN: www.gigamesh.io
       GCP_DEPLOY_CREDENTIALS: null
-      GCP_PROJECT: gigamesh-279607
+      GCP_PROJECT: gigamesh-293109
     user: user
     command: |
       set -euo pipefail
