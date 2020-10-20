@@ -20,5 +20,5 @@ jobs:
           repo: stephanmisc/toast
           write_remote_cache: ${{ github.event_name == 'push' }}
         env:
-          GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+          GCP_DEPLOY_CREDENTIALS: ${{ secrets.GCP_DEPLOY_CREDENTIALS }}
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
