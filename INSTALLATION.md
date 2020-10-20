@@ -96,4 +96,4 @@
     - Set up two secrets in the repository settings on GitHub:
       - `DOCKER_PASSWORD`: This is your Docker ID password. Toast will use it to cache intermediate Docker images when performing builds.
       - `GCP_DEPLOY_CREDENTIALS`: This should contain the contents of the credentials file for the deployment service account you created earlier. It's used to authorize the CI job to deploy the website.
-  - You will also need to update the constants in [`shared/constants.ts`](https://github.com/stepchowfun/gigamesh/blob/master/shared/constants.ts) as appropriate.
+  - You will also need to update the constants in [`shared/constants.ts`](https://github.com/stepchowfun/gigamesh/blob/master/shared/src/constants/constants.ts) as appropriate.
