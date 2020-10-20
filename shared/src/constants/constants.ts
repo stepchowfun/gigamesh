@@ -1,7 +1,7 @@
 // These two constants are used when making API calls to the backend.
 export const cloudFunctionsBaseUrlDevelopment = 'http://localhost:8081';
 export const cloudFunctionsBaseUrlProduction =
-  'https://us-east1-gigamesh-279607.cloudfunctions.net';
+  'https://us-central1-gigamesh-279607.cloudfunctions.net';
 
 // These two constants are used to set CORS headers in API responses.
 export const originDevelopment = 'http://localhost:8080';
