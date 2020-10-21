@@ -1,20 +1,13 @@
-import sendgrid from '@sendgrid/mail';
 import { Static } from 'runtypes';
 import { authenticationEmailSender } from '../shared/constants/constants';
-import { getSendgridSecret } from '../secrets/secrets';
 import { SendEmail1Request, SendEmail1Response } from '../shared/api/schema';
+import send from '../email/email';
 
 export default async function sendEmail1(
   request: Omit<Static<typeof SendEmail1Request>, 'type'>,
 ): Promise<Omit<Static<typeof SendEmail1Response>, 'type'>> {
-  // Fetch the SendGrid API key.
-  const sendgridApiKey = await getSendgridSecret();
-
-  // Configure SendGrid.
-  sendgrid.setApiKey(sendgridApiKey);
-
   // Send an email.
-  await sendgrid.send({
+  await send({
     to: 'boyerstephan@gmail.com',
     from: authenticationEmailSender,
     subject: 'This API was called: sendEmail1',
@@ -23,7 +16,7 @@ export default async function sendEmail1(
   });
 
   // Return a response to the client.
-  return Promise.resolve({
+  return {
     newAge: request.age * 2,
-  });
+  };
 }
