@@ -12,6 +12,13 @@ tasks:
       apt-get update
       apt-get install --yes google-cloud-sdk nodejs
 
+  install_tagref:
+    dependencies:
+      - install_packages
+    command: |
+      set -euo pipefail
+      curl https://raw.githubusercontent.com/stepchowfun/tagref/master/install.sh -LSfs | sh
+
   create_user:
     command: |
       set -euo pipefail
@@ -21,6 +28,7 @@ tasks:
     dependencies:
       - create_user
       - install_packages
+      - install_tagref
     input_paths:
       - backend/package-lock.json
       - backend/package.json
@@ -172,7 +180,8 @@ tasks:
     dependencies:
       - install_dependencies
     environment:
-      SENDGRID_API_KEY: null
+      POSTGRES_API_KEY: null # [ref:POSTGRES_API_KEY]
+      SENDGRID_API_KEY: null # [ref:SENDGRID_API_KEY]
     input_paths:
       # All the top-level paths in `backend/` except those in `.gitignore` and those in
       # `mount_paths`
