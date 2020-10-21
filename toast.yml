@@ -7,10 +7,12 @@ tasks:
       apt-get update
       echo 'deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main' | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
       apt-get install --yes apt-transport-https ca-certificates curl gnupg
-      curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-      curl -sL https://deb.nodesource.com/setup_14.x | bash -
+      curl -LSs https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+      curl -LSs https://deb.nodesource.com/setup_14.x | bash -
       apt-get update
       apt-get install --yes google-cloud-sdk nodejs
+      curl -LSs https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -o /usr/local/bin/cloud_sql_proxy
+      chmod a+rx /usr/local/bin/cloud_sql_proxy
 
   install_tagref:
     dependencies:
@@ -180,8 +182,10 @@ tasks:
     dependencies:
       - install_dependencies
     environment:
-      POSTGRES_API_KEY: null # [ref:POSTGRES_API_KEY]
-      SENDGRID_API_KEY: null # [ref:SENDGRID_API_KEY]
+      GCP_API_CREDENTIALS: null
+      POSTGRES_INSTANCE_CONNECTION_NAME: gigamesh-293109:us-central1:gigamesh
+      POSTGRES_SECRET: null # [ref:POSTGRES_SECRET]
+      SENDGRID_SECRET: null # [ref:SENDGRID_SECRET]
     input_paths:
       # All the top-level paths in `backend/` except those in `.gitignore` and those in
       # `mount_paths`
@@ -222,7 +226,16 @@ tasks:
     user: user
     command: |
       set -euo pipefail
-      (cd frontend && npm run development) & (cd backend && npm run development)
+
+      # Authenticate with the Google Cloud SDK.
+      GOOGLE_KEY_FILE=~/gcp-credentials.json
+      echo "$GCP_API_CREDENTIALS" > "$GOOGLE_KEY_FILE"
+      gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
+
+      # Start all the servers.
+      cloud_sql_proxy "-instances=$POSTGRES_INSTANCE_CONNECTION_NAME=tcp:5432" & \
+        (cd backend && npm run development) & \
+        (cd frontend && npm run development)
 
   deploy_backend:
     dependencies:

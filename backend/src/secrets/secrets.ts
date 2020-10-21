@@ -51,11 +51,11 @@ async function readSecret(
 }
 
 export async function getPostgresSecret(): Promise<string> {
-  // [tag:POSTGRES_API_KEY]
-  return readSecret(postgresSecretName, 'POSTGRES_API_KEY');
+  // [tag:POSTGRES_SECRET]
+  return readSecret(postgresSecretName, 'POSTGRES_SECRET');
 }
 
 export async function getSendgridSecret(): Promise<string> {
-  // [tag:SENDGRID_API_KEY]
-  return readSecret(sendgridSecretName, 'SENDGRID_API_KEY');
+  // [tag:SENDGRID_SECRET]
+  return readSecret(sendgridSecretName, 'SENDGRID_SECRET');
 }
