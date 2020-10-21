@@ -7,8 +7,10 @@ export const cloudFunctionsBaseUrlProduction =
 export const originDevelopment = 'http://localhost:8080';
 export const originProduction = 'https://www.gigamesh.io';
 
-// This constant points to the secret in GCP Secrets Manager corresponding to the SendGrid API key.
-export const sendgridApiKeySecretName =
+// This constant points to the secrets in GCP Secret Manager.
+export const postgresSecretName =
+  'projects/gigamesh-293109/secrets/postgres/versions/latest';
+export const sendgridSecretName =
   'projects/gigamesh-293109/secrets/sendgrid/versions/latest';
 
 // This is the "from" address for authentication emails.
