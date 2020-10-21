@@ -72,13 +72,13 @@
     - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for the API. On the secrets created above, add the service account as a member with the `Secret Manager Secret Accessor` role. On the project, add the service account as a member with the `Cloud SQL Client` role.
   - Set up manual deployment.
     - Clone this repository.
+    - Update the constants in [`constants.ts`](https://github.com/stepchowfun/gigamesh/blob/master/shared/src/constants/constants.ts) as appropriate.
+    - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
     - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for deployment (e.g., to be used by the CI system). Store the credentials file for the next step.
       - On the project, add the service account as a member with the `Cloud Functions Admin` role.
       - On the Cloud Storage bucket created earlier, add the deployment service account as a member with the `Storage Object Admin` role.
       - On the API service account, add the deployment service account as a member with the `Service Account User` role.
-    - Export the `GCP_DEPLOY_CREDENTIALS` environment variable to the contents of the credentials file for the service account you created in the previous step.
-    - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
-    - Once you have Toast installed, run the following command to build and deploy the service:
+    - Run the following command to build and deploy the service:
 
       ```sh
       DOMAIN=www.gigamesh.io \
@@ -92,9 +92,10 @@
       You should modify the environment variables as appropriate.
   - Set up continuous integration. This repository has a [GitHub action](https://github.com/stepchowfun/gigamesh/blob/master/.github/workflows/ci.yml) configured to build and deploy the service, with deploys only happening on the `master` branch. Follow the steps below to make this work.
     - Create a new Docker repository on [Docker Hub](https://hub.docker.com/). You'll need to create a Docker ID if you don't already have one.
-    - You'll need to change the `repo` field(s) of the GitHub action in `.github/workflows/ci.yml` to point to the Docker repository you just created.
-    - You'll need to change the `env` field(s) of the GitHub action in `.github/workflows/ci.yml` to set the correct environment variables for the deploy step (see the deployment instructions above).
+    - Update the workflow in `.github/workflows/ci.yml`:
+      - Change the `username` field of the Docker login action to match your Docker ID.
+      - Change the `repo` field(s) of both of the Toast actions to point to the Docker repository you just created.
+      - Change the `env` field(s) of the second Toast action to set the correct environment variables for the deploy step (see the `toast deploy` command above).
     - Set up two secrets in the repository settings on GitHub:
       - `DOCKER_PASSWORD`: This is your Docker ID password. Toast will use it to cache intermediate Docker images when performing builds.
       - `GCP_DEPLOY_CREDENTIALS`: This should contain the contents of the credentials file for the deployment service account you created earlier. It's used to authorize the CI job to deploy the website.
-  - You will also need to update the constants in [`constants.ts`](https://github.com/stepchowfun/gigamesh/blob/master/shared/src/constants/constants.ts) as appropriate.
