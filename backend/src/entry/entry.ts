@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
-import api from '../api/api';
-import { ApiRequest } from '../shared/api/api';
+import { Static } from 'runtypes';
+import sendEmail1 from '../api/sendEmail1';
+import sendEmail2 from '../api/sendEmail2';
+import { ApiRequest, ApiResponse } from '../shared/api/schema';
 import {
   originDevelopment,
   originProduction,
@@ -26,7 +28,19 @@ export async function entry(
     const payload = request.body;
 
     if (ApiRequest.guard(payload)) {
-      const apiResponse = await api(payload);
+      const apiResponse = await ApiRequest.match<
+        Promise<Static<typeof ApiResponse>>
+      >(
+        (sendEmail1Request) =>
+          sendEmail1(sendEmail1Request).then((partialApiResponse) => {
+            return { ...partialApiResponse, type: 'SendEmail1Response' };
+          }),
+        (sendEmail2Request) =>
+          sendEmail2(sendEmail2Request).then((partialApiResponse) => {
+            return { ...partialApiResponse, type: 'SendEmail2Response' };
+          }),
+      )(payload);
+
       response.status(200).send(apiResponse);
     } else {
       response.status(400).send('');

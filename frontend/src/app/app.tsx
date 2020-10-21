@@ -2,7 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import smiley from './smiley.svg';
 import sum from '../sum/sum';
-import api from '../api/api';
+import sendEmail1 from '../api/sendEmail1';
+import sendEmail2 from '../api/sendEmail2';
 
 const AppContainer = styled.div`
   color: #333333;
@@ -14,10 +15,24 @@ const SmileyContainer = styled.img`
 `;
 
 class App extends React.Component {
-  static handleClick(e: React.MouseEvent): void {
+  static handleClick1(e: React.MouseEvent): void {
     e.preventDefault();
 
-    api({ age: 42 })
+    sendEmail1({ age: 42 })
+      .then((response) => {
+        // eslint-disable-next-line no-alert
+        alert(response.newAge);
+      })
+      .catch((reason) => {
+        // eslint-disable-next-line no-alert
+        alert(reason);
+      });
+  }
+
+  static handleClick2(e: React.MouseEvent): void {
+    e.preventDefault();
+
+    sendEmail2({ age: 42 })
       .then((response) => {
         // eslint-disable-next-line no-alert
         alert(response.newAge);
@@ -36,7 +51,13 @@ class App extends React.Component {
             src={smiley}
             alt="Smiley face"
             // eslint-disable-next-line @typescript-eslint/unbound-method
-            onClick={App.handleClick}
+            onClick={App.handleClick1}
+          />{' '}
+          <SmileyContainer
+            src={smiley}
+            alt="Smiley face"
+            // eslint-disable-next-line @typescript-eslint/unbound-method
+            onClick={App.handleClick2}
           />
         </p>
         <p>1 + 2 = {sum(1, 2)}</p>
