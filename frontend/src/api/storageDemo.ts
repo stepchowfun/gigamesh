@@ -1,22 +1,22 @@
 import axios, { AxiosResponse } from 'axios';
 import { Static } from 'runtypes';
-import { SendEmail2Request, SendEmail2Response } from '../shared/api/schema';
+import { StorageDemoRequest, StorageDemoResponse } from '../shared/api/schema';
 import {
   cloudFunctionsBaseUrlDevelopment,
   cloudFunctionsBaseUrlProduction,
 } from '../shared/constants/constants';
 import { isProduction } from '../shared/environment/environment';
 
-export default async function sendEmail2(
-  request: Omit<Static<typeof SendEmail2Request>, 'type'>,
-): Promise<Omit<Static<typeof SendEmail2Response>, 'type'>> {
-  const payload: Static<typeof SendEmail2Request> = {
+export default async function storageDemo(
+  request: Omit<Static<typeof StorageDemoRequest>, 'type'>,
+): Promise<Omit<Static<typeof StorageDemoResponse>, 'type'>> {
+  const payload: Static<typeof StorageDemoRequest> = {
     ...request,
-    type: 'SendEmail2Request',
+    type: 'StorageDemoRequest',
   };
 
   const axiosResponse: AxiosResponse<Static<
-    typeof SendEmail2Response
+    typeof StorageDemoResponse
   >> = await axios.post(
     isProduction()
       ? `${cloudFunctionsBaseUrlProduction}/api`

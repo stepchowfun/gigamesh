@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Static } from 'runtypes';
-import sendEmail1 from '../api/sendEmail1';
-import sendEmail2 from '../api/sendEmail2';
+import emailDemo from '../api/emailDemo';
+import storageDemo from '../api/storageDemo';
 import { ApiRequest, ApiResponse } from '../shared/api/schema';
 import {
   originDevelopment,
@@ -31,13 +31,13 @@ export async function entry(
       const apiResponse = await ApiRequest.match<
         Promise<Static<typeof ApiResponse>>
       >(
-        (sendEmail1Request) =>
-          sendEmail1(sendEmail1Request).then((partialApiResponse) => {
-            return { ...partialApiResponse, type: 'SendEmail1Response' };
+        (emailDemoRequest) =>
+          emailDemo(emailDemoRequest).then((partialApiResponse) => {
+            return { ...partialApiResponse, type: 'EmailDemoResponse' };
           }),
-        (sendEmail2Request) =>
-          sendEmail2(sendEmail2Request).then((partialApiResponse) => {
-            return { ...partialApiResponse, type: 'SendEmail2Response' };
+        (storageDemoRequest) =>
+          storageDemo(storageDemoRequest).then((partialApiResponse) => {
+            return { ...partialApiResponse, type: 'StorageDemoResponse' };
           }),
       )(payload);
 

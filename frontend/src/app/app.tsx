@@ -2,8 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import smiley from './smiley.svg';
 import sum from '../sum/sum';
-import sendEmail1 from '../api/sendEmail1';
-import sendEmail2 from '../api/sendEmail2';
+import emailDemo from '../api/emailDemo';
+import storageDemo from '../api/storageDemo';
 
 const AppContainer = styled.div`
   color: #333333;
@@ -18,7 +18,7 @@ class App extends React.Component {
   static handleClick1(e: React.MouseEvent): void {
     e.preventDefault();
 
-    sendEmail1({ age: 42 })
+    emailDemo({ age: 42 })
       .then((response) => {
         // eslint-disable-next-line no-alert
         alert(response.newAge);
@@ -32,10 +32,10 @@ class App extends React.Component {
   static handleClick2(e: React.MouseEvent): void {
     e.preventDefault();
 
-    sendEmail2({ age: 42 })
+    storageDemo({})
       .then((response) => {
         // eslint-disable-next-line no-alert
-        alert(response.newAge);
+        alert(response.now);
       })
       .catch((reason) => {
         // eslint-disable-next-line no-alert

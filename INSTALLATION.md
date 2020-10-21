@@ -32,10 +32,13 @@
         - **Frontend configuration:** We'll set up two rules, one for HTTP and one for HTTPS. Create a new static IP address (different from the one you created earlier) and use it for both. For the HTTPS rule, use the certificate you created above for the first load balancer (1).
     - For the DNS configuration (e.g., in Google Domains): Create two A records, one for the root (`@`) and one for `www`. Use the appropriate IP addresses for the load balancers you created above.
   - Set up the backend.
-    - Enable Secrets Manager.
+    - Enable the necessary APIs:
 
       ```sh
+      gcloud services enable --project "$GCP_PROJECT" cloudbuild.googleapis.com
+      gcloud services enable --project "$GCP_PROJECT" cloudfunctions.googleapis.com
       gcloud services enable --project "$GCP_PROJECT" secretmanager.googleapis.com
+      gcloud services enable --project "$GCP_PROJECT" sqladmin.googleapis.com
       ```
     - Set up a PostgreSQL database instance via the [Cloud Console](https://console.cloud.google.com/sql/create-instance-postgres).
       - **Instance ID:** Use `gigamesh`.
@@ -66,7 +69,7 @@
         --replication-policy=automatic \
         --data-file=-
       ```
-    - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for the API. On the secrets created above, add the service account as a member with the `Secret Manager Secret Accessor` role.
+    - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for the API. On the secrets created above, add the service account as a member with the `Secret Manager Secret Accessor` role. On the project, add the service account as a member with the `Cloud SQL Client` role.
   - Set up manual deployment.
     - Clone this repository.
     - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for deployment (e.g., to be used by the CI system). Store the credentials file for the next step.
@@ -74,8 +77,6 @@
       - On the Cloud Storage bucket created earlier, add the deployment service account as a member with the `Storage Object Admin` role.
       - On the API service account, add the deployment service account as a member with the `Service Account User` role.
     - Export the `GCP_DEPLOY_CREDENTIALS` environment variable to the contents of the credentials file for the service account you created in the previous step.
-    - Enable the Cloud Functions API (e.g., by visiting the Cloud Functions area of the Cloud Console).
-    - Enable the Cloud Build API (e.g., by visiting the Cloud Build area of the Cloud Console).
     - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
     - Once you have Toast installed, run the following command to build and deploy the service:
 

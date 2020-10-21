@@ -13,5 +13,10 @@ export const postgresSecretName =
 export const sendgridSecretName =
   'projects/gigamesh-293109/secrets/sendgrid/versions/latest';
 
-// This is the "from" address for authentication emails.
-export const authenticationEmailSender = 'automated@gigamesh.io';
+// These constants are used for connecting to the database.
+export const databaseName = 'gigamesh';
+export const databaseUser = 'postgres';
+export const databaseHost = '/cloudsql/gigamesh-293109:us-central1:gigamesh';
+
+// This is the "from" address for emails.
+export const emailFromAddress = 'automated@gigamesh.io';
