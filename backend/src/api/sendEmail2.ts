@@ -5,15 +5,15 @@ import {
   authenticationEmailSender,
   sendgridApiKeySecretName,
 } from '../shared/constants/constants';
-import { ApiRequest, ApiResponse } from '../shared/api/api';
+import { SendEmail2Request, SendEmail2Response } from '../shared/api/schema';
 import { isProduction } from '../shared/environment/environment';
 
 // Create a secret manager once rather than in every request.
 const secretManager = new SecretManagerServiceClient();
 
-export default async function api(
-  request: Static<typeof ApiRequest>,
-): Promise<Static<typeof ApiResponse>> {
+export default async function sendEmail2(
+  request: Omit<Static<typeof SendEmail2Request>, 'type'>,
+): Promise<Omit<Static<typeof SendEmail2Response>, 'type'>> {
   // Fetch the SendGrid API key.
   const sendgridApiKey = await (async (): Promise<string> => {
     if (isProduction()) {
@@ -36,11 +36,13 @@ export default async function api(
   await sendgrid.send({
     to: 'boyerstephan@gmail.com',
     from: authenticationEmailSender,
-    subject: 'Sending with Twilio SendGrid is Fun',
-    text: 'and easy to do anywhere, even with Node.js',
-    html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+    subject: 'This API was called: sendEmail2',
+    text: 'Hello, World!',
+    html: '<strong>Hello, World!</strong>',
   });
 
   // Return a response to the client.
-  return Promise.resolve({ newAge: request.age * 2 });
+  return Promise.resolve({
+    newAge: request.age * 3,
+  });
 }
