@@ -1,31 +1,30 @@
-import { Literal, Number, Record, Union } from 'runtypes';
+import { InstanceOf, Literal, Number, Record, Union } from 'runtypes';
 
-// The request and response schema for sendEmail1
+// The request and response schema for emailDemo
 
-export const SendEmail1Request = Record({
-  type: Literal('SendEmail1Request'),
+export const EmailDemoRequest = Record({
+  type: Literal('EmailDemoRequest'),
   age: Number,
 });
 
-export const SendEmail1Response = Record({
-  type: Literal('SendEmail1Response'),
+export const EmailDemoResponse = Record({
+  type: Literal('EmailDemoResponse'),
   newAge: Number,
 });
 
-// The request and response schema for sendEmail2
+// The request and response schema for storageDemo
 
-export const SendEmail2Request = Record({
-  type: Literal('SendEmail2Request'),
-  age: Number,
+export const StorageDemoRequest = Record({
+  type: Literal('StorageDemoRequest'),
 });
 
-export const SendEmail2Response = Record({
-  type: Literal('SendEmail2Response'),
-  newAge: Number,
+export const StorageDemoResponse = Record({
+  type: Literal('StorageDemoResponse'),
+  now: InstanceOf(Date),
 });
 
 // The general request and response schemas
 
-export const ApiRequest = Union(SendEmail1Request, SendEmail2Request);
+export const ApiRequest = Union(EmailDemoRequest, StorageDemoRequest);
 
-export const ApiResponse = Union(SendEmail1Response, SendEmail2Response);
+export const ApiResponse = Union(EmailDemoResponse, StorageDemoResponse);
