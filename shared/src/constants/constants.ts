@@ -14,9 +14,15 @@ export const sendgridSecretName =
   'projects/gigamesh-293109/secrets/sendgrid/versions/latest';
 
 // These constants are used for connecting to the database.
-export const databaseName = 'gigamesh';
-export const databaseUser = 'postgres';
-export const databaseHost = '/cloudsql/gigamesh-293109:us-central1:gigamesh';
+export const databaseUserDevelopment = 'postgres';
+export const databaseNameDevelopment = 'gigamesh';
+export const databaseHostDevelopment = '127.0.0.1';
+export const databasePortDevelopment = 5432;
+export const databaseNameProduction = 'gigamesh';
+export const databaseUserProduction = 'postgres';
+export const databaseHostProduction =
+  '/cloudsql/gigamesh-293109:us-central1:gigamesh';
+export const databasePortProduction = undefined;
 
 // This is the "from" address for emails.
 export const emailFromAddress = 'automated@gigamesh.io';
