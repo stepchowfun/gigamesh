@@ -279,49 +279,73 @@ tasks:
       - install_packages
     cache: false
     environment:
-      DOMAIN: www.gigamesh.io
+      STAGING_BUCKET: gigamesh-staging
+      PRODUCTION_BUCKET: www.gigamesh.io
       GCP_DEPLOY_CREDENTIALS: null
       GCP_PROJECT: gigamesh-293109
     user: user
     command: |
       set -euo pipefail
 
+      # This script approximates an atomic deployment. There are two situations
+      # in which the approximation breaks down and a client may temporarily
+      # experience a broken website during a deploy:
+      #
+      # 1. File A references file B, either directly or indirectly. A client
+      #    downloads file A, then a deploy deletes file B, and finally the
+      #    client requests file B. To mitigate this, we don't delete any files
+      #    until a short while after all new files have been added to give
+      #    clients a reasonable amount of time to follow any references.
+      #    [tag:create_sleep_delete]
+      #
+      # 2. Non-fingerprinted file A references non-fingerprinted file B, either
+      #    directly or indirectly. An in-progress deploy creates file A, then a
+      #    client downloads file A and requests file B before the deploy has
+      #    created file B. To mitigate this, we rarely introduce new references
+      #    to non-fingerprinted files.
+
+      # Files with these extensions are fingerprinted.
+      FINGERPRINTED_EXTENSIONS='js svg'
+
       # Authenticate with the Google Cloud SDK.
       GOOGLE_KEY_FILE=~/gcp-credentials.json
       echo "$GCP_DEPLOY_CREDENTIALS" > "$GOOGLE_KEY_FILE"
       gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
 
-      # Upload all fingerprinted files first, so they'll be available by the
-      # time they're referenced by non-fingerprinted files.
-      for EXTENSION in js svg; do
-        # Upload files with this particular extension.
-        gsutil -m cp \
-          $(find frontend/dist -type f -name "*.$EXTENSION" -print) \
-          "gs://$DOMAIN"
+      # Upload the files to the staging bucket. We use a staging bucket rather
+      # than simply uploading the files directly to production because we want
+      # to set the object metadata before the files are served to real users.
+      gsutil -m rsync -d -r -c frontend/dist "gs://$STAGING_BUCKET"
 
-        # Fingerprinted files are cached for up to a week.
+      # By default, apply the most conservative caching policy: always require
+      # revalidation. In the next step, we'll set a more aggressive caching
+      # policy for fingerprinted files.
+      gsutil -m setmeta -h 'Cache-Control:public, max-age=0, must-revalidate' \
+        "gs://$STAGING_BUCKET/*"
+
+      # Allow fingerprinted files to be cached for up to a week.
+      for EXTENSION in $FINGERPRINTED_EXTENSIONS; do
         gsutil -m setmeta -h 'Cache-Control:public, max-age=604800, immutable' \
-          'gs://'"$DOMAIN"'/**.'"$EXTENSION"
+          "gs://$STAGING_BUCKET/*.$EXTENSION"
       done
 
-      # Upload the remaining files.
-      for EXTENSION in html ico; do
-        # Upload files with this particular extension.
+      # Copy the fingerprinted files to the production bucket. It's important
+      # to copy the fingerprinted files before copying the non-fingerprinted
+      # files, since the latter may refer to the former.
+      for EXTENSION in $FINGERPRINTED_EXTENSIONS; do
         gsutil -m cp \
-          $(find frontend/dist -type f -name "*.$EXTENSION" -print) \
-          "gs://$DOMAIN"
-
-        # Non-fingerprinted files must always be revalidated.
-        gsutil -m setmeta -h 'Cache-Control:public, max-age=0, must-revalidate' \
-          'gs://'"$DOMAIN"'/**.'"$EXTENSION"
+          "gs://$STAGING_BUCKET/*.$EXTENSION" \
+          "gs://$PRODUCTION_BUCKET"
       done
 
-      # Delete any superfluous files. Before doing so, we sleep for a short
-      # duration in case any clients are still requesting old fingerprinted
-      # assets (e.g., because they downloaded a non-fingerprinted HTML page
-      # just before we started this deploy).
+      # Copy the remaining files to the production bucket.
+      gsutil -m cp 'gs://'"$STAGING_BUCKET"'/*' 'gs://'"$PRODUCTION_BUCKET"
+
+      # Delete any superfluous files in the production bucket. Before doing so,
+      # sleep for a short duration to give clients one last chance to download
+      # these old files [ref:create_sleep_delete].
       sleep 10
-      gsutil -m rsync -d -r -c frontend/dist "gs://$DOMAIN"
+      gsutil -m rsync -d -r -c "gs://$STAGING_BUCKET" "gs://$PRODUCTION_BUCKET"
 
   deploy:
     dependencies:
