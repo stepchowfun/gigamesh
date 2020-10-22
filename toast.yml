@@ -291,16 +291,43 @@ tasks:
       echo "$GCP_DEPLOY_CREDENTIALS" > "$GOOGLE_KEY_FILE"
       gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
 
-      # Sync the frontend files to Cloud Storage.
-      gsutil -m rsync -d -r -c frontend/dist "gs://$DOMAIN"
+      # Files with these extensions are fingerprinted.
+      FINGERPRINTED_EXTENSIONS='js svg'
 
-      # The command below tells browsers and proxies to always revalidate
-      # certain files. We do this for HTML files because they aren't
-      # fingerprinted, and stale versions may refer to fingerprinted assets
-      # which no longer exist.
-      gsutil -m setmeta \
-        -h 'Cache-Control:public, max-age=0, must-revalidate' \
-        'gs://'"$DOMAIN"'/**.html'
+      # Files with these extensions are not fingerprinted.
+      NON_FINGERPRINTED_EXTENSIONS='html ico'
+
+      # Upload all fingerprinted files first, so they'll be available by the
+      # time they're referenced by non-fingerprinted files.
+      for EXTENSION in $FINGERPRINTED_EXTENSIONS; do
+        # Upload files with this particular extension.
+        gsutil -m cp \
+          $(find frontend/dist -type f -name "*.$EXTENSION" -print) \
+          "gs://$DOMAIN"
+
+        # Fingerprinted files are cached for up to a week.
+        gsutil -m setmeta -h 'Cache-Control:public, max-age=604800, immutable' \
+          'gs://'"$DOMAIN"'/**.'"$EXTENSION"
+      done
+
+      # Upload the remaining files.
+      for EXTENSION in $NON_FINGERPRINTED_EXTENSIONS; do
+        # Upload files with this particular extension.
+        gsutil -m cp \
+          $(find frontend/dist -type f -name "*.$EXTENSION" -print) \
+          "gs://$DOMAIN"
+
+        # Non-fingerprinted files must always be revalidated.
+        gsutil -m setmeta -h 'Cache-Control:public, max-age=0, must-revalidate' \
+          'gs://'"$DOMAIN"'/**.'"$EXTENSION"
+      done
+
+      # Delete any superfluous files. Before doing so, we sleep for a short
+      # duration in case any clients are still requesting old fingerprinted
+      # assets (e.g., because they downloaded a non-fingerprinted HTML page
+      # just before we started this deploy).
+      sleep 10
+      gsutil -m rsync -d -r -c frontend/dist "gs://$DOMAIN"
 
   deploy:
     dependencies:
