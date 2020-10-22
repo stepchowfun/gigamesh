@@ -291,15 +291,9 @@ tasks:
       echo "$GCP_DEPLOY_CREDENTIALS" > "$GOOGLE_KEY_FILE"
       gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
 
-      # Files with these extensions are fingerprinted.
-      FINGERPRINTED_EXTENSIONS='js svg'
-
-      # Files with these extensions are not fingerprinted.
-      NON_FINGERPRINTED_EXTENSIONS='html ico'
-
       # Upload all fingerprinted files first, so they'll be available by the
       # time they're referenced by non-fingerprinted files.
-      for EXTENSION in $FINGERPRINTED_EXTENSIONS; do
+      for EXTENSION in js svg; do
         # Upload files with this particular extension.
         gsutil -m cp \
           $(find frontend/dist -type f -name "*.$EXTENSION" -print) \
@@ -311,7 +305,7 @@ tasks:
       done
 
       # Upload the remaining files.
-      for EXTENSION in $NON_FINGERPRINTED_EXTENSIONS; do
+      for EXTENSION in html ico; do
         # Upload files with this particular extension.
         gsutil -m cp \
           $(find frontend/dist -type f -name "*.$EXTENSION" -print) \
