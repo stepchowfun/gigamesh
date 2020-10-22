@@ -5,16 +5,21 @@
   - Sign into the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
   - Install the [Google Cloud SDK](https://cloud.google.com/sdk/install) and run `gcloud init` to configure and authorize the SDK tools.
   - Set up the frontend.
-    - Create up a Cloud Storage bucket for serving the website. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
+    - Create up a Cloud Storage bucket for serving the website as well as a staging bucket that will assist in the deploy process. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
 
       ```sh
-      export DOMAIN=www.gigamesh.io # Change this to your domain.
+      export STAGING_BUCKET=gigamesh-staging # Change this to some unique name.
+      export PRODUCTION_BUCKET=www.gigamesh.io # Change this to your domain.
       export GCP_PROJECT=gigamesh-293109 # Change this to your project ID.
       export GCS_LOCATION=us # Feel free to change this to a different location.
 
-      gsutil mb -p "$GCP_PROJECT" -b on -c standard -l "$GCS_LOCATION" "gs://$DOMAIN"
-      gsutil iam ch allUsers:objectViewer "gs://$DOMAIN"
-      gsutil web set -m index.html "gs://$DOMAIN"
+      # Staging bucket.
+      gsutil mb -p "$GCP_PROJECT" -b on -c standard -l "$GCS_LOCATION" "gs://$STAGING_BUCKET"
+
+      # Production bucket.
+      gsutil mb -p "$GCP_PROJECT" -b on -c standard -l "$GCS_LOCATION" "gs://$PRODUCTION_BUCKET"
+      gsutil iam ch allUsers:objectViewer "gs://$PRODUCTION_BUCKET"
+      gsutil web set -m index.html "gs://$PRODUCTION_BUCKET"
       ```
     - Set up one or more load balancers. The number of load balancers you need depends on your domain and protocol. For example, the public hosted Gigamesh uses three load balancers: (1) the main one which serves `https://www.gigamesh.io`, (2) one to redirect `http://www.gigamesh.io` to `https://www.gigamesh.io`, and one to redirect `http(s)://gigamesh.io` to `https://www.gigamesh.io`. These instructions will assume you are following the same scheme.
       - You can create load balancers from the [Cloud Console](https://console.cloud.google.com/net-services/loadbalancing/list). All three load balancers will be HTTP(S) load balancers (as opposed to TCP load balancers or UDP load balancers).
@@ -76,12 +81,13 @@
     - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
     - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for deployment (e.g., to be used by the CI system). Store the credentials file for the next step.
       - On the project, add the service account as a member with the `Cloud Functions Admin` role.
-      - On the Cloud Storage bucket created earlier, add the deployment service account as a member with the `Storage Object Admin` role.
+      - On the Cloud Storage buckets created earlier, add the deployment service account as a member with the `Storage Object Admin` role.
       - On the API service account, add the deployment service account as a member with the `Service Account User` role.
     - Run the following command to build and deploy the service:
 
       ```sh
-      DOMAIN=www.gigamesh.io \
+      STAGING_BUCKET=gigamesh-staging \
+        PRODUCTION_BUCKET=www.gigamesh.io \
         GCF_REGION=us-central1 \
         GCF_SERVICE_ACCOUNT=gigamesh-api@gigamesh-293109.iam.gserviceaccount.com \
         GCP_DEPLOY_CREDENTIALS="$(cat credentials.json)" \
