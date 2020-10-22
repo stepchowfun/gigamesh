@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "webpack --config webpack.production.js",
-    "check": "jest --config jest.config.js && tsc --project tsconfig.json && eslint --config .eslintrc.js --ignore-path .gitignore --report-unused-disable-directives --max-warnings 0 './**/*{.js,.ts,.tsx}' && prettier --config .prettierrc.json --ignore-path .gitignore --check .",
+    "check": "tsc --project tsconfig.json && jest --config jest.config.js && eslint --config .eslintrc.js --ignore-path .gitignore --report-unused-disable-directives --max-warnings 0 './**/*{.js,.ts,.tsx}' && prettier --config .prettierrc.json --ignore-path .gitignore --check .",
     "development": "webpack serve --config webpack.development.js --host 0.0.0.0",
     "format": "prettier --config .prettierrc.json --ignore-path .gitignore --write ."
   },

@@ -6,8 +6,8 @@
   "main": "dist/entry/entry.js",
   "scripts": {
     "build": "tsc",
-    "check": "jest --config jest.config.js && tsc --project tsconfig.json && eslint --config .eslintrc.js --ignore-path .gitignore --report-unused-disable-directives --max-warnings 0 './**/*{.js,.ts}' && prettier --config .prettierrc.json --ignore-path .gitignore --check .",
-    "development": "tsc && NODE_ENV=development functions-framework --port 8081 --target=entry",
+    "check": "tsc --project tsconfig.json && jest --config jest.config.js && eslint --config .eslintrc.js --ignore-path .gitignore --report-unused-disable-directives --max-warnings 0 './**/*{.js,.ts}' && prettier --config .prettierrc.json --ignore-path .gitignore --check .",
+    "development": "tsc && NODE_ENV=development PORT=8081 node dist/entry/entry.js",
     "format": "prettier --config .prettierrc.json --ignore-path .gitignore --write ."
   },
   "author": "Stephan Boyer",
@@ -15,7 +15,9 @@
   "devDependencies": {
     "@types/express": "^4.17.1",
     "@types/jest": "^26.0.10",
+    "@types/morgan": "^1.9.1",
     "@types/pg": "^7.14.5",
+    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
     "eslint": "^6.8.0",
@@ -31,11 +33,12 @@
     "typescript": "^3.9.2"
   },
   "dependencies": {
-    "@google-cloud/functions-framework": "^1.5.1",
     "@google-cloud/secret-manager": "^3.2.0",
     "@sendgrid/mail": "^7.2.0",
     "express": "^4.17.1",
+    "morgan": "^1.10.0",
     "pg": "^8.4.1",
-    "runtypes": "^5.0.1"
+    "runtypes": "^5.0.1",
+    "winston": "^3.3.3"
   }
 }

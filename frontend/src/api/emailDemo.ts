@@ -19,8 +19,8 @@ export default async function emailDemo(
     typeof EmailDemoResponse
   >> = await axios.post(
     isProduction()
-      ? `${cloudFunctionsBaseUrlProduction}/api`
-      : `${cloudFunctionsBaseUrlDevelopment}/`,
+      ? cloudFunctionsBaseUrlProduction
+      : cloudFunctionsBaseUrlDevelopment,
     payload,
   );
 

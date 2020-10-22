@@ -23,8 +23,6 @@ export default async function getPool(): Promise<Pool> {
         port: databasePortProduction,
         database: databaseNameProduction,
         password: await getPostgresSecret(),
-        max: 1,
-        idleTimeoutMillis: 0,
       });
     } else {
       pool = new Pool({
@@ -33,8 +31,6 @@ export default async function getPool(): Promise<Pool> {
         port: databasePortDevelopment,
         database: databaseNameDevelopment,
         password: await getPostgresSecret(),
-        max: 1,
-        idleTimeoutMillis: 0,
       });
     }
   }
