@@ -47,10 +47,11 @@ tasks:
       - install_dependencies
     input_paths:
       # All the top-level paths in `backend/` except those in `.gitignore`
+      - backend/.dockerignore
       - backend/.eslintrc.js
-      - backend/.gcloudignore
       - backend/.gitignore
       - backend/.prettierrc.json
+      - backend/Dockerfile
       - backend/jest.config.js
       - backend/package-lock.json
       - backend/package.json
@@ -101,10 +102,11 @@ tasks:
       - install_dependencies
     input_paths:
       # All the top-level paths in `backend/` except those in `.gitignore`
+      - backend/.dockerignore
       - backend/.eslintrc.js
-      - backend/.gcloudignore
       - backend/.gitignore
       - backend/.prettierrc.json
+      - backend/Dockerfile
       - backend/jest.config.js
       - backend/package-lock.json
       - backend/package.json
@@ -135,9 +137,10 @@ tasks:
     output_paths:
       # All the top-level paths in `backend/` except those in `.gitignore` and except symlinks
       # (cf. the note below about symlinks)
+      - backend/.dockerignore
       - backend/.eslintrc.js
-      - backend/.gcloudignore
       - backend/.gitignore
+      - backend/Dockerfile
       - backend/package-lock.json
       - backend/package.json
       - backend/src/
@@ -189,10 +192,11 @@ tasks:
     input_paths:
       # All the top-level paths in `backend/` except those in `.gitignore` and those in
       # `mount_paths`
+      - backend/.dockerignore
       - backend/.eslintrc.js
-      - backend/.gcloudignore
       - backend/.gitignore
       - backend/.prettierrc.json
+      - backend/Dockerfile
       - backend/jest.config.js
       - backend/package-lock.json
       - backend/package.json
@@ -244,13 +248,12 @@ tasks:
       - create_user
       - install_packages
     cache: false
-    input_paths:
-      - backend/.gcloudignore
     environment:
-      GCF_REGION: us-central1
-      GCF_SERVICE_ACCOUNT: gigamesh-api@gigamesh-293109.iam.gserviceaccount.com
+      GCB_REGION: us-central1
       GCP_DEPLOY_CREDENTIALS: null
       GCP_PROJECT: gigamesh-293109
+      GCR_REGION: us-central1
+      GCR_SERVICE_ACCOUNT: gigamesh-api@gigamesh-293109.iam.gserviceaccount.com
     user: user
     command: |
       set -euo pipefail
@@ -260,16 +263,36 @@ tasks:
       echo "$GCP_DEPLOY_CREDENTIALS" > "$GOOGLE_KEY_FILE"
       gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
 
-      # Deploy the Cloud Functions.
-      gcloud functions deploy api \
+      # Build the Docker image.
+      gcloud builds submit backend \
         --project "$GCP_PROJECT" \
-        --region "$GCF_REGION" \
-        --runtime nodejs10 \
-        --source backend \
-        --entry-point entry \
-        --service-account "$GCF_SERVICE_ACCOUNT" \
-        --trigger-http \
+        --quiet \
+        --gcs-log-dir "gs://${GCP_PROJECT}_cloudbuild/logs" \
+        --ignore-file .dockerignore \
+        --tag "$GCB_REGION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api"
+
+      # Deploy the Cloud Run service.
+      gcloud run deploy api \
+        --project "$GCP_PROJECT" \
+        --quiet \
+        --platform managed \
+        --image "$GCB_REGION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api" \
+        --add-cloudsql-instances gigamesh-293109:us-central1:gigamesh \
+        --set-env-vars INSTANCE_CONNECTION_NAME=gigamesh-293109:us-central1:gigamesh \
+        --set-env-vars NODE_ENV=production \
+        --region "$GCR_REGION" \
+        --service-account "$GCR_SERVICE_ACCOUNT" \
         --allow-unauthenticated
+
+      # Delete the Docker image.
+      gcloud beta artifacts docker images delete \
+        --project "$GCP_PROJECT" \
+        --quiet \
+        --delete-tags \
+        "$GCB_REGION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api"
+
+      # Clean up the Cloud Storage bucket created by Cloud Build.
+      gsutil -m rm -r "gs://${GCP_PROJECT}_cloudbuild"
 
   deploy_frontend:
     dependencies:
@@ -279,10 +302,10 @@ tasks:
       - install_packages
     cache: false
     environment:
-      STAGING_BUCKET: gigamesh-staging
-      PRODUCTION_BUCKET: www.gigamesh.io
       GCP_DEPLOY_CREDENTIALS: null
       GCP_PROJECT: gigamesh-293109
+      PRODUCTION_BUCKET: www.gigamesh.io
+      STAGING_BUCKET: gigamesh-staging
     user: user
     command: |
       set -euo pipefail

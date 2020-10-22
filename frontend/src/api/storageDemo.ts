@@ -19,8 +19,8 @@ export default async function storageDemo(
     typeof StorageDemoResponse
   >> = await axios.post(
     isProduction()
-      ? `${cloudFunctionsBaseUrlProduction}/api`
-      : `${cloudFunctionsBaseUrlDevelopment}/`,
+      ? cloudFunctionsBaseUrlProduction
+      : cloudFunctionsBaseUrlDevelopment,
     payload,
   );
 

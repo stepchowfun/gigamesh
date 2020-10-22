@@ -1,3 +1,4 @@
+.dockerignore
 .eslintrc.js
 .gcloudignore
 .gitignore

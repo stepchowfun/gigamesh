@@ -5,7 +5,7 @@
   - Sign into the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
   - Install the [Google Cloud SDK](https://cloud.google.com/sdk/install) and run `gcloud init` to configure and authorize the SDK tools.
   - Set up the frontend.
-    - Create up a Cloud Storage bucket for serving the website as well as a staging bucket that will assist in the deploy process. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
+    - Create a Cloud Storage bucket for serving the website and a separate staging bucket that will assist in the deploy process. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
 
       ```sh
       export STAGING_BUCKET=gigamesh-staging # Change this to some unique name.
@@ -13,10 +13,10 @@
       export GCP_PROJECT=gigamesh-293109 # Change this to your project ID.
       export GCS_LOCATION=us # Feel free to change this to a different location.
 
-      # Staging bucket.
+      # Staging bucket
       gsutil mb -p "$GCP_PROJECT" -b on -c standard -l "$GCS_LOCATION" "gs://$STAGING_BUCKET"
 
-      # Production bucket.
+      # Production bucket
       gsutil mb -p "$GCP_PROJECT" -b on -c standard -l "$GCS_LOCATION" "gs://$PRODUCTION_BUCKET"
       gsutil iam ch allUsers:objectViewer "gs://$PRODUCTION_BUCKET"
       gsutil web set -m index.html "gs://$PRODUCTION_BUCKET"
@@ -40,8 +40,9 @@
     - Enable the necessary APIs:
 
       ```sh
+      gcloud services enable --project "$GCP_PROJECT" artifactregistry.googleapis.com
       gcloud services enable --project "$GCP_PROJECT" cloudbuild.googleapis.com
-      gcloud services enable --project "$GCP_PROJECT" cloudfunctions.googleapis.com
+      gcloud services enable --project "$GCP_PROJECT" run.googleapis.com
       gcloud services enable --project "$GCP_PROJECT" secretmanager.googleapis.com
       gcloud services enable --project "$GCP_PROJECT" sqladmin.googleapis.com
       ```
@@ -79,19 +80,21 @@
     - Clone this repository.
     - Update the constants in [`constants.ts`](https://github.com/stepchowfun/gigamesh/blob/master/shared/src/constants/constants.ts) as appropriate.
     - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
+    - Create a Docker repository in Artifact Registry named `gigamesh`.
     - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for deployment (e.g., to be used by the CI system). Store the credentials file for the next step.
-      - On the project, add the service account as a member with the `Cloud Functions Admin` role.
-      - On the Cloud Storage buckets created earlier, add the deployment service account as a member with the `Storage Object Admin` role.
+      - On the project, add the service account as a member with the `Cloud Build Editor`, `Cloud Run Admin`, and `Storage Admin` roles.
+      - On the Artifact Registry repository, add the service account as a member with the `Artifact Registry Repository Administrator` role.
       - On the API service account, add the deployment service account as a member with the `Service Account User` role.
     - Run the following command to build and deploy the service:
 
       ```sh
-      STAGING_BUCKET=gigamesh-staging \
-        PRODUCTION_BUCKET=www.gigamesh.io \
-        GCF_REGION=us-central1 \
-        GCF_SERVICE_ACCOUNT=gigamesh-api@gigamesh-293109.iam.gserviceaccount.com \
-        GCP_DEPLOY_CREDENTIALS="$(cat credentials.json)" \
-        GCP_PROJECT=gigamesh-293109 \
+      GCB_REGION: us-central1 \
+        GCP_DEPLOY_CREDENTIALS: "$(cat credentials.json)" \
+        GCP_PROJECT: gigamesh-293109 \
+        GCR_REGION: us-central1 \
+        GCR_SERVICE_ACCOUNT: gigamesh-api@gigamesh-293109.iam.gserviceaccount.com \
+        PRODUCTION_BUCKET: www.gigamesh.io \
+        STAGING_BUCKET: gigamesh-staging \
         toast deploy
       ```
 
