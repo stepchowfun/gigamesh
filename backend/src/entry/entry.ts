@@ -22,7 +22,7 @@ export async function entry(
   if (request.method === 'OPTIONS') {
     response.set('Access-Control-Allow-Methods', 'GET, POST');
     response.set('Access-Control-Allow-Headers', 'Content-Type');
-    response.set('Access-Control-Max-Age', '3600');
+    response.set('Access-Control-Max-Age', '86400'); // 1 day
     response.status(204).send('');
   } else {
     const payload = request.body;
