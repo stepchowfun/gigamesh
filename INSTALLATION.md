@@ -88,7 +88,8 @@
     - Run the following command to build and deploy the service:
 
       ```sh
-      GCB_REGION: us-central1 \
+      DATABASE_INSTANCE_CONNECTION_NAME: gigamesh-293109:us-central1:gigamesh \
+        GAR_REGION: us-central1 \
         GCP_DEPLOY_CREDENTIALS: "$(cat credentials.json)" \
         GCP_PROJECT: gigamesh-293109 \
         GCR_REGION: us-central1 \
