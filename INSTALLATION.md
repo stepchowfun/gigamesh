@@ -46,27 +46,36 @@
       gcloud services enable --project "$GCP_PROJECT" secretmanager.googleapis.com
       gcloud services enable --project "$GCP_PROJECT" sqladmin.googleapis.com
       ```
-    - Set up a PostgreSQL database instance via the [Cloud Console](https://console.cloud.google.com/sql/create-instance-postgres).
-      - **Instance ID:** Use `gigamesh`.
-      - **Default password:** Choose a secure password (or let the Cloud Console generate one for you). Store it in Secrets Manager as follows:
+    - Set up the database.
+      - Provision up a PostgreSQL database instance via the [Cloud Console](https://console.cloud.google.com/sql/create-instance-postgres).
+        - **Instance ID:** Use `gigamesh`.
+        - **Default password:** Choose a secure password (or let the Cloud Console generate one for you). Store it in Secrets Manager as follows:
 
-        ```sh
-        echo -n 'THE SECRET' | gcloud secrets create postgres \
-          --project "$GCP_PROJECT" \
-          --replication-policy=automatic \
-          --data-file=-
-        ```
-      - **Region:** Choose a region that corresponds to the location of the Cloud Storage bucket you created above.
-      - **Zone:** `Any` is fine.
-      - **Database version:** Use `PostgreSQL 12`.
-    - Create a database.
-      - From the Cloud Console, navigate to the database instance created in the previous step and hit the `Connect using Cloud Shell` button.
-      - Log in using the password you created for the `postgres` user above.
-      - Enter the following:
+          ```sh
+          echo -n 'THE SECRET' | gcloud secrets create postgres \
+            --project "$GCP_PROJECT" \
+            --replication-policy=automatic \
+            --data-file=-
+          ```
+        - **Region:** Choose a region that corresponds to the location of the Cloud Storage bucket you created above.
+        - **Zone:** `Any` is fine.
+        - **Database version:** Use `PostgreSQL 12`.
+      - Secure the database instance in the `Connections` pane for the instance.
+        - Add an authorized network that you can access.
+        - Create server and client certificates. Store the certificate files in a safe place.
+        - Click the "Only allow SSL connections" button.
+      - Initialize the database.
+        - Connect to the database using a command like the following:
 
-        ```sql
-        CREATE DATABASE gigamesh;
-        ```
+          ```sh
+          psql 'sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=35.223.233.124 port=5432 user=postgres dbname=gigamesh'
+          ```
+        - Log in using the password you created for the `postgres` user above.
+        - Enter the following:
+
+          ```sql
+          CREATE DATABASE gigamesh;
+          ```
     - Create a [SendGrid](https://sendgrid.com/) account and follow SendGrid's instructions to configure the domain for sending emails. Create an API key with the permission to send mail. Store the key in Secrets Manager as follows:
 
       ```sh
