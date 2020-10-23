@@ -1,5 +1,4 @@
 import express, { Request, Response } from 'express';
-import morgan from 'morgan';
 import { Static } from 'runtypes';
 import emailDemo from '../api/emailDemo';
 import logger from '../logger/logger';
@@ -20,6 +19,8 @@ async function handleRpc(request: Request, response: Response): Promise<void> {
   const payload = request.body;
 
   if (ApiRequest.guard(payload)) {
+    logger.info('Received valid request.', { request: payload });
+
     const apiResponse = await ApiRequest.match<
       Promise<Static<typeof ApiResponse>>
     >(
@@ -35,6 +36,7 @@ async function handleRpc(request: Request, response: Response): Promise<void> {
 
     response.status(200).send(apiResponse);
   } else {
+    logger.info('Bad request.', { request: payload });
     response.status(400).send('Bad Request');
   }
 }
@@ -59,9 +61,6 @@ const app = express();
 // Populate the `body` field of incoming requests.
 app.use(express.json());
 
-// Log requests.
-app.use(morgan('tiny'));
-
 // Disable the `x-powered-by` header.
 app.disable('x-powered-by');
 
@@ -73,5 +72,5 @@ app.options('/', handleOptions);
 // Start the server.
 app.listen(port, () => {
   // The server has started.
-  logger.info('Listening on port %s…', port);
+  logger.info('Server started.', { port });
 });
