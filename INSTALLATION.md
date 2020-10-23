@@ -1,7 +1,7 @@
 # Installation
 
 - If you want to use the public hosted version of Gigamesh, head on over to [gigamesh.io](https://www.gigamesh.io/).
-- If you want to run and manage your own instance of Gigamesh, below are instructions for doing so with Google Cloud Platform.
+- If you want to run and manage your own instance of Gigamesh, below are instructions for doing so with Google Cloud Platform. These instructions will assume you own a domain name that you want to use for the website (e.g., `www.gigamesh.io`), as well as another domain or subdomain for the API (e.g., `api.gigamesh.io`).
   - Sign into the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
   - Install the [Google Cloud SDK](https://cloud.google.com/sdk/install) and run `gcloud init` to configure and authorize the SDK tools.
   - Set up the frontend.
@@ -88,18 +88,20 @@
     - Run the following command to build and deploy the service:
 
       ```sh
-      DATABASE_INSTANCE_CONNECTION_NAME: gigamesh-293109:us-central1:gigamesh \
-        GAR_REGION: us-central1 \
-        GCP_DEPLOY_CREDENTIALS: "$(cat credentials.json)" \
-        GCP_PROJECT: gigamesh-293109 \
-        GCR_REGION: us-central1 \
-        GCR_SERVICE_ACCOUNT: gigamesh-api@gigamesh-293109.iam.gserviceaccount.com \
-        PRODUCTION_BUCKET: www.gigamesh.io \
-        STAGING_BUCKET: gigamesh-staging \
-        toast deploy
+      export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh-293109:us-central1:gigamesh
+      export GAR_REGION=us-central1
+      export GCP_DEPLOY_CREDENTIALS="$(cat credentials.json)"
+      export GCP_PROJECT=gigamesh-293109
+      export GCR_REGION=us-central1
+      export GCR_SERVICE_ACCOUNT=gigamesh-api@gigamesh-293109.iam.gserviceaccount.com
+      export PRODUCTION_BUCKET=www.gigamesh.io
+      export STAGING_BUCKET=gigamesh-staging
+
+      toast deploy
       ```
 
       You should modify the environment variables as appropriate.
+    - In the Cloud Run UI in the Cloud Console, set up a domain mapping for the newly created API service. You'll need to update your DNS configuration accordingly.
   - Set up continuous integration. This repository has a [GitHub action](https://github.com/stepchowfun/gigamesh/blob/master/.github/workflows/ci.yml) configured to build and deploy the service, with deploys only happening on the `master` branch. Follow the steps below to make this work.
     - Create a new Docker repository on [Docker Hub](https://hub.docker.com/). You'll need to create a Docker ID if you don't already have one.
     - Update the workflow in `.github/workflows/ci.yml`:
