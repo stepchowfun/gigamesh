@@ -68,7 +68,7 @@
         - Connect to the database using a command like the following:
 
           ```sh
-          psql 'sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=35.223.233.124 port=5432 user=postgres dbname=gigamesh'
+          psql 'sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=35.223.233.124 port=5432 user=postgres'
           ```
         - Log in using the password you created for the `postgres` user above.
         - Enter the following:
