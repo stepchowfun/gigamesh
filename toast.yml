@@ -307,26 +307,70 @@ tasks:
       GCP_PROJECT: gigamesh-293109
       PRODUCTION_BUCKET: www.gigamesh.io
       STAGING_BUCKET: gigamesh-staging
+      PURGE_OLD_ASSETS: false # [ref:skip_purging_by_default]
     user: user
     command: |
       set -euo pipefail
 
-      # This script approximates an atomic deployment. There are two situations
-      # in which the approximation breaks down and a client may temporarily
-      # experience a broken website during a deploy:
+      # This deploy script is designed to prevent clients from experiencing a
+      # broken website due to race conditions involving deploys. It depends on
+      # the following simplifying assumptions:
+      #
+      # * For each page load, clients only request files that are either (a)
+      #   non-fingerprinted (e.g., `index.html`), or (b) referenced from files
+      #   they have already requested during that page load
+      #   [tag:file_discoverability].
+      #
+      # * There exists an upper bound for the duration between the time a
+      #   client requests a file and the time a client has finished downloading
+      #   all files referenced (directly or indirectly) by that file
+      #   [tag:max_page_load_duration]. For concreteness, lets arbitrarily
+      #   decree that this upper bound is 10 minutes. In most cases, the
+      #   actual duration will be well under a second thanks to our CDN.
+      #
+      # In situations where these assumptions are violated (users requesting
+      # fingerprinted files directly or extremely slow clients), no guarantees
+      # are made.
+      #
+      # To prevent race conditions involving deploys, we pay special attention
+      # to two pathological scenarios:
       #
       # 1. File A references file B, either directly or indirectly. A client
       #    downloads file A, then a deploy deletes file B, and finally the
-      #    client requests file B. To mitigate this, we don't delete any files
-      #    until a short while after all new files have been added to give
-      #    clients a reasonable amount of time to follow any references.
-      #    [tag:create_sleep_delete]
+      #    client requests file B. To prevent this from happening, we default
+      #    to not deleting old files [tag:skip_purging_by_default].
       #
-      # 2. Non-fingerprinted file A references non-fingerprinted file B, either
-      #    directly or indirectly. An in-progress deploy creates file A, then a
-      #    client downloads file A and requests file B before the deploy has
-      #    created file B. To mitigate this, we rarely introduce new references
-      #    to non-fingerprinted files.
+      #    To free up space, we can purge old files by following a special
+      #    procedure: first, we do an ordinary deploy (with
+      #    `PURGE_OLD_ASSETS=false`), then we wait for the cache TTL for non-
+      #    fingerprinted files plus the maximum page load duration (i.e.,
+      #    [ref:non_fingerprinted_ttl] + [ref:max_page_load_duration]), and
+      #    finally we deploy the same snapshot again, but this time with
+      #    `PURGE_OLD_ASSETS=true`. This ensures clients will have enough time
+      #    to follow references (direct and indirect) from any non-
+      #    fingerprinted file, even if file was loaded from a cache. Note that
+      #    all page loads start with a request for a non-fingerprinted file due
+      #    to [ref:file_discoverability], so we don't need to consider the TTL
+      #    for fingerprinted files here.
+      #
+      # 2. File A references file B, either directly or indirectly. An in-
+      #    progress deploy creates file A, then a client downloads file A and
+      #    requests file B before the deploy has created file B. There are two
+      #    sub-cases to consider:
+      #
+      #    (a) File B is fingerprinted. To prevent breakage due to this case,
+      #        we deploy all fingerprinted files before any non-fingerprinted
+      #        files [tag:deploy_fingerprinted_files_first]. Then, due to
+      #        [ref:file_discoverability], the fingerprinted files will not be
+      #        requested by clients until after they have all been deployed.
+      #
+      #    (a) File B is not fingerprinted. To prevent breakage due to this
+      #        case, we must follow a special procedure to introduce non-
+      #        fingerprinted files: we deploy a snapshot that introduces the
+      #        new files first without referencing them, and we only introduce
+      #        references to them in subsequent deploys. Then, due to
+      #        [ref:file_discoverability], the fingerprinted files will not be
+      #        requested by clients while the first deploy is in progress.
 
       # Files with these extensions are fingerprinted.
       FINGERPRINTED_EXTENSIONS='js svg'
@@ -341,10 +385,10 @@ tasks:
       # to set the object metadata before the files are served to real users.
       gsutil -m rsync -d -r -c frontend/dist "gs://$STAGING_BUCKET"
 
-      # By default, apply the most conservative caching policy: always require
-      # revalidation. In the next step, we'll set a more aggressive caching
-      # policy for fingerprinted files.
-      gsutil -m setmeta -h 'Cache-Control:public, max-age=0, must-revalidate' \
+      # By default, allow files to be cached for up to an hour
+      # [tag:non_fingerprinted_ttl]. In the next step, we'll set a more
+      # aggressive caching policy for fingerprinted files.
+      gsutil -m setmeta -h 'Cache-Control:public, max-age=3600' \
         "gs://$STAGING_BUCKET/*"
 
       # Allow fingerprinted files to be cached for up to a week.
@@ -355,7 +399,7 @@ tasks:
 
       # Copy the fingerprinted files to the production bucket. It's important
       # to copy the fingerprinted files before copying the non-fingerprinted
-      # files, since the latter may refer to the former.
+      # files due to [ref:deploy_fingerprinted_files_first].
       for EXTENSION in $FINGERPRINTED_EXTENSIONS; do
         gsutil -m cp \
           "gs://$STAGING_BUCKET/*.$EXTENSION" \
@@ -365,11 +409,16 @@ tasks:
       # Copy the remaining files to the production bucket.
       gsutil -m cp 'gs://'"$STAGING_BUCKET"'/*' 'gs://'"$PRODUCTION_BUCKET"
 
-      # Delete any superfluous files in the production bucket. Before doing so,
-      # sleep for a short duration to give clients one last chance to download
-      # these old files [ref:create_sleep_delete].
-      sleep 10
-      gsutil -m rsync -d -r -c "gs://$STAGING_BUCKET" "gs://$PRODUCTION_BUCKET"
+      # Optionally delete any superfluous files in the production bucket. By
+      # default, we skip this step because it can cause race conditions with
+      # clients unless special precautions are taken
+      # [ref:skip_purging_by_default].
+      if [ "$PURGE_OLD_ASSETS" = 'true' ]; then
+        echo 'Purging old assets…'
+        gsutil -m rsync -d -r -c "gs://$STAGING_BUCKET" "gs://$PRODUCTION_BUCKET"
+      else
+        echo 'Not purging old assets.'
+      fi
 
   deploy:
     dependencies:

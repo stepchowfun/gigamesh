@@ -8,15 +8,15 @@
     - Create a Cloud Storage bucket for serving the website and a separate staging bucket that will assist in the deploy process. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
 
       ```sh
-      export STAGING_BUCKET=gigamesh-staging # Change this to some unique name.
-      export PRODUCTION_BUCKET=www.gigamesh.io # Change this to your domain.
-      export GCP_PROJECT=gigamesh-293109 # Change this to your project ID.
-      export GCS_LOCATION=us # Feel free to change this to a different location.
+      export GCP_PROJECT=gigamesh-293109 # Your project ID
+      export GCS_LOCATION=us # A location as close to your users as possible
+      export PRODUCTION_BUCKET=www.gigamesh.io # Your domain for the website
+      export STAGING_BUCKET=gigamesh-staging # Any unique name
 
-      # Staging bucket
+      # Set up the staging bucket
       gsutil mb -p "$GCP_PROJECT" -b on -c standard -l "$GCS_LOCATION" "gs://$STAGING_BUCKET"
 
-      # Production bucket
+      # Set up the production bucket
       gsutil mb -p "$GCP_PROJECT" -b on -c standard -l "$GCS_LOCATION" "gs://$PRODUCTION_BUCKET"
       gsutil web set -m index.html "gs://$PRODUCTION_BUCKET"
       gsutil iam ch allUsers:objectViewer "gs://$PRODUCTION_BUCKET"
@@ -97,14 +97,14 @@
     - Run the following command to build and deploy the service:
 
       ```sh
-      export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh-293109:us-central1:gigamesh
-      export GAR_REGION=us-central1
-      export GCP_DEPLOY_CREDENTIALS="$(cat credentials.json)"
-      export GCP_PROJECT=gigamesh-293109
-      export GCR_REGION=us-central1
-      export GCR_SERVICE_ACCOUNT=gigamesh-api@gigamesh-293109.iam.gserviceaccount.com
-      export PRODUCTION_BUCKET=www.gigamesh.io
-      export STAGING_BUCKET=gigamesh-staging
+      export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh-293109:us-central1:gigamesh # Your database connection info
+      export GAR_REGION=us-central1 # The Artifact Registry region (not particularly important)
+      export GCP_DEPLOY_CREDENTIALS="$(cat credentials.json)" # Credentials for the deployment service account
+      export GCP_PROJECT=gigamesh-293109 # Your project ID
+      export GCR_REGION=us-central1 # A region as close to your users as possible
+      export GCR_SERVICE_ACCOUNT=gigamesh-api@gigamesh-293109.iam.gserviceaccount.com # The API service account
+      export PRODUCTION_BUCKET=www.gigamesh.io # A bucket we created earlier
+      export STAGING_BUCKET=gigamesh-staging # A bucket we created earlier
 
       toast deploy
       ```
