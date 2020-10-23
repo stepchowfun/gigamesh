@@ -1,11 +1,11 @@
 # Installation
 
 - If you want to use the public hosted version of Gigamesh, head on over to [gigamesh.io](https://www.gigamesh.io/).
-- If you want to run and manage your own instance of Gigamesh, below are instructions for doing so with Google Cloud Platform. These instructions will assume you own a domain name that you want to use for the website (e.g., `www.gigamesh.io`), as well as another domain or subdomain for the API (e.g., `api.gigamesh.io`).
+- If you want to run and manage your own instance of Gigamesh, below are instructions for doing so with Google Cloud Platform. These instructions will assume you own a domain name that you want to use for the website (e.g., `www.gigamesh.io`), as well as another domain or subdomain for the API service (e.g., `api.gigamesh.io`).
   - Sign into the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
   - Install the [Google Cloud SDK](https://cloud.google.com/sdk/install) and run `gcloud init` to configure and authorize the SDK tools.
   - Set up the frontend.
-    - Create a Cloud Storage bucket for serving the website and a separate staging bucket that will assist in the deploy process. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
+    - Create a [Cloud Storage](https://cloud.google.com/storage) bucket for serving the website and a separate staging bucket that will assist in the deploy process. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
 
       ```sh
       export GCP_PROJECT=gigamesh-293109 # Your project ID
@@ -21,7 +21,7 @@
       gsutil web set -m index.html "gs://$PRODUCTION_BUCKET"
       gsutil iam ch allUsers:objectViewer "gs://$PRODUCTION_BUCKET"
       ```
-    - Set up one or more load balancers. The number of load balancers you need depends on your domain and protocol. For example, the public hosted Gigamesh uses three load balancers: (1) the main one which serves `https://www.gigamesh.io`, (2) one to redirect `http://www.gigamesh.io` to `https://www.gigamesh.io`, and one to redirect `http(s)://gigamesh.io` to `https://www.gigamesh.io`. These instructions will assume you are following the same scheme.
+    - Set up one or more [load balancers](https://cloud.google.com/load-balancing). The number of load balancers you need depends on your domain and protocol. For example, the public hosted Gigamesh uses three load balancers: (1) the main one which serves `https://www.gigamesh.io`, (2) one to redirect `http://www.gigamesh.io` to `https://www.gigamesh.io`, and one to redirect `http(s)://gigamesh.io` to `https://www.gigamesh.io`. These instructions will assume you are following the same scheme.
       - You can create load balancers from the [Cloud Console](https://console.cloud.google.com/net-services/loadbalancing/list). All three load balancers will be HTTP(S) load balancers (as opposed to TCP load balancers or UDP load balancers).
       - Set up the main load balancer (1).
         - **Backend configuration:** Set up a backend bucket that points to the Cloud Storage bucket you created earlier. Enable Cloud CDN.
@@ -46,10 +46,10 @@
       gcloud services enable --project "$GCP_PROJECT" secretmanager.googleapis.com
       gcloud services enable --project "$GCP_PROJECT" sqladmin.googleapis.com
       ```
-    - Set up the database.
+    - Set up the database in [Cloud SQL](https://cloud.google.com/sql).
       - Provision up a PostgreSQL database instance via the [Cloud Console](https://console.cloud.google.com/sql/create-instance-postgres).
         - **Instance ID:** Use `gigamesh`.
-        - **Default password:** Choose a secure password (or let the Cloud Console generate one for you). Store it in Secrets Manager as follows:
+        - **Default password:** Choose a secure password (or let the Cloud Console generate one for you). Store it in [Secret Manager](https://cloud.google.com/secret-manager) as follows:
 
           ```sh
           echo -n 'THE SECRET' | gcloud secrets create postgres \
@@ -64,8 +64,8 @@
         - Add an authorized network that you can access.
         - Create server and client certificates. Store the certificate files in a safe place.
         - Click the "Only allow SSL connections" button.
-      - Initialize the database.
-        - Connect to the database using a command like the following:
+      - Create the database.
+        - Connect to the database instance using a command like the following:
 
           ```sh
           psql 'sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=35.223.233.124 port=5432 user=postgres'
@@ -76,7 +76,19 @@
           ```sql
           CREATE DATABASE gigamesh;
           ```
-    - Create a [SendGrid](https://sendgrid.com/) account and follow SendGrid's instructions to configure the domain for sending emails. Create an API key with the permission to send mail. Store the key in Secrets Manager as follows:
+      - Create the tables.
+        - Connect to the database instance again, but this time with the newly created `gigamesh` database:
+
+          ```sh
+          psql 'sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=35.223.233.124 port=5432 user=postgres dbname=gigamesh'
+          ```
+        - Log in using the password you created for the `postgres` user above.
+        - Enter the following:
+
+          ```sql
+          CREATE TABLE employees (id SERIAL PRIMARY KEY, name TEXT);
+          ```
+    - Create a [SendGrid](https://sendgrid.com/) account and follow SendGrid's instructions to configure the domain for sending emails. Create an API key with the permission to send mail. Store the key in Secret Manager as follows:
 
       ```sh
       echo -n 'THE SECRET' | gcloud secrets create sendgrid \
@@ -84,13 +96,13 @@
         --replication-policy=automatic \
         --data-file=-
       ```
-    - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for the API. On the secrets created above, add the service account as a member with the `Secret Manager Secret Accessor` role. On the project, add the service account as a member with the `Cloud SQL Client` role.
+    - Create a service account [here](https://console.cloud.google.com/iam-admin/serviceaccounts) for the API service. On the secrets created above, add the service account as a member with the `Secret Manager Secret Accessor` role. On the project, add the service account as a member with the `Cloud SQL Client` role.
   - Set up manual deployment.
     - Clone this repository.
     - Update the constants in [`constants.ts`](https://github.com/stepchowfun/gigamesh/blob/master/shared/src/constants/constants.ts) as appropriate.
     - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
-    - Create a Docker repository in Artifact Registry named `gigamesh`.
-    - Create a service account [here](https://console.cloud.google.com/apis/credentials/serviceaccountkey) for deployment (e.g., to be used by the CI system). Store the credentials file for the next step.
+    - Create a Docker repository in [Artifact Registry](https://cloud.google.com/artifact-registry) named `gigamesh`.
+    - Create a service account [here](https://console.cloud.google.com/iam-admin/serviceaccounts) for deployment (e.g., to be used by the CI system). Store the credentials file for the next step.
       - On the project, add the service account as a member with the `Cloud Build Editor`, `Cloud Run Admin`, and `Storage Admin` roles. The latter two roles are only needed for the first deploy and will be removed in a later step.
       - On the Artifact Registry repository, add the service account as a member with the `Artifact Registry Repository Administrator` role.
       - On the API service account, add the deployment service account as a member with the `Service Account User` role.
@@ -111,10 +123,10 @@
 
       You should modify the environment variables as appropriate.
     - Remove permissions from the deployment service account:
-      - On the newly deployed Cloud Run service, add the service account as a member with the `Cloud Run Admin` role. Remove the corresponding policy from the project.
+      - On the newly deployed [Cloud Run](https://cloud.google.com/run) service, add the service account as a member with the `Cloud Run Admin` role. Remove the corresponding policy from the project.
       - Update the Cloud Storage policies:
         - On the two Cloud Storage buckets created earlier, add the service account as a member with the `Storage Object Admin` role.
-        - During the deploy, a Cloud Storage bucket called `<GCP_PROJECT>_cloudbuild` was created by Cloud Build. On that bucket, add the service account as a member with the `Storage Object Admin` role.
+        - During the deploy, a Cloud Storage bucket called `<GCP_PROJECT>_cloudbuild` was created by [Cloud Build](https://cloud.google.com/cloud-build). On that bucket, add the service account as a member with the `Storage Object Admin` role.
         - Update the policy that grants the `Storage Admin` role to the service account from the project to grant the `Viewer` role instead.
     - In the Cloud Run UI in the Cloud Console, set up a domain mapping for the newly created API service. You'll need to update your DNS configuration accordingly.
   - Set up continuous integration. This repository has a [GitHub action](https://github.com/stepchowfun/gigamesh/blob/master/.github/workflows/ci.yml) configured to build and deploy the service, with deploys only happening on the `master` branch. Follow the steps below to make this work.
