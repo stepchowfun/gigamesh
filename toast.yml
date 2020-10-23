@@ -292,8 +292,8 @@ tasks:
         --delete-tags \
         "$GAR_REGION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api"
 
-      # Delete the Cloud Storage bucket created by Cloud Build.
-      gsutil -m rm -r "gs://${GCP_PROJECT}_cloudbuild"
+      # Clean up the Cloud Storage bucket created by Cloud Build.
+      gsutil -m rm "gs://${GCP_PROJECT}_cloudbuild/**"
 
   deploy_frontend:
     dependencies:
