@@ -18,8 +18,8 @@
 
       # Production bucket
       gsutil mb -p "$GCP_PROJECT" -b on -c standard -l "$GCS_LOCATION" "gs://$PRODUCTION_BUCKET"
-      gsutil iam ch allUsers:objectViewer "gs://$PRODUCTION_BUCKET"
       gsutil web set -m index.html "gs://$PRODUCTION_BUCKET"
+      gsutil iam ch allUsers:objectViewer "gs://$PRODUCTION_BUCKET"
       ```
     - Set up one or more load balancers. The number of load balancers you need depends on your domain and protocol. For example, the public hosted Gigamesh uses three load balancers: (1) the main one which serves `https://www.gigamesh.io`, (2) one to redirect `http://www.gigamesh.io` to `https://www.gigamesh.io`, and one to redirect `http(s)://gigamesh.io` to `https://www.gigamesh.io`. These instructions will assume you are following the same scheme.
       - You can create load balancers from the [Cloud Console](https://console.cloud.google.com/net-services/loadbalancing/list). All three load balancers will be HTTP(S) load balancers (as opposed to TCP load balancers or UDP load balancers).
