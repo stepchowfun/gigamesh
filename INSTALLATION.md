@@ -103,7 +103,7 @@
     - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
     - Create a Docker repository in [Artifact Registry](https://cloud.google.com/artifact-registry) named `gigamesh`.
     - Create a service account [here](https://console.cloud.google.com/iam-admin/serviceaccounts) for deployment (e.g., to be used by the CI system). Store the credentials file for the next step.
-      - On the project, add the service account as a member with the `Cloud Build Editor`and `Cloud Run Admin` roles. The latter role are only needed for the first deploy and will be removed in a later step.
+      - On the project, add the service account as a member with the `Cloud Build Editor`and `Cloud Run Admin` roles. The latter is only needed for the first deploy and will be removed in a later step.
       - On the production Cloud Storage bucket, add the service account as a member with the `Storage Object Admin` role.
       - On the staging Cloud Storage bucket, add the service account as a member with the `Storage Admin` role. Note that this role is different from the `Storage Object Admin` role used for the production bucket.
       - On the Artifact Registry repository, add the service account as a member with the `Artifact Registry Repository Administrator` role.
