@@ -135,8 +135,8 @@ tasks:
       # Shared top-level paths
       - shared
     output_paths:
-      # All the top-level paths in `backend/` except those in `.gitignore` and except symlinks
-      # (cf. the note below about symlinks)
+      # All the top-level paths in `backend/` except those in `.gitignore` and
+      # except symlinks (cf. the note below about symlinks)
       - backend/.dockerignore
       - backend/.eslintrc.js
       - backend/.gitignore
@@ -147,8 +147,8 @@ tasks:
       - backend/tsconfig.eslint.json
       - backend/tsconfig.json
 
-      # All the top-level paths in `frontend/` except those in `.gitignore` and except symlinks
-      # (cf. the note below about symlinks)
+      # All the top-level paths in `frontend/` except those in `.gitignore` and
+      # except symlinks (cf. the note below about symlinks)
       - frontend/.eslintrc.js
       - frontend/.gitignore
       - frontend/babel.config.json
@@ -172,8 +172,9 @@ tasks:
       (cd backend && npm run format)
       (cd frontend && npm run format)
 
-      # These `rm` commands are needed to work around a bug in `docker container cp` related to
-      # symlinks. See https://stackoverflow.com/questions/35787702/docker-cp-a-folder-with-a-relative-symlink-invalid-symlink
+      # These `rm` commands are needed to work around a bug in
+      # `docker container cp` related to symlinks. See
+      # https://stackoverflow.com/questions/35787702/docker-cp-a-folder-with-a-relative-symlink-invalid-symlink
       # for details.
       rm backend/src/shared
       rm frontend/src/shared
@@ -190,8 +191,8 @@ tasks:
       POSTGRES_SECRET: null # [ref:POSTGRES_SECRET]
       SENDGRID_SECRET: null # [ref:SENDGRID_SECRET]
     input_paths:
-      # All the top-level paths in `backend/` except those in `.gitignore` and those in
-      # `mount_paths`
+      # All the top-level paths in `backend/` except those in `.gitignore` and
+      # those in `mount_paths`
       - backend/.dockerignore
       - backend/.eslintrc.js
       - backend/.gitignore
@@ -203,8 +204,8 @@ tasks:
       - backend/tsconfig.eslint.json
       - backend/tsconfig.json
 
-      # All the top-level paths in `frontend/` except those in `.gitignore` and those in
-      # `mount_paths`
+      # All the top-level paths in `frontend/` except those in `.gitignore` and
+      # those in `mount_paths`
       - frontend/.eslintrc.js
       - frontend/.gitignore
       - frontend/.prettierrc.json
@@ -237,7 +238,8 @@ tasks:
       gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
 
       # Start all the servers.
-      cloud_sql_proxy "-instances=$DATABASE_INSTANCE_CONNECTION_NAME=tcp:5432" & \
+      cloud_sql_proxy \
+        "-instances=$DATABASE_INSTANCE_CONNECTION_NAME=tcp:5432" & \
         (cd backend && npm run development) & \
         (cd frontend && npm run development)
 
@@ -281,7 +283,8 @@ tasks:
         --platform managed \
         --image "$GAR_REGION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api" \
         --add-cloudsql-instances "$DATABASE_INSTANCE_CONNECTION_NAME" \
-        --set-env-vars "INSTANCE_CONNECTION_NAME=$DATABASE_INSTANCE_CONNECTION_NAME" \
+        --set-env-vars \
+          "INSTANCE_CONNECTION_NAME=$DATABASE_INSTANCE_CONNECTION_NAME" \
         --set-env-vars NODE_ENV=production \
         --region "$GCR_REGION" \
         --service-account "$GCR_SERVICE_ACCOUNT" \
@@ -397,7 +400,8 @@ tasks:
 
       # Allow fingerprinted files to be cached for up to a week.
       for EXTENSION in $FINGERPRINTED_EXTENSIONS; do
-        gsutil -m setmeta -h 'Cache-Control:public, max-age=604800, immutable' \
+        gsutil -m setmeta \
+          -h 'Cache-Control:public, max-age=604800, immutable' \
           "gs://$STAGING_BUCKET/dist/*.$EXTENSION"
       done
 
