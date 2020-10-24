@@ -20,7 +20,7 @@ export const databasePortDevelopment = 5432;
 export const databaseNameProduction = 'gigamesh';
 export const databaseUserProduction = 'api';
 export const databaseHostProduction =
-  '/cloudsql/gigamesh-293109:us-central1:gigamesh';
+  '/cloudsql/gigamesh-293109:us-central1:gigamesh-db';
 export const databasePortProduction = undefined;
 
 // This is the "from" address for emails.

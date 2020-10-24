@@ -8,7 +8,7 @@
     - Create a [Cloud Storage](https://cloud.google.com/storage) bucket for serving the website and a separate staging bucket that will assist in the deploy process. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
 
       ```sh
-      export GCP_PROJECT=gigamesh-293109 # Your project ID
+      export GCP_PROJECT=gigamesh # Your project ID
       export GCS_LOCATION=us # A location as close to your users as possible
       export PRODUCTION_BUCKET=www.gigamesh.io # Your domain for the website
       export STAGING_BUCKET=gigamesh-staging # Any unique name
@@ -47,16 +47,55 @@
       gcloud services enable --project "$GCP_PROJECT" sqladmin.googleapis.com
       ```
     - Set up the database in [Cloud SQL](https://cloud.google.com/sql).
-      - Provision up a PostgreSQL database instance via the [Cloud Console](https://console.cloud.google.com/sql/create-instance-postgres).
-        - **Instance ID:** Use `gigamesh`.
-        - **Default password:** Choose a secure password for the default `postgres` user (or let the Cloud Console generate one for you). Store it in a safe place.
-        - **Region:** Choose a region that corresponds to the location of the Cloud Storage bucket you created above.
-        - **Zone:** `Any` is fine.
-        - **Database version:** Use `PostgreSQL 12`.
-      - Secure the database instance in the `Connections` pane for the instance.
-        - Add an authorized network that you can access.
-        - Create server and client certificates. Store the certificate files in a safe place.
-        - Click the "Only allow SSL connections" button.
+      - Provision up a PostgreSQL database instance. The cheapest way to do so is the following:
+
+        ```sh
+        gcloud sql instances create gigamesh \
+          --project "$GCP_PROJECT" \
+          --database-version POSTGRES_12 \
+          --tier db-f1-micro \
+          --no-backup \
+          --region us-central \
+          --assign-ip \
+          --require-ssl \
+          --authorized-networks <MY IP ADDRESS>/32 \
+          --root-password <A PASSWORD>
+        ```
+
+        **Tip:** A good way to generate a password is:
+
+        ```sh
+        openssl rand -base64 32
+        ```
+
+        For production, you should consider configuring high availability, provisioning more CPU and memory, enabling backups, adding read replicas, etc.
+
+        Generate a client certificate:
+
+        ```sh
+        gcloud sql ssl client-certs create ops client-key.pem \
+          --project "$GCP_PROJECT" \
+          --instance gigamesh
+        ```
+
+        Download the public key for that client certificate:
+
+        ```sh
+        gcloud sql ssl client-certs describe ops \
+          --project "$GCP_PROJECT" \
+          --instance gigamesh \
+          --format 'value(cert)' \
+          > client-cert.pem
+        ```
+
+        Download the server certificate:
+
+        ```sh
+        gcloud sql instances describe gigamesh \
+          --project "$GCP_PROJECT" \
+          --format 'value(serverCaCert.cert)' \
+          > server-ca.pem
+        ```
       - Create the database.
         - Connect to the database instance using a command like the following:
 
@@ -87,7 +126,7 @@
         -- Create the user.
         CREATE USER api LOGIN;
 
-        -- Set the password for the user. This will ask you for the password.
+        -- Create a password for the user. This will prompt you for it interactively.
         \password api;
 
         -- Grant the privileges. Note that `UPDATE` and `DELETE` is not granted.
@@ -98,18 +137,18 @@
         Store the password in [Secret Manager](https://cloud.google.com/secret-manager) as follows:
 
           ```sh
-          echo -n 'THE SECRET' | gcloud secrets create postgres \
+          echo -n 'THE PASSWORD' | gcloud secrets create postgres \
             --project "$GCP_PROJECT" \
-            --replication-policy=automatic \
-            --data-file=-
+            --replication-policy automatic \
+            --data-file -
           ```
     - Create a [SendGrid](https://sendgrid.com/) account and follow SendGrid's instructions to configure the domain for sending emails. Create an API key with the permission to send mail. Store the key in Secret Manager as follows:
 
       ```sh
-      echo -n 'THE SECRET' | gcloud secrets create sendgrid \
+      echo -n 'THE API KEY' | gcloud secrets create sendgrid \
         --project "$GCP_PROJECT" \
-        --replication-policy=automatic \
-        --data-file=-
+        --replication-policy automatic \
+        --data-file -
       ```
     - Create a service account [here](https://console.cloud.google.com/iam-admin/serviceaccounts) for the API service. On the secrets created above, add the service account as a member with the `Secret Manager Secret Accessor` role. On the project, add the service account as a member with the `Cloud SQL Client` role.
   - Perform the first deploy.
@@ -126,12 +165,12 @@
     - Run the following command to build and deploy the service:
 
       ```sh
-      export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh-293109:us-central1:gigamesh # Your database connection info
+      export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh:us-central1:gigamesh # Your database connection info
       export GAR_REGION=us-central1 # The Artifact Registry region (not particularly important)
       export GCP_DEPLOY_CREDENTIALS="$(cat credentials.json)" # Credentials for the deployment service account
-      export GCP_PROJECT=gigamesh-293109 # Your project ID
+      export GCP_PROJECT=gigamesh # Your project ID
       export GCR_REGION=us-central1 # A region as close to your users as possible
-      export GCR_SERVICE_ACCOUNT=gigamesh-api@gigamesh-293109.iam.gserviceaccount.com # The API service account
+      export GCR_SERVICE_ACCOUNT=gigamesh-api@gigamesh.iam.gserviceaccount.com # The API service account
       export PRODUCTION_BUCKET=www.gigamesh.io # A bucket we created earlier
       export STAGING_BUCKET=gigamesh-staging # A bucket we created earlier
 
@@ -150,11 +189,3 @@
     - Set up two secrets in the repository settings on GitHub:
       - `DOCKER_PASSWORD`: This is your Docker ID password. Toast will use it to cache intermediate Docker images when performing builds.
       - `GCP_DEPLOY_CREDENTIALS`: This should contain the contents of the credentials file for the deployment service account you created earlier. It's used to authorize the CI job to deploy the website.
-
-## Notes
-
-- When generating database passwords, a good way to do that is:
-
-  ```sh
-  openssl rand -base64 32
-  ```
