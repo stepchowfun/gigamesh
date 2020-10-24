@@ -5,19 +5,31 @@
   - Sign into the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
   - Install the [Google Cloud SDK](https://cloud.google.com/sdk/install) and run `gcloud init` to configure and authorize the SDK tools.
   - Set up the frontend.
-    - Create a [Cloud Storage](https://cloud.google.com/storage) bucket for serving the website and a separate staging bucket that will assist in the deploy process. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
+    - Create a [Cloud Storage](https://cloud.google.com/storage) bucket for serving the website from your domain and a separate staging bucket that will assist in the deploy process. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
 
       ```sh
-      export GCP_PROJECT=gigamesh # Your project ID
-      export GCS_LOCATION=us # A location as close to your users as possible
+      export GCP_PROJECT=gigamesh # Your Google Cloud Platform project ID
+      export GCS_LOCATION=us # A Cloud Storage location close to your users
       export PRODUCTION_BUCKET=www.gigamesh.io # Your domain for the website
-      export STAGING_BUCKET=gigamesh-staging # Any unique name
+      export STAGING_BUCKET=gigamesh-staging # Any unique Cloud Storage bucket name
 
-      # Set up the staging bucket
-      gsutil mb -p "$GCP_PROJECT" -b on -c standard -l "$GCS_LOCATION" "gs://$STAGING_BUCKET"
+      # Create the staging bucket.
+      gsutil mb \
+        -p "$GCP_PROJECT" \
+        -b on \
+        -c standard \
+        -l "$GCS_LOCATION" \
+        "gs://$STAGING_BUCKET"
 
-      # Set up the production bucket
-      gsutil mb -p "$GCP_PROJECT" -b on -c standard -l "$GCS_LOCATION" "gs://$PRODUCTION_BUCKET"
+      # Create the production bucket.
+      gsutil mb \
+        -p "$GCP_PROJECT" \
+        -b on \
+        -c standard \
+        -l "$GCS_LOCATION" \
+        "gs://$PRODUCTION_BUCKET"
+
+      # Configure the production bucket for serving a public web site.
       gsutil web set -m index.html "gs://$PRODUCTION_BUCKET"
       gsutil iam ch allUsers:objectViewer "gs://$PRODUCTION_BUCKET"
       ```
@@ -50,16 +62,21 @@
       - Provision up a PostgreSQL database instance. The cheapest way to do so is the following:
 
         ```sh
-        gcloud sql instances create gigamesh \
+        export AUTHORIZED_NETWORKS=123.123.123.123/32 # Allow yourself to connect to the database
+        export POSTGRES_USER_PASSWORD=abc123 # A secure password for the default user
+        export DATABASE_INSTANCE=gigamesh # A name for the database instance
+        export DATABASE_REGION=us-central # A Cloud SQL region
+
+        gcloud sql instances create "$DATABASE_INSTANCE" \
           --project "$GCP_PROJECT" \
           --database-version POSTGRES_12 \
           --tier db-f1-micro \
           --no-backup \
-          --region us-central \
+          --region "$DATABASE_REGION" \
           --assign-ip \
           --require-ssl \
-          --authorized-networks <MY IP ADDRESS>/32 \
-          --root-password <A PASSWORD>
+          --authorized-networks "$AUTHORIZED_NETWORKS" \
+          --root-password "$POSTGRES_USER_PASSWORD"
         ```
 
         **Tip:** A good way to generate a password is:
@@ -73,17 +90,19 @@
         Generate a client certificate:
 
         ```sh
-        gcloud sql ssl client-certs create ops client-key.pem \
+        export CLIENT_CERTIFICATE_NAME=ops # A name for the client certificate
+
+        gcloud sql ssl client-certs create "$CLIENT_CERTIFICATE_NAME" client-key.pem \
           --project "$GCP_PROJECT" \
-          --instance gigamesh
+          --instance "$DATABASE_INSTANCE"
         ```
 
         Download the public key for that client certificate:
 
         ```sh
-        gcloud sql ssl client-certs describe ops \
+        gcloud sql ssl client-certs describe "$CLIENT_CERTIFICATE_NAME" \
           --project "$GCP_PROJECT" \
-          --instance gigamesh \
+          --instance "$DATABASE_INSTANCE" \
           --format 'value(cert)' \
           > client-cert.pem
         ```
@@ -91,7 +110,7 @@
         Download the server certificate:
 
         ```sh
-        gcloud sql instances describe gigamesh \
+        gcloud sql instances describe "$DATABASE_INSTANCE" \
           --project "$GCP_PROJECT" \
           --format 'value(serverCaCert.cert)' \
           > server-ca.pem
@@ -100,7 +119,9 @@
         - Connect to the database instance using a command like the following:
 
           ```sh
-          psql 'sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=35.223.233.124 port=5432 user=postgres'
+          DATABASE_IP=35.223.233.124 # The IP address of your database instance
+
+          psql "sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=$DATABASE_IP port=5432 user=postgres"
           ```
         - Log in using the password you created for the `postgres` user above.
         - Enter the following:
@@ -112,7 +133,7 @@
         - Connect to the database instance again, but this time with the newly created `gigamesh` database:
 
           ```sh
-          psql 'sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=35.223.233.124 port=5432 user=postgres dbname=gigamesh'
+          psql "sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=$DATABASE_IP port=5432 user=postgres dbname=gigamesh"
           ```
         - Log in using the password you created for the `postgres` user above.
         - Enter the following:
@@ -120,6 +141,8 @@
           ```sql
           CREATE TABLE employees (id SERIAL PRIMARY KEY, name TEXT);
           ```
+
+          Keep the database connection open for the next step.
       - The default `postgres` user is too powerful. Create a more restricted user for the API service and grant them access to the tables created above.
 
         ```sql
@@ -168,8 +191,8 @@
       export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh:us-central1:gigamesh # Your database connection info
       export GAR_REGION=us-central1 # The Artifact Registry region (not particularly important)
       export GCP_DEPLOY_CREDENTIALS="$(cat credentials.json)" # Credentials for the deployment service account
-      export GCP_PROJECT=gigamesh # Your project ID
-      export GCR_REGION=us-central1 # A region as close to your users as possible
+      export GCP_PROJECT=gigamesh # Your Google Cloud Platform project ID
+      export GCR_REGION=us-central1 # A Cloud Run region close to your users
       export GCR_SERVICE_ACCOUNT=gigamesh-api@gigamesh.iam.gserviceaccount.com # The API service account
       export PRODUCTION_BUCKET=www.gigamesh.io # A bucket we created earlier
       export STAGING_BUCKET=gigamesh-staging # A bucket we created earlier
