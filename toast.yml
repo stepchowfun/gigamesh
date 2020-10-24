@@ -185,8 +185,8 @@ tasks:
     dependencies:
       - install_dependencies
     environment:
-      GCP_API_CREDENTIALS: null
       DATABASE_INSTANCE_CONNECTION_NAME: gigamesh-293109:us-central1:gigamesh
+      GCP_API_CREDENTIALS: null
       POSTGRES_SECRET: null # [ref:POSTGRES_SECRET]
       SENDGRID_SECRET: null # [ref:SENDGRID_SECRET]
     input_paths:
@@ -255,6 +255,7 @@ tasks:
       GCP_PROJECT: gigamesh-293109
       GCR_REGION: us-central1
       GCR_SERVICE_ACCOUNT: gigamesh-api@gigamesh-293109.iam.gserviceaccount.com
+      STAGING_BUCKET: gigamesh-staging
     user: user
     command: |
       set -euo pipefail
@@ -268,7 +269,8 @@ tasks:
       gcloud builds submit backend \
         --project "$GCP_PROJECT" \
         --quiet \
-        --gcs-log-dir "gs://${GCP_PROJECT}_cloudbuild/logs" \
+        --gcs-log-dir "gs://$STAGING_BUCKET/build-logs" \
+        --gcs-source-staging-dir "gs://$STAGING_BUCKET/build-source" \
         --ignore-file .dockerignore \
         --tag "$GAR_REGION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api"
 
@@ -292,8 +294,10 @@ tasks:
         --delete-tags \
         "$GAR_REGION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api"
 
-      # Clean up the Cloud Storage bucket created by Cloud Build.
-      gsutil -m rm "gs://${GCP_PROJECT}_cloudbuild/**"
+      # Clean up the Cloud Storage objects created during the build.
+      gsutil -m rm -r \
+        "gs://$STAGING_BUCKET/build-logs" \
+        "gs://$STAGING_BUCKET/build-source"
 
   deploy_frontend:
     dependencies:
@@ -306,8 +310,8 @@ tasks:
       GCP_DEPLOY_CREDENTIALS: null
       GCP_PROJECT: gigamesh-293109
       PRODUCTION_BUCKET: www.gigamesh.io
-      STAGING_BUCKET: gigamesh-staging
       PURGE_OLD_ASSETS: false # [ref:skip_purging_by_default]
+      STAGING_BUCKET: gigamesh-staging
     user: user
     command: |
       set -euo pipefail
@@ -383,18 +387,18 @@ tasks:
       # Upload the files to the staging bucket. We use a staging bucket rather
       # than simply uploading the files directly to production because we want
       # to set the object metadata before the files are served to real users.
-      gsutil -m rsync -d -r -c frontend/dist "gs://$STAGING_BUCKET"
+      gsutil -m rsync -d -r -c frontend/dist "gs://$STAGING_BUCKET/dist"
 
       # By default, allow files to be cached for up to an hour
       # [tag:non_fingerprinted_ttl]. In the next step, we'll set a more
       # aggressive caching policy for fingerprinted files.
       gsutil -m setmeta -h 'Cache-Control:public, max-age=3600' \
-        "gs://$STAGING_BUCKET/*"
+        "gs://$STAGING_BUCKET/dist/*"
 
       # Allow fingerprinted files to be cached for up to a week.
       for EXTENSION in $FINGERPRINTED_EXTENSIONS; do
         gsutil -m setmeta -h 'Cache-Control:public, max-age=604800, immutable' \
-          "gs://$STAGING_BUCKET/*.$EXTENSION"
+          "gs://$STAGING_BUCKET/dist/*.$EXTENSION"
       done
 
       # Copy the fingerprinted files to the production bucket. It's important
@@ -402,12 +406,12 @@ tasks:
       # files due to [ref:deploy_fingerprinted_files_first].
       for EXTENSION in $FINGERPRINTED_EXTENSIONS; do
         gsutil -m cp \
-          "gs://$STAGING_BUCKET/*.$EXTENSION" \
+          "gs://$STAGING_BUCKET/dist/*.$EXTENSION" \
           "gs://$PRODUCTION_BUCKET"
       done
 
       # Copy the remaining files to the production bucket.
-      gsutil -m cp 'gs://'"$STAGING_BUCKET"'/*' 'gs://'"$PRODUCTION_BUCKET"
+      gsutil -m cp "gs://$STAGING_BUCKET/dist/*" "gs://$PRODUCTION_BUCKET"
 
       # Optionally delete any superfluous files in the production bucket. By
       # default, we skip this step because it can cause race conditions with
@@ -415,10 +419,15 @@ tasks:
       # [ref:skip_purging_by_default].
       if [ "$PURGE_OLD_ASSETS" = 'true' ]; then
         echo 'Purging old assets…'
-        gsutil -m rsync -d -r -c "gs://$STAGING_BUCKET" "gs://$PRODUCTION_BUCKET"
+        gsutil -m rsync -d -r -c \
+          "gs://$STAGING_BUCKET/dist" \
+          "gs://$PRODUCTION_BUCKET"
       else
         echo 'Not purging old assets.'
       fi
+
+      # Clean up the Cloud Storage objects created during the deploy.
+      gsutil -m rm -r "gs://$STAGING_BUCKET/dist"
 
   deploy:
     dependencies:
