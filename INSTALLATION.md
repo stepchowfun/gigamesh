@@ -8,10 +8,10 @@
     - Create a [Cloud Storage](https://cloud.google.com/storage) bucket for serving the website from your domain and a separate staging bucket that will assist in the deploy process. You must be [authorized to use the domain](https://cloud.google.com/storage/docs/domain-name-verification#who-can-create) for this to succeed.
 
       ```sh
-      export GCP_PROJECT=gigamesh # Your Google Cloud Platform project ID
-      export GCS_LOCATION=us # A Cloud Storage location close to your users
-      export PRODUCTION_BUCKET=www.gigamesh.io # Your domain for the website
-      export STAGING_BUCKET=gigamesh-staging # Any unique Cloud Storage bucket name
+      GCP_PROJECT=gigamesh # Your Google Cloud Platform project ID
+      GCS_LOCATION=us # A Cloud Storage location close to your users
+      PRODUCTION_BUCKET=www.gigamesh.io # Your domain for the website
+      STAGING_BUCKET=gigamesh-staging # Any unique Cloud Storage bucket name
 
       # Create the staging bucket.
       gsutil mb \
@@ -62,10 +62,10 @@
       - Provision up a PostgreSQL database instance. The cheapest way to do so is the following:
 
         ```sh
-        export AUTHORIZED_NETWORKS=123.123.123.123/32 # Allow yourself to connect to the database
-        export POSTGRES_USER_PASSWORD=abc123 # A secure password for the default user
-        export DATABASE_INSTANCE=gigamesh # A name for the database instance
-        export DATABASE_REGION=us-central # A Cloud SQL region
+        AUTHORIZED_NETWORKS=123.123.123.123/32 # Allow yourself to connect to the database
+        POSTGRES_USER_PASSWORD=abc123 # A secure password for the default user
+        DATABASE_INSTANCE=gigamesh # A name for the database instance
+        DATABASE_REGION=us-central # A Cloud SQL region
 
         gcloud sql instances create "$DATABASE_INSTANCE" \
           --project "$GCP_PROJECT" \
@@ -90,7 +90,7 @@
         Generate a client certificate:
 
         ```sh
-        export CLIENT_CERTIFICATE_NAME=ops # A name for the client certificate
+        CLIENT_CERTIFICATE_NAME=ops # A name for the client certificate
 
         gcloud sql ssl client-certs create "$CLIENT_CERTIFICATE_NAME" client-key.pem \
           --project "$GCP_PROJECT" \
@@ -203,7 +203,7 @@
     - Create a Docker repository in [Artifact Registry](https://cloud.google.com/artifact-registry).
 
       ```sh
-      export GAR_LOCATION=us-central1 # The Artifact Registry location (not particularly important)
+      GAR_LOCATION=us-central1 # The Artifact Registry location (not particularly important)
 
       gcloud beta artifacts repositories create gigamesh \
         --project "$GCP_PROJECT" \
@@ -260,9 +260,14 @@
     - Run the following command to build and deploy the service:
 
       ```sh
+      export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh:us-central1:gigamesh-db $ Database connection info
+      export GAR_LOCATION=us-central1 # The Artifact Registry location (not particularly important)
       export GCP_DEPLOY_CREDENTIALS="$(cat credentials.json)" # Credentials for the deployment service account
+      export GCP_PROJECT=gigamesh # Your Google Cloud Platform project ID
       export GCR_REGION=us-central1 # A Cloud Run region close to your users
       export GCR_SERVICE_ACCOUNT=gigamesh-api@gigamesh.iam.gserviceaccount.com # The API service account
+      export PRODUCTION_BUCKET=www.gigamesh.io # A bucket we created earlier
+      export STAGING_BUCKET=gigamesh-staging # A bucket we created earlier
 
       toast deploy
       ```
