@@ -3,14 +3,14 @@ import { Static } from 'runtypes';
 import emailDemo from '../api/emailDemo';
 import logger from '../logger/logger';
 import storageDemo from '../api/storageDemo';
-import { ApiRequest, ApiResponse } from '../shared/api/schema';
+import { PostRequest, PostResponse } from '../shared/api/schema';
 import {
   originDevelopment,
   originProduction,
 } from '../shared/constants/constants';
 import { isProduction } from '../shared/environment/environment';
 
-async function handleRpc(request: Request, response: Response): Promise<void> {
+async function handlePost(request: Request, response: Response): Promise<void> {
   response.set(
     'Access-Control-Allow-Origin',
     isProduction() ? originProduction : originDevelopment,
@@ -18,19 +18,19 @@ async function handleRpc(request: Request, response: Response): Promise<void> {
 
   const payload = request.body;
 
-  if (ApiRequest.guard(payload)) {
+  if (PostRequest.guard(payload)) {
     logger.info('Received valid request.', { request: payload });
 
-    const apiResponse = await ApiRequest.match<
-      Promise<Static<typeof ApiResponse>>
+    const apiResponse = await PostRequest.match<
+      Promise<Static<typeof PostResponse>>
     >(
       (emailDemoRequest) =>
-        emailDemo(emailDemoRequest).then((partialApiResponse) => {
-          return { ...partialApiResponse, type: 'EmailDemoResponse' };
+        emailDemo(emailDemoRequest).then((partialPostResponse) => {
+          return { ...partialPostResponse, type: 'EmailDemoResponse' };
         }),
       (storageDemoRequest) =>
-        storageDemo(storageDemoRequest).then((partialApiResponse) => {
-          return { ...partialApiResponse, type: 'StorageDemoResponse' };
+        storageDemo(storageDemoRequest).then((partialPostResponse) => {
+          return { ...partialPostResponse, type: 'StorageDemoResponse' };
         }),
     )(payload);
 
@@ -46,7 +46,7 @@ function handleOptions(request: Request, response: Response): void {
     'Access-Control-Allow-Origin',
     isProduction() ? originProduction : originDevelopment,
   );
-  response.set('Access-Control-Allow-Methods', 'GET, POST');
+  response.set('Access-Control-Allow-Methods', 'POST');
   response.set('Access-Control-Allow-Headers', 'Content-Type');
   response.set('Access-Control-Max-Age', '86400'); // 1 day
   response.status(204).send('');
@@ -65,8 +65,7 @@ app.use(express.json());
 app.disable('x-powered-by');
 
 // Set up routes.
-app.get('/', handleRpc);
-app.post('/', handleRpc);
+app.post('/', handlePost);
 app.options('/', handleOptions);
 
 // Start the server.

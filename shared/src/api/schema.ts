@@ -25,6 +25,6 @@ export const StorageDemoResponse = Record({
 
 // The general request and response schemas
 
-export const ApiRequest = Union(EmailDemoRequest, StorageDemoRequest);
+export const PostRequest = Union(EmailDemoRequest, StorageDemoRequest);
 
-export const ApiResponse = Union(EmailDemoResponse, StorageDemoResponse);
+export const PostResponse = Union(EmailDemoResponse, StorageDemoResponse);
