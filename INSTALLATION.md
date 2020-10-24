@@ -103,7 +103,9 @@
     - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
     - Create a Docker repository in [Artifact Registry](https://cloud.google.com/artifact-registry) named `gigamesh`.
     - Create a service account [here](https://console.cloud.google.com/iam-admin/serviceaccounts) for deployment (e.g., to be used by the CI system). Store the credentials file for the next step.
-      - On the project, add the service account as a member with the `Cloud Build Editor`, `Cloud Run Admin`, and `Storage Admin` roles. The latter two roles are only needed for the first deploy and will be removed in a later step.
+      - On the project, add the service account as a member with the `Cloud Build Editor`and `Cloud Run Admin` roles. The latter role are only needed for the first deploy and will be removed in a later step.
+      - On the production Cloud Storage bucket, add the service account as a member with the `Storage Object Admin` role.
+      - On the staging Cloud Storage bucket, add the service account as a member with the `Storage Admin` role. Note that this role is different from the `Storage Object Admin` role used for the production bucket.
       - On the Artifact Registry repository, add the service account as a member with the `Artifact Registry Repository Administrator` role.
       - On the API service account, add the deployment service account as a member with the `Service Account User` role.
     - Run the following command to build and deploy the service:
@@ -122,12 +124,7 @@
       ```
 
       You should modify the environment variables as appropriate.
-    - Remove permissions from the deployment service account:
-      - On the newly deployed [Cloud Run](https://cloud.google.com/run) service, add the service account as a member with the `Cloud Run Admin` role. Remove the corresponding policy from the project.
-      - Update the Cloud Storage policies:
-        - On the two Cloud Storage buckets created earlier, add the service account as a member with the `Storage Object Admin` role.
-        - During the deploy, a Cloud Storage bucket called `<GCP_PROJECT>_cloudbuild` was created by [Cloud Build](https://cloud.google.com/cloud-build). On that bucket, add the service account as a member with the `Storage Object Admin` role.
-        - Update the policy that grants the `Storage Admin` role to the service account from the project to grant the `Viewer` role instead.
+    - On the newly deployed [Cloud Run](https://cloud.google.com/run) service, add the service account as a member with the `Cloud Run Admin` role. Remove the corresponding policy from the project.
     - In the Cloud Run UI in the Cloud Console, set up a domain mapping for the newly created API service. You'll need to update your DNS configuration accordingly.
   - Set up continuous integration. This repository has a [GitHub action](https://github.com/stepchowfun/gigamesh/blob/master/.github/workflows/ci.yml) configured to build and deploy the service, with deploys only happening on the `master` branch. Follow the steps below to make this work.
     - Create a new Docker repository on [Docker Hub](https://hub.docker.com/). You'll need to create a Docker ID if you don't already have one.
