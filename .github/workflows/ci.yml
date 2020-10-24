@@ -14,6 +14,10 @@ jobs:
         with:
           repo: stephanmisc/toast
           write_remote_cache: ${{ github.event_name == 'push' }}
+      - uses: softprops/turnstyle@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       - uses: stepchowfun/toast/.github/actions/toast@master
         with:
           tasks: deploy
