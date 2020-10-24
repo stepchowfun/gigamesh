@@ -97,7 +97,7 @@
         --data-file=-
       ```
     - Create a service account [here](https://console.cloud.google.com/iam-admin/serviceaccounts) for the API service. On the secrets created above, add the service account as a member with the `Secret Manager Secret Accessor` role. On the project, add the service account as a member with the `Cloud SQL Client` role.
-  - Set up manual deployment.
+  - Perform the first deploy.
     - Clone this repository.
     - Update the constants in [`constants.ts`](https://github.com/stepchowfun/gigamesh/blob/master/shared/src/constants/constants.ts) as appropriate.
     - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
