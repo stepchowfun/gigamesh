@@ -160,7 +160,7 @@
         Store the password in [Secret Manager](https://cloud.google.com/secret-manager) as follows:
 
           ```sh
-          echo -n 'THE PASSWORD' | gcloud secrets create postgres \
+          echo -n 'THE PASSWORD' | gcloud secrets create postgres-api \
             --project "$GCP_PROJECT" \
             --replication-policy automatic \
             --data-file -
@@ -173,35 +173,115 @@
         --replication-policy automatic \
         --data-file -
       ```
-    - Create a service account [here](https://console.cloud.google.com/iam-admin/serviceaccounts) for the API service. On the secrets created above, add the service account as a member with the `Secret Manager Secret Accessor` role. On the project, add the service account as a member with the `Cloud SQL Client` role.
+    - Create a service account [here](https://console.cloud.google.com/iam-admin/serviceaccounts) for the API service.
+
+      ```sh
+      # Create the service account.
+      gcloud iam service-accounts create gigamesh-api --project "$GCP_PROJECT"
+
+      # Give the service account access to the PostgreSQL password.
+      gcloud secrets add-iam-policy-binding postgres-api \
+        --project "$GCP_PROJECT" \
+        --member "serviceAccount:gigamesh-api@${GCP_PROJECT}.iam.gserviceaccount.com" \
+        --role roles/secretmanager.secretAccessor
+
+      # Give the service account access to the SendGrid API key.
+      gcloud secrets add-iam-policy-binding sendgrid \
+        --project "$GCP_PROJECT" \
+        --member "serviceAccount:gigamesh-api@${GCP_PROJECT}.iam.gserviceaccount.com" \
+        --role roles/secretmanager.secretAccessor
+
+      # Give the service account permission to connect to the Cloud SQL instance.
+      gcloud projects add-iam-policy-binding "$GCP_PROJECT" \
+        --member "serviceAccount:gigamesh-api@${GCP_PROJECT}.iam.gserviceaccount.com" \
+        --role roles/cloudsql.client
+      ```
   - Perform the first deploy.
     - Clone this repository.
     - Update the constants in [`constants.ts`](https://github.com/stepchowfun/gigamesh/blob/master/shared/src/constants/constants.ts) as appropriate.
     - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
-    - Create a Docker repository in [Artifact Registry](https://cloud.google.com/artifact-registry) named `gigamesh`.
+    - Create a Docker repository in [Artifact Registry](https://cloud.google.com/artifact-registry).
+
+      ```sh
+      export GAR_LOCATION=us-central1 # The Artifact Registry location (not particularly important)
+
+      gcloud beta artifacts repositories create gigamesh \
+        --project "$GCP_PROJECT" \
+        --repository-format docker \
+        --location "$GAR_LOCATION"
+      ```
     - Create a service account [here](https://console.cloud.google.com/iam-admin/serviceaccounts) for deployment (e.g., to be used by the CI system). Store the credentials file for the next step.
-      - On the project, add the service account as a member with the `Cloud Build Editor`and `Cloud Run Admin` roles. The latter is only needed for the first deploy and will be removed in a later step.
-      - On the production Cloud Storage bucket, add the service account as a member with the `Storage Object Admin` role.
-      - On the staging Cloud Storage bucket, add the service account as a member with the `Storage Admin` role. Note that this role is different from the `Storage Object Admin` role used for the production bucket.
-      - On the Artifact Registry repository, add the service account as a member with the `Artifact Registry Repository Administrator` role.
-      - On the API service account, add the deployment service account as a member with the `Service Account User` role.
+
+      ```sh
+      # Create the service account.
+      gcloud iam service-accounts create gigamesh-deployer --project "$GCP_PROJECT"
+
+      # Give the service account permission to create Cloud Run services.
+      # This is only needed for the first deploy and will be removed in a later step.
+      gcloud projects add-iam-policy-binding "$GCP_PROJECT" \
+        --member "serviceAccount:gigamesh-deployer@${GCP_PROJECT}.iam.gserviceaccount.com" \
+        --role roles/run.admin
+
+      # Give the service account permission to create builds.
+      gcloud projects add-iam-policy-binding "$GCP_PROJECT" \
+        --member "serviceAccount:gigamesh-deployer@${GCP_PROJECT}.iam.gserviceaccount.com" \
+        --role roles/cloudbuild.builds.editor
+
+      # Give the service account permission to access the production bucket.
+      gsutil iam ch \
+        "serviceAccount:gigamesh-deployer@${GCP_PROJECT}.iam.gserviceaccount.com:roles/storage.objectAdmin" \
+        "gs://$PRODUCTION_BUCKET"
+
+      # Give the service account permission to access the staging bucket.
+      gsutil iam ch \
+        "serviceAccount:gigamesh-deployer@${GCP_PROJECT}.iam.gserviceaccount.com:roles/storage.admin" \
+        "gs://$STAGING_BUCKET"
+
+      # Give the service account permission to impersonate the other service
+      # account for the API Service. This is needed to deploy the service.
+      gcloud iam service-accounts add-iam-policy-binding \
+        gigamesh-api@${GCP_PROJECT}.iam.gserviceaccount.com \
+        --project "$GCP_PROJECT" \
+        --member "serviceAccount:gigamesh-deployer@${GCP_PROJECT}.iam.gserviceaccount.com" \
+        --role roles/iam.serviceAccountUser
+
+      # Give the service account permission to access the Docker image repository.
+      gcloud beta artifacts repositories add-iam-policy-binding gigamesh \
+        --project "$GCP_PROJECT" \
+        --location "$GAR_LOCATION" \
+        --member "serviceAccount:gigamesh-deployer@${GCP_PROJECT}.iam.gserviceaccount.com" \
+        --role roles/artifactregistry.repoAdmin
+
+      # Create and download a service account key.
+      gcloud iam service-accounts keys create gcp-deploy-credentials.json \
+        --project "$GCP_PROJECT" \
+        --iam-account "gigamesh-deployer@${GCP_PROJECT}.iam.gserviceaccount.com"
+      ```
     - Run the following command to build and deploy the service:
 
       ```sh
-      export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh:us-central1:gigamesh # Your database connection info
-      export GAR_REGION=us-central1 # The Artifact Registry region (not particularly important)
       export GCP_DEPLOY_CREDENTIALS="$(cat credentials.json)" # Credentials for the deployment service account
-      export GCP_PROJECT=gigamesh # Your Google Cloud Platform project ID
       export GCR_REGION=us-central1 # A Cloud Run region close to your users
       export GCR_SERVICE_ACCOUNT=gigamesh-api@gigamesh.iam.gserviceaccount.com # The API service account
-      export PRODUCTION_BUCKET=www.gigamesh.io # A bucket we created earlier
-      export STAGING_BUCKET=gigamesh-staging # A bucket we created earlier
 
       toast deploy
       ```
-
-      You should modify the environment variables as appropriate.
     - On the newly deployed [Cloud Run](https://cloud.google.com/run) service, add the service account as a member with the `Cloud Run Admin` role. Remove the corresponding policy from the project.
+
+      ```
+      # Give the service account permission to update the API service.
+      gcloud run services add-iam-policy-binding api \
+        --project "$GCP_PROJECT" \
+        --member "serviceAccount:gigamesh-deployer@${GCP_PROJECT}.iam.gserviceaccount.com" \
+        --role roles/run.admin \
+        --platform managed \
+        --region "$GCR_REGION"
+
+      # Revoke the permission to create new Cloud Run services.
+      gcloud projects remove-iam-policy-binding "$GCP_PROJECT" \
+        --member "serviceAccount:gigamesh-deployer@${GCP_PROJECT}.iam.gserviceaccount.com" \
+        --role roles/cloudbuild.builds.editor
+      ```
     - In the Cloud Run UI in the Cloud Console, set up a domain mapping for the newly created API service. You'll need to update your DNS configuration accordingly.
   - Set up continuous integration. This repository has a [GitHub action](https://github.com/stepchowfun/gigamesh/blob/master/.github/workflows/ci.yml) configured to build and deploy the service, with deploys only happening on the `master` branch. Follow the steps below to make this work.
     - Create a new Docker repository on [Docker Hub](https://hub.docker.com/). You'll need to create a Docker ID if you don't already have one.

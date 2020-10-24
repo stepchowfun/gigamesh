@@ -252,7 +252,7 @@ tasks:
     cache: false
     environment:
       DATABASE_INSTANCE_CONNECTION_NAME: gigamesh-293109:us-central1:gigamesh-db
-      GAR_REGION: us-central1
+      GAR_LOCATION: us-central1
       GCP_DEPLOY_CREDENTIALS: null
       GCP_PROJECT: gigamesh-293109
       GCR_REGION: us-central1
@@ -274,14 +274,14 @@ tasks:
         --gcs-log-dir "gs://$STAGING_BUCKET/build-logs" \
         --gcs-source-staging-dir "gs://$STAGING_BUCKET/build-source" \
         --ignore-file .dockerignore \
-        --tag "$GAR_REGION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api"
+        --tag "$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api"
 
       # Deploy the Cloud Run service.
       gcloud run deploy api \
         --project "$GCP_PROJECT" \
         --quiet \
         --platform managed \
-        --image "$GAR_REGION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api" \
+        --image "$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api" \
         --set-cloudsql-instances "$DATABASE_INSTANCE_CONNECTION_NAME" \
         --set-env-vars \
           "INSTANCE_CONNECTION_NAME=$DATABASE_INSTANCE_CONNECTION_NAME" \
@@ -295,7 +295,7 @@ tasks:
         --project "$GCP_PROJECT" \
         --quiet \
         --delete-tags \
-        "$GAR_REGION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api"
+        "$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api"
 
       # Clean up the Cloud Storage objects created during the build.
       gsutil -m rm -r \
