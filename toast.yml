@@ -186,7 +186,7 @@ tasks:
     dependencies:
       - install_dependencies
     environment:
-      DATABASE_INSTANCE_CONNECTION_NAME: gigamesh-293109:us-central1:gigamesh
+      DATABASE_INSTANCE_CONNECTION_NAME: gigamesh-293109:us-central1:gigamesh-db
       GCP_API_CREDENTIALS: null
       POSTGRES_SECRET: null # [ref:POSTGRES_SECRET]
       SENDGRID_SECRET: null # [ref:SENDGRID_SECRET]
@@ -251,7 +251,7 @@ tasks:
       - install_packages
     cache: false
     environment:
-      DATABASE_INSTANCE_CONNECTION_NAME: gigamesh-293109:us-central1:gigamesh
+      DATABASE_INSTANCE_CONNECTION_NAME: gigamesh-293109:us-central1:gigamesh-db
       GAR_REGION: us-central1
       GCP_DEPLOY_CREDENTIALS: null
       GCP_PROJECT: gigamesh-293109
@@ -282,7 +282,7 @@ tasks:
         --quiet \
         --platform managed \
         --image "$GAR_REGION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api" \
-        --add-cloudsql-instances "$DATABASE_INSTANCE_CONNECTION_NAME" \
+        --set-cloudsql-instances "$DATABASE_INSTANCE_CONNECTION_NAME" \
         --set-env-vars \
           "INSTANCE_CONNECTION_NAME=$DATABASE_INSTANCE_CONNECTION_NAME" \
         --set-env-vars NODE_ENV=production \
