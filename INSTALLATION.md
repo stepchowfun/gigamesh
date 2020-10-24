@@ -49,14 +49,7 @@
     - Set up the database in [Cloud SQL](https://cloud.google.com/sql).
       - Provision up a PostgreSQL database instance via the [Cloud Console](https://console.cloud.google.com/sql/create-instance-postgres).
         - **Instance ID:** Use `gigamesh`.
-        - **Default password:** Choose a secure password (or let the Cloud Console generate one for you). Store it in [Secret Manager](https://cloud.google.com/secret-manager) as follows:
-
-          ```sh
-          echo -n 'THE SECRET' | gcloud secrets create postgres \
-            --project "$GCP_PROJECT" \
-            --replication-policy=automatic \
-            --data-file=-
-          ```
+        - **Default password:** Choose a secure password for the default `postgres` user (or let the Cloud Console generate one for you). Store it in a safe place.
         - **Region:** Choose a region that corresponds to the location of the Cloud Storage bucket you created above.
         - **Zone:** `Any` is fine.
         - **Database version:** Use `PostgreSQL 12`.
@@ -87,6 +80,28 @@
 
           ```sql
           CREATE TABLE employees (id SERIAL PRIMARY KEY, name TEXT);
+          ```
+      - The default `postgres` user is too powerful. Create a more restricted user for the API service and grant them access to the tables created above.
+
+        ```sql
+        -- Create the user.
+        CREATE USER api LOGIN;
+
+        -- Set the password for the user. This will ask you for the password.
+        \password api;
+
+        -- Grant the privileges. Note that `UPDATE` and `DELETE` is not granted.
+        -- This user cannot change existing data.
+        GRANT SELECT, INSERT, REFERENCES on employees TO api;
+        ```
+
+        Store the password in [Secret Manager](https://cloud.google.com/secret-manager) as follows:
+
+          ```sh
+          echo -n 'THE SECRET' | gcloud secrets create postgres \
+            --project "$GCP_PROJECT" \
+            --replication-policy=automatic \
+            --data-file=-
           ```
     - Create a [SendGrid](https://sendgrid.com/) account and follow SendGrid's instructions to configure the domain for sending emails. Create an API key with the permission to send mail. Store the key in Secret Manager as follows:
 
@@ -135,3 +150,11 @@
     - Set up two secrets in the repository settings on GitHub:
       - `DOCKER_PASSWORD`: This is your Docker ID password. Toast will use it to cache intermediate Docker images when performing builds.
       - `GCP_DEPLOY_CREDENTIALS`: This should contain the contents of the credentials file for the deployment service account you created earlier. It's used to authorize the CI job to deploy the website.
+
+## Notes
+
+- When generating database passwords, a good way to do that is:
+
+  ```sh
+  openssl rand -base64 32
+  ```
