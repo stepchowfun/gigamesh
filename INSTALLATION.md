@@ -260,7 +260,7 @@
     - Run the following command to build and deploy the service:
 
       ```sh
-      export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh:us-central1:gigamesh-db $ Database connection info
+      export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh:us-central1:gigamesh-db # Database connection info
       export GAR_LOCATION=us-central1 # The Artifact Registry location (not particularly important)
       export GCP_DEPLOY_CREDENTIALS="$(cat credentials.json)" # Credentials for the deployment service account
       export GCP_PROJECT=gigamesh # Your Google Cloud Platform project ID
