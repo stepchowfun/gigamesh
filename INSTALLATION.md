@@ -253,7 +253,7 @@
         --role roles/artifactregistry.repoAdmin
 
       # Create and download a service account key.
-      gcloud iam service-accounts keys create gcp-deploy-credentials.json \
+      gcloud iam service-accounts keys create deploy-credentials.json \
         --project "$GCP_PROJECT" \
         --iam-account "gigamesh-deployer@${GCP_PROJECT}.iam.gserviceaccount.com"
       ```
@@ -262,7 +262,7 @@
       ```sh
       export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh:us-central1:gigamesh # Database connection info
       export GAR_LOCATION=us-central1 # The Artifact Registry location (not particularly important)
-      export GCP_DEPLOY_CREDENTIALS="$(cat credentials.json)" # Credentials for the deployment service account
+      export GCP_DEPLOY_CREDENTIALS="$(cat deploy-credentials.json)" # Credentials for the deployment service account
       export GCP_PROJECT=gigamesh # Your Google Cloud Platform project ID
       export GCR_REGION=us-central1 # A Cloud Run region close to your users
       export GCR_SERVICE_ACCOUNT=gigamesh-api@gigamesh.iam.gserviceaccount.com # The API service account
