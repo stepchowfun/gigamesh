@@ -19,6 +19,9 @@ module.exports = {
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
+          options: {
+            configFile: path.resolve(__dirname, 'babel.config.json'),
+          },
         },
       },
       {
@@ -37,7 +40,15 @@ module.exports = {
             loader: 'css-loader',
             options: { importLoaders: 1, sourceMap: false },
           },
-          { loader: 'postcss-loader', options: { sourceMap: true } },
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                config: path.resolve(__dirname, 'postcss.config.js'),
+              },
+              sourceMap: true,
+            },
+          },
           { loader: 'resolve-url-loader', options: { sourceMap: true } },
           { loader: 'sass-loader', options: { sourceMap: true } },
         ],
