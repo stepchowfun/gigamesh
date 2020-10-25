@@ -10,12 +10,20 @@ const AppContainer = styled.div`
   text-align: center;
 `;
 
-const SmileyContainer = styled.img`
+interface SmileyProps {
+  readonly loaded: boolean;
+}
+
+const SmileyContainer = styled.img<SmileyProps>`
   cursor: pointer;
+  opacity: ${(props) => (props.loaded ? 1 : 0.1)};
 `;
 
-class App extends React.Component {
-  static handleClick1(e: React.MouseEvent): void {
+class App extends React.Component<
+  Record<string, unknown>,
+  { loaded: boolean }
+> {
+  static handleClick(e: React.MouseEvent): void {
     e.preventDefault();
 
     emailDemo({ age: 42 })
@@ -29,13 +37,15 @@ class App extends React.Component {
       });
   }
 
-  static handleClick2(e: React.MouseEvent): void {
-    e.preventDefault();
+  constructor(props: Record<string, unknown>) {
+    super(props);
+    this.state = { loaded: false };
+  }
 
+  componentDidMount(): void {
     storageDemo({})
-      .then((response) => {
-        // eslint-disable-next-line no-alert
-        alert(response.now);
+      .then(() => {
+        this.setState({ loaded: true });
       })
       .catch((reason) => {
         // eslint-disable-next-line no-alert
@@ -44,6 +54,8 @@ class App extends React.Component {
   }
 
   render(): React.ReactNode {
+    const { loaded } = this.state;
+
     return (
       <AppContainer>
         <p>
@@ -51,13 +63,8 @@ class App extends React.Component {
             src={smiley}
             alt="Smiley face"
             // eslint-disable-next-line @typescript-eslint/unbound-method
-            onClick={App.handleClick1}
-          />{' '}
-          <SmileyContainer
-            src={smiley}
-            alt="Smiley face"
-            // eslint-disable-next-line @typescript-eslint/unbound-method
-            onClick={App.handleClick2}
+            onClick={App.handleClick}
+            loaded={loaded}
           />
         </p>
         <p>1 + 2 = {sum(1, 2)}</p>
