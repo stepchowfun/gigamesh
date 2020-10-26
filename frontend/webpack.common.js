@@ -17,11 +17,9 @@ module.exports = {
       {
         test: /\.(ts|tsx)$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            configFile: path.resolve(__dirname, 'babel.config.json'),
-          },
+        loader: 'babel-loader',
+        options: {
+          configFile: path.resolve(__dirname, 'babel.config.json'),
         },
       },
       {
@@ -55,7 +53,10 @@ module.exports = {
       },
       {
         test: /\.svg$/,
-        use: ['file-loader'],
+        loader: 'file-loader',
+        options: {
+          name: '[contenthash]-fingerprint.[ext]',
+        },
       },
     ],
   },
@@ -81,7 +82,7 @@ module.exports = {
     ],
   },
   output: {
-    filename: '[contenthash].js',
+    filename: '[contenthash]-fingerprint.js',
     path: path.resolve(__dirname, 'dist'),
   },
   devServer: {

@@ -379,9 +379,6 @@ tasks:
       #        [ref:file_discoverability], the fingerprinted files will not be
       #        requested by clients while the first deploy is in progress.
 
-      # Files with these extensions are fingerprinted.
-      FINGERPRINTED_EXTENSIONS='js svg'
-
       # Authenticate with the Google Cloud SDK.
       GOOGLE_KEY_FILE=~/gcp-credentials.json
       echo "$GCP_DEPLOY_CREDENTIALS" > "$GOOGLE_KEY_FILE"
@@ -399,20 +396,16 @@ tasks:
         "gs://$STAGING_BUCKET/dist/*"
 
       # Allow fingerprinted files to be cached for up to a week.
-      for EXTENSION in $FINGERPRINTED_EXTENSIONS; do
-        gsutil -m setmeta \
-          -h 'Cache-Control:public, max-age=604800, immutable' \
-          "gs://$STAGING_BUCKET/dist/*.$EXTENSION"
-      done
+      gsutil -m setmeta \
+        -h 'Cache-Control:public, max-age=604800, immutable' \
+        "gs://$STAGING_BUCKET/dist/*-fingerprint.*"
 
       # Copy the fingerprinted files to the production bucket. It's important
       # to copy the fingerprinted files before copying the non-fingerprinted
       # files due to [ref:deploy_fingerprinted_files_first].
-      for EXTENSION in $FINGERPRINTED_EXTENSIONS; do
-        gsutil -m cp \
-          "gs://$STAGING_BUCKET/dist/*.$EXTENSION" \
-          "gs://$PRODUCTION_BUCKET"
-      done
+      gsutil -m cp \
+        "gs://$STAGING_BUCKET/dist/*-fingerprint.*" \
+        "gs://$PRODUCTION_BUCKET"
 
       # Copy the remaining files to the production bucket.
       gsutil -m cp "gs://$STAGING_BUCKET/dist/*" "gs://$PRODUCTION_BUCKET"
