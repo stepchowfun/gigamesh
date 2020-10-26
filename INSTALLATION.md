@@ -102,7 +102,7 @@
       ```
     - You probably want to redirect HTTP traffic to use the HTTPS protocol. You can do that with a second load balancer.
 
-      ```
+      ```sh
       # Create a URL map.
       gcloud compute url-maps import gigamesh-www-http-to-https \
         --project "$GCP_PROJECT" \
@@ -130,7 +130,7 @@
       ```
     - If you are serving the website from a subdomain (e.g., `www`) rather than the apex domain, you probably want to redirect requests to the apex domain to the subdomain. You can do that with a third load balancer.
 
-      ```
+      ```sh
       # Create a URL map.
       gcloud compute url-maps import gigamesh-apex-to-www \
         --project "$GCP_PROJECT" \
