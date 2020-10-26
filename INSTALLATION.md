@@ -33,21 +33,147 @@
       gsutil web set -m index.html "gs://$PRODUCTION_BUCKET"
       gsutil iam ch allUsers:objectViewer "gs://$PRODUCTION_BUCKET"
       ```
-    - Set up one or more [load balancers](https://cloud.google.com/load-balancing). The number of load balancers you need depends on your domain and protocol. For example, the public hosted Gigamesh uses three load balancers: (1) the main one which serves `https://www.gigamesh.io`, (2) one to redirect `http://www.gigamesh.io` to `https://www.gigamesh.io`, and one to redirect `http(s)://gigamesh.io` to `https://www.gigamesh.io`. These instructions will assume you are following the same scheme.
-      - You can create load balancers from the [Cloud Console](https://console.cloud.google.com/net-services/loadbalancing/list). All three load balancers will be HTTP(S) load balancers (as opposed to TCP load balancers or UDP load balancers).
-      - Set up the main load balancer (1).
-        - **Backend configuration:** Set up a backend bucket that points to the Cloud Storage bucket you created earlier. Enable Cloud CDN.
-        - **Host and path rules:** Use the default settings.
-        - **Frontend configuration:** Set the protocol to HTTPS, create a new static IP address, and create a single certificate configured for both the apex and the `www` subdomain.
-      - Set up a load balancer (2) to redirect HTTP traffic to HTTPS.
-        - **Backend configuration:** None.
-        - **Host and path rules:** Use an "Advanced host and path rule", and choose "Redirect the client to a different host/path" with an empty "Host redirect" and "Prefix redirect". Set the response code to 301 and enable "HTTPS redirect".
-        - **Frontend configuration:** Choose the IP address created for the previous load balancer (1).
-      - Set up a load balancer (2) to redirect apex traffic to `www`.
-        - **Backend configuration:** None.
-        - **Host and path rules:** Use an "Advanced host and path rule", and choose "Redirect the client to a different host/path". Set the "Host redirect" to the appropriate domain (with `www`) and configure an empty "Prefix redirect". Set the response code to 301 and enable "HTTPS redirect".
-        - **Frontend configuration:** We'll set up two rules, one for HTTP and one for HTTPS. Create a new static IP address (different from the one you created earlier) and use it for both. For the HTTPS rule, use the certificate you created above for the first load balancer (1).
-    - For the DNS configuration (e.g., in Google Domains): Create two A records, one for the root (`@`) and one for `www`. Use the appropriate IP addresses for the load balancers you created above.
+    - Reserve IP addresses for the load balancers. If you want to serve the website on a subdomain (e.g., `www.gigamesh.io`) and also redirect the apex domain (e.g., `gigamesh.io`) to that subdomain, you'll need two IP addresses.
+
+      ```sh
+      # Reserve an IP address for `www.gigamesh.io`.
+      gcloud compute addresses create gigamesh-www \
+        --project "$GCP_PROJECT" \
+        --global
+
+      # Reserve an IP address for `gigamesh.io`.
+      gcloud compute addresses create gigamesh-apex \
+        --project "$GCP_PROJECT" \
+        --global
+      ```
+
+      You should create the corresponding A records in your DNS configuration. To get the actual IP addresses that were just reserved, use these commands:
+
+      ```sh
+      # Get the IP address for `www.gigamesh.io`.
+      gcloud compute addresses describe gigamesh-www \
+        --project "$GCP_PROJECT" \
+        --global \
+        --format 'get(address)'
+
+      # Get the IP address for `gigamesh.io`.
+      gcloud compute addresses describe gigamesh-apex \
+        --project "$GCP_PROJECT" \
+        --global \
+        --format 'get(address)'
+      ```
+    - Create a TLS certificate. If you want to serve the website on a subdomain (e.g., `www.gigamesh.io`) and also redirect the apex domain (e.g., `gigamesh.io`) to that subdomain, be sure to include both domains in this command.
+
+      ```sh
+      gcloud compute ssl-certificates create gigamesh-www \
+        --project "$GCP_PROJECT" \
+        --global \
+        --domains www.gigamesh.io,gigamesh.io
+      ```
+    - Set up the main [load balancer](https://cloud.google.com/load-balancing) for the website. This load balancer will be responsible for TLS termination and serving requests using the production bucket created in the previous step. For the public hosted version of Gigamesh, this is the load balancer that serves [https://www.gigamesh.io/](https://www.gigamesh.io/).
+
+      ```sh
+      # Create a backend.
+      gcloud compute backend-buckets create gigamesh-www \
+        --project "$GCP_PROJECT" \
+        --gcs-bucket-name "$PRODUCTION_BUCKET" \
+        --enable-cdn
+
+      # Create a URL map.
+      gcloud compute url-maps create gigamesh-www \
+        --project "$GCP_PROJECT" \
+        --global \
+        --default-backend-bucket gigamesh-www
+
+      # Create a target proxy.
+      gcloud compute target-https-proxies create gigamesh-www \
+        --project "$GCP_PROJECT" \
+        --global \
+        --url-map gigamesh-www \
+        --ssl-certificates gigamesh-www
+
+      # Create a forwarding rule.
+      gcloud compute forwarding-rules create gigamesh-www \
+        --project "$GCP_PROJECT" \
+        --global \
+        --address gigamesh-www \
+        --target-https-proxy gigamesh-www \
+        --ports 443
+      ```
+    - You probably want to redirect HTTP traffic to use the HTTPS protocol. You can do that with a second load balancer.
+
+      ```
+      # Create a URL map.
+      gcloud compute url-maps import gigamesh-www-http-to-https \
+        --project "$GCP_PROJECT" \
+        --global << EOF
+      kind: compute#urlMap
+      name: gigamesh-www-http-to-https
+      defaultUrlRedirect:
+         redirectResponseCode: MOVED_PERMANENTLY_DEFAULT
+         httpsRedirect: True
+      EOF
+
+      # Create a target proxy.
+      gcloud compute target-http-proxies create gigamesh-www-http-to-https \
+        --project "$GCP_PROJECT" \
+        --global \
+        --url-map gigamesh-www-http-to-https
+
+      # Create a forwarding rule.
+      gcloud compute forwarding-rules create gigamesh-www-http-to-https \
+        --project "$GCP_PROJECT" \
+        --global \
+        --address gigamesh-www \
+        --target-http-proxy gigamesh-www-http-to-https \
+        --ports 80
+      ```
+    - If you are serving the website from a subdomain (e.g., `www`) rather than the apex domain, you probably want to redirect requests to the apex domain to the subdomain. You can do that with a third load balancer.
+
+      ```
+      # Create a URL map.
+      gcloud compute url-maps import gigamesh-apex-to-www \
+        --project "$GCP_PROJECT" \
+        --global \
+        --global << EOF
+      kind: compute#urlMap
+      name: gigamesh-apex-to-www
+      defaultUrlRedirect:
+        hostRedirect: www.gigamesh.io
+        httpsRedirect: true
+        redirectResponseCode: MOVED_PERMANENTLY_DEFAULT
+        stripQuery: false
+      EOF
+
+      # Create an HTTP target proxy.
+      gcloud compute target-http-proxies create gigamesh-apex-to-www \
+        --project "$GCP_PROJECT" \
+        --global \
+        --url-map gigamesh-apex-to-www
+
+      # Create an HTTPS target proxy.
+      gcloud compute target-https-proxies create gigamesh-apex-to-www \
+        --project "$GCP_PROJECT" \
+        --global \
+        --url-map gigamesh-apex-to-www \
+        --ssl-certificates gigamesh-www
+
+      # Create a forwarding rule for HTTP traffic.
+      gcloud compute forwarding-rules create gigamesh-apex-to-www-http \
+        --project "$GCP_PROJECT" \
+        --global \
+        --address gigamesh-apex \
+        --target-http-proxy gigamesh-apex-to-www \
+        --ports 80
+
+      # Create a forwarding rule for HTTPS traffic.
+      gcloud compute forwarding-rules create gigamesh-apex-to-www-https \
+        --project "$GCP_PROJECT" \
+        --global \
+        --address gigamesh-apex \
+        --target-https-proxy gigamesh-apex-to-www \
+        --ports 443
+      ```
   - Set up the backend.
     - Enable the necessary APIs:
 
