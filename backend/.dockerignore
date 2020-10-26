@@ -1,0 +1,10 @@
+.dockerignore
+.eslintrc.js
+.gcloudignore
+.gitignore
+.prettierrc.json
+/node_modules/
+/src/
+jest.config.js
+tsconfig.eslint.json
+tsconfig.json
