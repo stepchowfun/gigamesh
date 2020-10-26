@@ -1,5 +1,5 @@
 import { Static } from 'runtypes';
-import { fromEmailAddress } from '../shared/constants/constants';
+import { fromEmailAddress } from '../constants/constants';
 import { EmailDemoRequest, EmailDemoResponse } from '../shared/api/schema';
 import send from '../email/email';
 

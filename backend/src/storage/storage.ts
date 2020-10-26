@@ -10,7 +10,7 @@ import {
   databasePortProduction,
   databaseUserDevelopment,
   databaseUserProduction,
-} from '../shared/constants/constants';
+} from '../constants/constants';
 
 let pool: Pool | null = null;
 

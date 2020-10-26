@@ -4,10 +4,7 @@ import emailDemo from '../api/emailDemo';
 import logger from '../logger/logger';
 import storageDemo from '../api/storageDemo';
 import { PostRequest, PostResponse } from '../shared/api/schema';
-import {
-  originDevelopment,
-  originProduction,
-} from '../shared/constants/constants';
+import { originDevelopment, originProduction } from '../constants/constants';
 import { isProduction } from '../shared/environment/environment';
 
 async function handlePost(request: Request, response: Response): Promise<void> {

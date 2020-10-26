@@ -324,7 +324,7 @@
       ```
   - Perform the first deploy.
     - Clone this repository.
-    - Update the constants in [`constants.ts`](https://github.com/stepchowfun/gigamesh/blob/master/shared/src/constants/constants.ts) as appropriate.
+    - Update the constants [here](https://github.com/stepchowfun/gigamesh/blob/master/frontend/src/constants/constants.ts) and [here](https://github.com/stepchowfun/gigamesh/blob/master/backend/src/constants/constants.ts) as appropriate.
     - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of choice.
     - Create a Docker repository in [Artifact Registry](https://cloud.google.com/artifact-registry).
 

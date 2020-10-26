@@ -4,7 +4,7 @@ import { EmailDemoRequest, EmailDemoResponse } from '../shared/api/schema';
 import {
   cloudFunctionsBaseUrlDevelopment,
   cloudFunctionsBaseUrlProduction,
-} from '../shared/constants/constants';
+} from '../constants/constants';
 import { isProduction } from '../shared/environment/environment';
 
 export default async function emailDemo(
