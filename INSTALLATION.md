@@ -399,7 +399,7 @@
       ```
     - On the newly deployed [Cloud Run](https://cloud.google.com/run) service, add the service account as a member with the `Cloud Run Admin` role. Remove the corresponding policy from the project.
 
-      ```
+      ```sh
       # Give the service account permission to update the API service.
       gcloud run services add-iam-policy-binding api \
         --project "$GCP_PROJECT" \
