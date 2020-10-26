@@ -1,0 +1,433 @@
+image: ubuntu:18.04
+default: check
+tasks:
+  install_packages:
+    command: |
+      set -euo pipefail
+      apt-get update
+      echo 'deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main' | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+      apt-get install --yes apt-transport-https ca-certificates curl gnupg
+      curl -LSs https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+      curl -LSs https://deb.nodesource.com/setup_14.x | bash -
+      apt-get update
+      apt-get install --yes google-cloud-sdk nodejs
+      curl -LSs https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -o /usr/local/bin/cloud_sql_proxy
+      chmod a+rx /usr/local/bin/cloud_sql_proxy
+
+  install_tagref:
+    dependencies:
+      - install_packages
+    command: |
+      set -euo pipefail
+      curl https://raw.githubusercontent.com/stepchowfun/tagref/master/install.sh -LSfs | sh
+
+  create_user:
+    command: |
+      set -euo pipefail
+      adduser --disabled-password --gecos '' user
+
+  install_dependencies:
+    dependencies:
+      - create_user
+      - install_packages
+      - install_tagref
+    input_paths:
+      - backend/package-lock.json
+      - backend/package.json
+      - frontend/package-lock.json
+      - frontend/package.json
+    user: user
+    command: |
+      set -euo pipefail
+      (cd backend && npm ci)
+      (cd frontend && npm ci)
+
+  build:
+    dependencies:
+      - install_dependencies
+    input_paths:
+      # All the top-level paths in `backend/` except those in `.gitignore`
+      - backend/.dockerignore
+      - backend/.eslintrc.js
+      - backend/.gitignore
+      - backend/.prettierrc.json
+      - backend/Dockerfile
+      - backend/jest.config.js
+      - backend/package-lock.json
+      - backend/package.json
+      - backend/src/
+      - backend/tsconfig.eslint.json
+      - backend/tsconfig.json
+
+      # All the top-level paths in `frontend/` except those in `.gitignore`
+      - frontend/.eslintrc.js
+      - frontend/.gitignore
+      - frontend/.prettierrc.json
+      - frontend/babel.config.json
+      - frontend/images.d.ts
+      - frontend/jest.config.js
+      - frontend/package-lock.json
+      - frontend/package.json
+      - frontend/postcss.config.js
+      - frontend/src/
+      - frontend/static/
+      - frontend/tsconfig.eslint.json
+      - frontend/tsconfig.json
+      - frontend/webpack.common.js
+      - frontend/webpack.development.js
+      - frontend/webpack.production.js
+
+      # Shared top-level paths
+      - shared
+    output_paths:
+      - backend/dist
+      - frontend/dist
+    user: user
+    command: |
+      set -euo pipefail
+      (cd backend && npm run build)
+      (cd frontend && npm run build)
+
+  check:
+    dependencies:
+      - build
+    user: user
+    command: |
+      set -euo pipefail
+      (cd backend && npm run check)
+      (cd frontend && npm run check)
+
+  format:
+    dependencies:
+      - install_dependencies
+    input_paths:
+      # All the top-level paths in `backend/` except those in `.gitignore`
+      - backend/.dockerignore
+      - backend/.eslintrc.js
+      - backend/.gitignore
+      - backend/.prettierrc.json
+      - backend/Dockerfile
+      - backend/jest.config.js
+      - backend/package-lock.json
+      - backend/package.json
+      - backend/src/
+      - backend/tsconfig.eslint.json
+      - backend/tsconfig.json
+
+      # All the top-level paths in `frontend/` except those in `.gitignore`
+      - frontend/.eslintrc.js
+      - frontend/.gitignore
+      - frontend/.prettierrc.json
+      - frontend/babel.config.json
+      - frontend/images.d.ts
+      - frontend/jest.config.js
+      - frontend/package-lock.json
+      - frontend/package.json
+      - frontend/postcss.config.js
+      - frontend/src/
+      - frontend/static/
+      - frontend/tsconfig.eslint.json
+      - frontend/tsconfig.json
+      - frontend/webpack.common.js
+      - frontend/webpack.development.js
+      - frontend/webpack.production.js
+
+      # Shared top-level paths
+      - shared
+    output_paths:
+      # All the top-level paths in `backend/` except those in `.gitignore` and
+      # except symlinks (cf. the note below about symlinks)
+      - backend/.dockerignore
+      - backend/.eslintrc.js
+      - backend/.gitignore
+      - backend/Dockerfile
+      - backend/package-lock.json
+      - backend/package.json
+      - backend/src/
+      - backend/tsconfig.eslint.json
+      - backend/tsconfig.json
+
+      # All the top-level paths in `frontend/` except those in `.gitignore` and
+      # except symlinks (cf. the note below about symlinks)
+      - frontend/.eslintrc.js
+      - frontend/.gitignore
+      - frontend/babel.config.json
+      - frontend/images.d.ts
+      - frontend/package-lock.json
+      - frontend/package.json
+      - frontend/postcss.config.js
+      - frontend/src/
+      - frontend/static/
+      - frontend/tsconfig.eslint.json
+      - frontend/tsconfig.json
+      - frontend/webpack.common.js
+      - frontend/webpack.development.js
+      - frontend/webpack.production.js
+
+      # Shared top-level paths
+      - shared
+    user: user
+    command: |
+      set -euo pipefail
+      (cd backend && npm run format)
+      (cd frontend && npm run format)
+
+      # These `rm` commands are needed to work around a bug in
+      # `docker container cp` related to symlinks. See
+      # https://stackoverflow.com/questions/35787702/docker-cp-a-folder-with-a-relative-symlink-invalid-symlink
+      # for details.
+      rm backend/src/shared
+      rm frontend/src/shared
+      rm shared/.prettierrc.json
+      rm shared/jest.config.js
+
+  development:
+    cache: false
+    dependencies:
+      - install_dependencies
+    environment:
+      DATABASE_INSTANCE_CONNECTION_NAME: gigamesh-293109:us-central1:gigamesh-db
+      GCP_API_CREDENTIALS: null
+      POSTGRES_SECRET: null # [ref:POSTGRES_SECRET]
+      SENDGRID_SECRET: null # [ref:SENDGRID_SECRET]
+    input_paths:
+      # All the top-level paths in `backend/` except those in `.gitignore` and
+      # those in `mount_paths`
+      - backend/.dockerignore
+      - backend/.eslintrc.js
+      - backend/.gitignore
+      - backend/.prettierrc.json
+      - backend/Dockerfile
+      - backend/jest.config.js
+      - backend/package-lock.json
+      - backend/package.json
+      - backend/tsconfig.eslint.json
+      - backend/tsconfig.json
+
+      # All the top-level paths in `frontend/` except those in `.gitignore` and
+      # those in `mount_paths`
+      - frontend/.eslintrc.js
+      - frontend/.gitignore
+      - frontend/.prettierrc.json
+      - frontend/babel.config.json
+      - frontend/images.d.ts
+      - frontend/jest.config.js
+      - frontend/package-lock.json
+      - frontend/package.json
+      - frontend/postcss.config.js
+      - frontend/static/
+      - frontend/tsconfig.eslint.json
+      - frontend/tsconfig.json
+      - frontend/webpack.common.js
+      - frontend/webpack.development.js
+      - frontend/webpack.production.js
+    mount_paths:
+      - backend/src/
+      - frontend/src/
+      - shared
+    ports:
+      - 8081:8081 # The backend
+      - 8080:8080 # The frontend
+    user: user
+    command: |
+      set -euo pipefail
+
+      # Authenticate with the Google Cloud SDK.
+      GOOGLE_KEY_FILE=~/gcp-credentials.json
+      echo "$GCP_API_CREDENTIALS" > "$GOOGLE_KEY_FILE"
+      gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
+
+      # Start all the servers.
+      cloud_sql_proxy \
+        "-instances=$DATABASE_INSTANCE_CONNECTION_NAME=tcp:5432" & \
+        (cd backend && npm run development) & \
+        (cd frontend && npm run development)
+
+  deploy_backend:
+    dependencies:
+      - build
+      - check
+      - create_user
+      - install_packages
+    cache: false
+    environment:
+      DATABASE_INSTANCE_CONNECTION_NAME: gigamesh-293109:us-central1:gigamesh-db
+      GAR_LOCATION: us-central1
+      GCP_DEPLOY_CREDENTIALS: null
+      GCP_PROJECT: gigamesh-293109
+      GCR_REGION: us-central1
+      GCR_SERVICE_ACCOUNT: gigamesh-api@gigamesh-293109.iam.gserviceaccount.com
+      STAGING_BUCKET: gigamesh-staging
+    user: user
+    command: |
+      set -euo pipefail
+
+      # Authenticate with the Google Cloud SDK.
+      GOOGLE_KEY_FILE=~/gcp-credentials.json
+      echo "$GCP_DEPLOY_CREDENTIALS" > "$GOOGLE_KEY_FILE"
+      gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
+
+      # Build the Docker image.
+      gcloud builds submit backend \
+        --project "$GCP_PROJECT" \
+        --quiet \
+        --gcs-log-dir "gs://$STAGING_BUCKET/build-logs" \
+        --gcs-source-staging-dir "gs://$STAGING_BUCKET/build-source" \
+        --ignore-file .dockerignore \
+        --tag "$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api"
+
+      # Deploy the Cloud Run service.
+      gcloud run deploy api \
+        --project "$GCP_PROJECT" \
+        --quiet \
+        --platform managed \
+        --image "$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api" \
+        --set-cloudsql-instances "$DATABASE_INSTANCE_CONNECTION_NAME" \
+        --set-env-vars \
+          "INSTANCE_CONNECTION_NAME=$DATABASE_INSTANCE_CONNECTION_NAME" \
+        --set-env-vars NODE_ENV=production \
+        --region "$GCR_REGION" \
+        --service-account "$GCR_SERVICE_ACCOUNT" \
+        --allow-unauthenticated
+
+      # Delete the Docker image.
+      gcloud beta artifacts docker images delete \
+        --project "$GCP_PROJECT" \
+        --quiet \
+        --delete-tags \
+        "$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT/gigamesh/api"
+
+      # Clean up the Cloud Storage objects created during the build.
+      gsutil -m rm -r \
+        "gs://$STAGING_BUCKET/build-logs" \
+        "gs://$STAGING_BUCKET/build-source"
+
+  deploy_frontend:
+    dependencies:
+      - build
+      - check
+      - create_user
+      - install_packages
+    cache: false
+    environment:
+      GCP_DEPLOY_CREDENTIALS: null
+      GCP_PROJECT: gigamesh-293109
+      PRODUCTION_BUCKET: www.gigamesh.io
+      PURGE_OLD_ASSETS: false # [ref:skip_purging_by_default]
+      STAGING_BUCKET: gigamesh-staging
+    user: user
+    command: |
+      set -euo pipefail
+
+      # This deploy script is designed to prevent clients from experiencing a
+      # broken website due to race conditions involving deploys. It depends on
+      # the following simplifying assumptions:
+      #
+      # * For each page load, clients only request files that are either (a)
+      #   non-fingerprinted (e.g., `index.html`), or (b) referenced from files
+      #   they have already requested during that page load
+      #   [tag:file_discoverability].
+      #
+      # * There exists an upper bound for the duration between the time a
+      #   client requests a file and the time a client has finished downloading
+      #   all files referenced (directly or indirectly) by that file
+      #   [tag:max_page_load_duration]. For concreteness, lets arbitrarily
+      #   decree that this upper bound is 10 minutes. In most cases, the
+      #   actual duration will be well under a second thanks to our CDN.
+      #
+      # In situations where these assumptions are violated (users requesting
+      # fingerprinted files directly or extremely slow clients), no guarantees
+      # are made.
+      #
+      # To prevent race conditions involving deploys, we pay special attention
+      # to two pathological scenarios:
+      #
+      # 1. File A references file B, either directly or indirectly. A client
+      #    downloads file A, then a deploy deletes file B, and finally the
+      #    client requests file B. To prevent this from happening, we default
+      #    to not deleting old files [tag:skip_purging_by_default].
+      #
+      #    To free up space, we can purge old files by following a special
+      #    procedure: first, we do an ordinary deploy (with
+      #    `PURGE_OLD_ASSETS=false`), then we wait for the cache TTL for non-
+      #    fingerprinted files plus the maximum page load duration (i.e.,
+      #    [ref:non_fingerprinted_ttl] + [ref:max_page_load_duration]), and
+      #    finally we deploy the same snapshot again, but this time with
+      #    `PURGE_OLD_ASSETS=true`. This ensures clients will have enough time
+      #    to follow references (direct and indirect) from any non-
+      #    fingerprinted file, even if file was loaded from a cache. Note that
+      #    all page loads start with a request for a non-fingerprinted file due
+      #    to [ref:file_discoverability], so we don't need to consider the TTL
+      #    for fingerprinted files here.
+      #
+      # 2. File A references file B, either directly or indirectly. An in-
+      #    progress deploy creates file A, then a client downloads file A and
+      #    requests file B before the deploy has created file B. There are two
+      #    sub-cases to consider:
+      #
+      #    (a) File B is fingerprinted. To prevent breakage due to this case,
+      #        we deploy all fingerprinted files before any non-fingerprinted
+      #        files [tag:deploy_fingerprinted_files_first]. Then, due to
+      #        [ref:file_discoverability], the fingerprinted files will not be
+      #        requested by clients until after they have all been deployed.
+      #
+      #    (a) File B is not fingerprinted. To prevent breakage due to this
+      #        case, we must follow a special procedure to introduce non-
+      #        fingerprinted files: we deploy a snapshot that introduces the
+      #        new files first without referencing them, and we only introduce
+      #        references to them in subsequent deploys. Then, due to
+      #        [ref:file_discoverability], the fingerprinted files will not be
+      #        requested by clients while the first deploy is in progress.
+
+      # Authenticate with the Google Cloud SDK.
+      GOOGLE_KEY_FILE=~/gcp-credentials.json
+      echo "$GCP_DEPLOY_CREDENTIALS" > "$GOOGLE_KEY_FILE"
+      gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
+
+      # Upload the files to the staging bucket. We use a staging bucket rather
+      # than simply uploading the files directly to production because we want
+      # to set the object metadata before the files are served to real users.
+      gsutil -m rsync -d -r -c frontend/dist "gs://$STAGING_BUCKET/dist"
+
+      # By default, allow files to be cached for up to an hour
+      # [tag:non_fingerprinted_ttl]. In the next step, we'll set a more
+      # aggressive caching policy for fingerprinted files.
+      gsutil -m setmeta -h 'Cache-Control:public, max-age=3600' \
+        "gs://$STAGING_BUCKET/dist/*"
+
+      # Allow fingerprinted files to be cached for up to a week.
+      gsutil -m setmeta \
+        -h 'Cache-Control:public, max-age=604800, immutable' \
+        "gs://$STAGING_BUCKET/dist/*-fingerprint.*"
+
+      # Copy the fingerprinted files to the production bucket. It's important
+      # to copy the fingerprinted files before copying the non-fingerprinted
+      # files due to [ref:deploy_fingerprinted_files_first].
+      gsutil -m cp \
+        "gs://$STAGING_BUCKET/dist/*-fingerprint.*" \
+        "gs://$PRODUCTION_BUCKET"
+
+      # Copy the remaining files to the production bucket.
+      gsutil -m cp "gs://$STAGING_BUCKET/dist/*" "gs://$PRODUCTION_BUCKET"
+
+      # Optionally delete any superfluous files in the production bucket. By
+      # default, we skip this step because it can cause race conditions with
+      # clients unless special precautions are taken
+      # [ref:skip_purging_by_default].
+      if [ "$PURGE_OLD_ASSETS" = 'true' ]; then
+        echo 'Purging old assets…'
+        gsutil -m rsync -d -r -c \
+          "gs://$STAGING_BUCKET/dist" \
+          "gs://$PRODUCTION_BUCKET"
+      else
+        echo 'Not purging old assets.'
+      fi
+
+      # Clean up the Cloud Storage objects created during the deploy.
+      gsutil -m rm -r "gs://$STAGING_BUCKET/dist"
+
+  deploy:
+    dependencies:
+      - deploy_backend
+      - deploy_frontend
+    cache: false
