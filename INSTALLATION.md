@@ -295,7 +295,7 @@
         Store the password in [Secret Manager](https://cloud.google.com/secret-manager) as follows:
 
           ```sh
-          echo -n 'THE PASSWORD' | gcloud secrets create postgres-api \
+          echo -n 'THE_PASSWORD' | gcloud secrets create postgres-api \
             --project "$GCP_PROJECT" \
             --replication-policy automatic \
             --data-file -
@@ -303,10 +303,19 @@
     - Create a [SendGrid](https://sendgrid.com/) account and follow SendGrid's instructions to configure the domain for sending emails. Create an API key with the permission to send mail. Store the key in Secret Manager as follows:
 
       ```sh
-      echo -n 'THE API KEY' | gcloud secrets create sendgrid \
+      echo -n 'THE_API_KEY' | gcloud secrets create sendgrid \
         --project "$GCP_PROJECT" \
         --replication-policy automatic \
         --data-file -
+      ```
+    - Configure SendGrid to require the recipient to support TLS. It's important that emails are encrypted because login tokens are delivered via email.
+
+      ```sh
+      curl --request PATCH \
+        --url https://api.sendgrid.com/v3/user/settings/enforced_tls \
+        --header 'authorization: Bearer THE_API_KEY' \
+        --header 'content-type: application/json' \
+        --data '{ "require_tls": true, "require_valid_cert": true }'
       ```
     - Create a service account [here](https://console.cloud.google.com/iam-admin/serviceaccounts) for the API service.
 
