@@ -269,7 +269,12 @@
         - Enter the following:
 
           ```sql
-          CREATE TABLE employees (id SERIAL PRIMARY KEY, name TEXT);
+          CREATE TABLE login_tokens (
+            id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            token TEXT NOT NULL UNIQUE,
+            email TEXT NOT NULL
+          );
           ```
 
           Keep the database connection open for the next step.
@@ -284,7 +289,7 @@
 
         -- Grant the privileges. Note that `UPDATE` and `DELETE` is not granted.
         -- This user cannot change existing data.
-        GRANT SELECT, INSERT, REFERENCES on employees TO api;
+        GRANT SELECT, INSERT, REFERENCES on login_tokens TO api;
         ```
 
         Store the password in [Secret Manager](https://cloud.google.com/secret-manager) as follows:
