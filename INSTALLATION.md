@@ -279,20 +279,31 @@
           CREATE TABLE "user" (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            email TEXT UNIQUE,
+            email TEXT,
+            normalized_email TEXT UNIQUE,
             deleted BOOLEAN NOT NULL DEFAULT false,
             email_when_deleted TEXT,
 
             CHECK (
-              (NOT deleted AND email IS NOT NULL AND email_when_deleted IS NULL) OR
-              (deleted AND email IS NULL AND email_when_deleted IS NOT NULL)
+              (
+                NOT deleted AND
+                email IS NOT NULL AND
+                normalized_email IS NOT NULL AND
+                email_when_deleted IS NULL
+              ) OR (
+                deleted AND
+                email IS NULL AND
+                normalized_email IS NULL AND
+                email_when_deleted IS NOT NULL
+              )
             )
           );
 
           CREATE TABLE sign_up_invitation (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            email TEXT NOT NULL
+            email TEXT NOT NULL,
+            normalized_email TEXT NOT NULL
           );
 
           CREATE TABLE log_in_invitation (
@@ -310,7 +321,7 @@
             CHECK (refreshed_at >= created_at)
           );
 
-          CREATE INDEX ON sign_up_invitation (email);
+          CREATE INDEX ON sign_up_invitation (normalized_email);
           CREATE INDEX ON log_in_invitation (user_id);
           CREATE INDEX ON session (user_id);
           ```
