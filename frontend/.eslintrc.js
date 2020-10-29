@@ -33,6 +33,7 @@ module.exports = {
     'import/extensions': ['error', 'never', { scss: 'always', svg: 'always' }],
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'react/jsx-filename-extension': ['error', { extensions: ['.tsx'] }],
+    'jsx-a11y/label-has-associated-control': ['error', { assert: 'either' }],
     // See https://github.com/typescript-eslint/typescript-eslint/issues/2540 for an explanation of
     // the following two lines:
     'no-use-before-define': 'off',
