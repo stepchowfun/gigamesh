@@ -10,7 +10,7 @@ const AppContainer = styled.div`
 
 const App: FunctionComponent<{}> = () => {
   const [email, setEmail] = useState('');
-  const [submittingInvite, setSubmittingInvite] = useState(false);
+  const [submittingEmail, setSubmittingEmail] = useState(false);
 
   const handleEmailChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -20,40 +20,44 @@ const App: FunctionComponent<{}> = () => {
     setEmail(event.target.value);
   };
 
-  const handleInviteSubmit = (
-    event: React.FormEvent<HTMLFormElement>,
+  const handleEmailKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
   ): void => {
-    event.preventDefault();
+    if (event.key === 'Enter' && !submittingEmail) {
+      event.preventDefault();
 
-    setSubmittingInvite(true);
+      setSubmittingEmail(true);
 
-    invite({ email })
-      .then(() => {
-        setEmail('');
-        setSubmittingInvite(false);
-      })
-      .catch((reason) => {
-        // eslint-disable-next-line no-alert
-        alert(reason);
-      });
+      invite({ email })
+        .then(() => {
+          setEmail('');
+          setSubmittingEmail(false);
+        })
+        .catch((reason) => {
+          setSubmittingEmail(false);
+
+          // eslint-disable-next-line no-alert
+          alert(reason);
+        });
+    }
   };
 
   return (
     <AppContainer>
-      <form onSubmit={handleInviteSubmit}>
-        <h2>Get started</h2>
-        <label>
-          Email:{' '}
-          <input
-            type="email"
-            placeholder="sophie@example.com"
-            value={email}
-            onChange={handleEmailChange}
-            disabled={submittingInvite}
-            required
-          />
-        </label>
-      </form>
+      <h2>Get started</h2>
+      <label>
+        Email:{' '}
+        <input
+          type="email"
+          autoComplete="email"
+          placeholder="sophie@example.com"
+          value={email}
+          onChange={handleEmailChange}
+          onKeyDown={handleEmailKeyDown}
+          readOnly={submittingEmail}
+          required
+        />
+      </label>
     </AppContainer>
   );
 };
