@@ -268,7 +268,7 @@
         - Log in using the password you created for the `postgres` user above.
         - Install the `pgcrypto` extension for UUID support.
 
-          ```sh
+          ```sql
           CREATE EXTENSION pgcrypto;
           ```
 
@@ -384,6 +384,8 @@
           --replication-policy automatic \
           --data-file -
         ```
+
+        Create a second API key for development. Keep it for your development machine; it doesn't need to be stored in Secret Manager.
       - Configure SendGrid to require the recipient to support TLS. It's important that emails are encrypted because login tokens are delivered via email.
 
         ```sh
@@ -393,6 +395,8 @@
           --header 'content-type: application/json' \
           --data '{ "require_tls": true, "require_valid_cert": true }'
         ```
+
+        You may also do this for the development account, though it isn't necessary.
     - Create a service account [here](https://console.cloud.google.com/iam-admin/serviceaccounts) for the API service.
 
       ```sh
@@ -477,7 +481,7 @@
         --project "$GCP_PROJECT" \
         --iam-account "gigamesh-deployer@${GCP_PROJECT}.iam.gserviceaccount.com"
       ```
-    - Run the following command to build and deploy the service:
+    - Run the following to build and deploy the service:
 
       ```sh
       export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh:us-central1:gigamesh # Database connection info
@@ -526,3 +530,13 @@
     - Set up two secrets in the repository settings on GitHub.
       - `DOCKER_PASSWORD`: This is your Docker ID password. Toast will use it to cache intermediate Docker images when performing builds.
       - `GCP_DEPLOY_CREDENTIALS`: This should contain the contents of the credentials file for the deployment service account you created earlier. It's used to authorize the CI job to deploy the website.
+  - To start the development environment, run the following:
+
+    ```sh
+    export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh:us-central1:gigamesh # Database connection info
+    export GCP_API_CREDENTIALS="$(cat api-credentials.json)" # Credentials for the API service account
+    export POSTGRES_SECRET=abc123 # The password for the `api_development` user
+    export SENDGRID_SECRET=abc123 # The SendGrid API key for development
+
+    toast development
+    ```
