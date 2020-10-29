@@ -269,12 +269,45 @@
         - Enter the following:
 
           ```sql
-          CREATE TABLE login_tokens (
-            id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+          CREATE EXTENSION pgcrypto;
+
+          CREATE TABLE "user" (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            token TEXT NOT NULL UNIQUE,
+            email TEXT UNIQUE,
+            deleted BOOLEAN NOT NULL DEFAULT false,
+            email_when_deleted TEXT,
+
+            CHECK (
+              (NOT deleted AND email IS NOT NULL AND email_when_deleted IS NULL) OR
+              (deleted AND email IS NULL AND email_when_deleted IS NOT NULL)
+            )
+          );
+
+          CREATE TABLE sign_up_invitation (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             email TEXT NOT NULL
           );
+
+          CREATE TABLE log_in_invitation (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            user_id UUID NOT NULL REFERENCES "user" ON DELETE RESTRICT
+          );
+
+          CREATE TABLE session (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            refreshed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            user_id UUID NOT NULL REFERENCES "user" ON DELETE RESTRICT,
+
+            CHECK (refreshed_at >= created_at)
+          );
+
+          CREATE INDEX ON sign_up_invitation (email);
+          CREATE INDEX ON log_in_invitation (user_id);
+          CREATE INDEX ON session (user_id);
           ```
 
           Keep the database connection open for the next step.
@@ -287,9 +320,11 @@
         -- Create a password for the user. This will prompt you for it interactively.
         \password api;
 
-        -- Grant the privileges. Note that `UPDATE` and `DELETE` is not granted.
-        -- This user cannot change existing data.
-        GRANT SELECT, INSERT, REFERENCES on login_tokens TO api;
+        -- Grant privileges to the user.
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on "user" TO api;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on sign_up_invitation TO api;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on log_in_invitation TO api;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on session TO api;
         ```
 
         Store the password in [Secret Manager](https://cloud.google.com/secret-manager) as follows:
