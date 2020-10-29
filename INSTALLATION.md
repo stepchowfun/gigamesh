@@ -367,10 +367,8 @@
 
         \password api_development;
 
-        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on "user" TO api_development;
-        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on sign_up_invitation TO api_development;
-        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on log_in_invitation TO api_development;
-        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on session TO api_development;
+        GRANT ...;
+        ...
         ```
 
         Keep the password for the `api_development` user for your development machine.
