@@ -340,7 +340,7 @@
           --replication-policy automatic \
           --data-file -
         ```
-      - For development purposes, create a copy of the database and API user. You may create a new Cloud SQL instance for this, or you may decide to reuse the same instance depending on your budget.
+      - For development purposes, create a copy of the database and API user. You may create a new Cloud SQL instance (possibly in an entirely different GCP project) for this, or you may decide to reuse the same instance depending on your budget and isolation requirements.
 
         ```sql
         CREATE DATABASE gigamesh_development;
@@ -376,7 +376,7 @@
         Keep the password for the `api_development` user for your development machine.
     - Set up [SendGrid](https://sendgrid.com/) for sending emails.
       - Create a [SendGrid](https://sendgrid.com/) account and follow SendGrid's instructions to configure the domain for sending emails.
-      - In the SendGrid UI, create an API key with the permission to send mail (no other permissions are needed). Store the key in Secret Manager as follows:
+      - In the SendGrid UI, create an API key with full permissions; we'll refine them later. Store the key in Secret Manager as follows:
 
         ```sh
         echo -n 'THE_API_KEY' | gcloud secrets create sendgrid \
@@ -385,8 +385,7 @@
           --data-file -
         ```
 
-        Create a second API key for development. Keep it for your development machine; it doesn't need to be stored in Secret Manager.
-      - Configure SendGrid to require the recipient to support TLS. It's important that emails are encrypted because login tokens are delivered via email.
+        Configure SendGrid to require the recipient to support TLS. It's important that emails are encrypted because login tokens are delivered via email.
 
         ```sh
         curl --request PATCH \
@@ -396,7 +395,9 @@
           --data '{ "require_tls": true, "require_valid_cert": true }'
         ```
 
-        You may also do this for the development account, though it isn't necessary.
+        In the SendGrid UI, remove all permissions from this API key except the ability to send mail.
+
+        Create a second API key for development. Keep it for your development machine; it doesn't need to be stored in Secret Manager.
     - Create a service account [here](https://console.cloud.google.com/iam-admin/serviceaccounts) for the API service.
 
       ```sh
