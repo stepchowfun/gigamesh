@@ -220,7 +220,7 @@
         Generate a client certificate.
 
         ```sh
-        CLIENT_CERTIFICATE_NAME=ops # A name for the client certificate
+        CLIENT_CERTIFICATE_NAME=client-cert # A name for the client certificate
 
         gcloud sql ssl client-certs create "$CLIENT_CERTIFICATE_NAME" client-key.pem \
           --project "$GCP_PROJECT" \
