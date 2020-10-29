@@ -9,12 +9,12 @@ export const sendgridSecretName =
   'projects/gigamesh-293109/secrets/sendgrid/versions/latest';
 
 // These constants are used for connecting to the database.
-export const databaseUserDevelopment = 'api';
-export const databaseNameDevelopment = 'gigamesh';
+export const databaseUserDevelopment = 'api_development';
+export const databaseNameDevelopment = 'gigamesh_development';
 export const databaseHostDevelopment = '127.0.0.1';
 export const databasePortDevelopment = 5432;
-export const databaseNameProduction = 'gigamesh';
-export const databaseUserProduction = 'api';
+export const databaseUserProduction = 'api_production';
+export const databaseNameProduction = 'gigamesh_production';
 export const databaseHostProduction =
   '/cloudsql/gigamesh-293109:us-central1:gigamesh-db';
 export const databasePortProduction = undefined;

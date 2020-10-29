@@ -179,7 +179,7 @@
         --ports 443
       ```
   - Set up the backend.
-    - Enable the necessary APIs:
+    - Enable the necessary APIs.
 
       ```sh
       gcloud services enable --project "$GCP_PROJECT" artifactregistry.googleapis.com
@@ -217,7 +217,7 @@
 
         For production, you should consider configuring high availability, provisioning more CPU and memory, enabling backups, adding read replicas, etc.
 
-        Generate a client certificate:
+        Generate a client certificate.
 
         ```sh
         CLIENT_CERTIFICATE_NAME=ops # A name for the client certificate
@@ -227,7 +227,7 @@
           --instance "$DATABASE_INSTANCE"
         ```
 
-        Download the public key for that client certificate:
+        Download the public key for that client certificate.
 
         ```sh
         gcloud sql ssl client-certs describe "$CLIENT_CERTIFICATE_NAME" \
@@ -237,7 +237,7 @@
           > client-cert.pem
         ```
 
-        Download the server certificate:
+        Download the server certificate.
 
         ```sh
         gcloud sql instances describe "$DATABASE_INSTANCE" \
@@ -254,23 +254,28 @@
           psql "sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=$DATABASE_IP port=5432 user=postgres"
           ```
         - Log in using the password you created for the `postgres` user above.
-        - Enter the following:
+        - Create the database.
 
           ```sql
-          CREATE DATABASE gigamesh;
+          CREATE DATABASE gigamesh_production;
           ```
       - Create the tables.
-        - Connect to the database instance again, but this time with the newly created `gigamesh` database:
+        - Connect to the database instance again, but this time with the newly created `gigamesh_production` database.
 
           ```sh
-          psql "sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=$DATABASE_IP port=5432 user=postgres dbname=gigamesh"
+          psql "sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=$DATABASE_IP port=5432 user=postgres dbname=gigamesh_production"
           ```
         - Log in using the password you created for the `postgres` user above.
+        - Install the `pgcrypto` extension for UUID support.
+
+          ```sh
+          CREATE EXTENSION pgcrypto;
+          ```
+
+          Keep the database connection open for the next step.
         - Enter the following:
 
           ```sql
-          CREATE EXTENSION pgcrypto;
-
           CREATE TABLE "user" (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -315,16 +320,16 @@
 
         ```sql
         -- Create the user.
-        CREATE USER api LOGIN;
+        CREATE USER api_production LOGIN;
 
         -- Create a password for the user. This will prompt you for it interactively.
-        \password api;
+        \password api_production;
 
         -- Grant privileges to the user.
-        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on "user" TO api;
-        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on sign_up_invitation TO api;
-        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on log_in_invitation TO api;
-        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on session TO api;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on "user" TO api_production;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on sign_up_invitation TO api_production;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on log_in_invitation TO api_production;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on session TO api_production;
         ```
 
         Store the password in [Secret Manager](https://cloud.google.com/secret-manager) as follows:
@@ -335,6 +340,40 @@
           --replication-policy automatic \
           --data-file -
         ```
+      - For development purposes, create a copy of the database and API user. You may create a new Cloud SQL instance for this, or you may decide to reuse the same instance depending on your budget.
+
+        ```sql
+        CREATE DATABASE gigamesh_development;
+        ```
+
+        Connect to the newly created database.
+
+        ```sh
+        psql "sslmode=verify-ca sslrootcert=server-ca.pem sslcert=client-cert.pem sslkey=client-key.pem hostaddr=$DATABASE_IP port=5432 user=postgres dbname=gigamesh_development"
+        ```
+
+        Continue setting up the database and API user.
+
+        ```sql
+        CREATE EXTENSION pgcrypto;
+
+        CREATE TABLE ...;
+        ...
+
+        CREATE INDEX ...;
+        ...
+
+        CREATE USER api_development LOGIN;
+
+        \password api_development;
+
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on "user" TO api_development;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on sign_up_invitation TO api_development;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on log_in_invitation TO api_development;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on session TO api_development;
+        ```
+
+        Keep the password for the `api_development` user for your development machine.
     - Set up [SendGrid](https://sendgrid.com/) for sending emails.
       - Create a [SendGrid](https://sendgrid.com/) account and follow SendGrid's instructions to configure the domain for sending emails.
       - In the SendGrid UI, create an API key with the permission to send mail (no other permissions are needed). Store the key in Secret Manager as follows:
@@ -480,10 +519,10 @@
       You'll need to update your DNS records accordingly.
   - Set up continuous integration. This repository has a [GitHub action](https://github.com/stepchowfun/gigamesh/blob/master/.github/workflows/ci.yml) configured to build and deploy the service, with deploys only happening on the `master` branch. Follow the steps below to make this work.
     - Create a new Docker repository on [Docker Hub](https://hub.docker.com/). You'll need to create a Docker ID if you don't already have one.
-    - Update the workflow in `.github/workflows/ci.yml`:
+    - Update the workflow in `.github/workflows/ci.yml`.
       - Change the `username` field of the Docker login action to match your Docker ID.
       - Change the `repo` field(s) of both of the Toast actions to point to the Docker repository you just created.
       - Change the `env` field(s) of the second Toast action to set the correct environment variables for the deploy step (see the `toast deploy` command above).
-    - Set up two secrets in the repository settings on GitHub:
+    - Set up two secrets in the repository settings on GitHub.
       - `DOCKER_PASSWORD`: This is your Docker ID password. Toast will use it to cache intermediate Docker images when performing builds.
       - `GCP_DEPLOY_CREDENTIALS`: This should contain the contents of the credentials file for the deployment service account you created earlier. It's used to authorize the CI job to deploy the website.
