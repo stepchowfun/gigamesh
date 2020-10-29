@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import styled from 'styled-components';
 import invite from '../api/invite';
 
@@ -8,72 +8,54 @@ const AppContainer = styled.div`
   color: #333333;
 `;
 
-class App extends React.Component<
-  Record<string, unknown>,
-  { email: string; submittingInvite: boolean }
-> {
-  private handleEmailChangeBound: (
+const App: FunctionComponent<{}> = () => {
+  const [email, setEmail] = useState('');
+  const [submittingInvite, setSubmittingInvite] = useState(false);
+
+  const handleEmailChange = (
     event: React.ChangeEvent<HTMLInputElement>,
-  ) => void;
+  ): void => {
+    event.preventDefault();
 
-  private handleInviteSubmitBound: (
+    setEmail(event.target.value);
+  };
+
+  const handleInviteSubmit = (
     event: React.FormEvent<HTMLFormElement>,
-  ) => void;
-
-  constructor(props: Record<string, unknown>) {
-    super(props);
-
-    this.state = { email: '', submittingInvite: false };
-
-    this.handleEmailChangeBound = this.handleEmailChange.bind(this);
-    this.handleInviteSubmitBound = this.handleInviteSubmit.bind(this);
-  }
-
-  handleEmailChange(event: React.ChangeEvent<HTMLInputElement>): void {
+  ): void => {
     event.preventDefault();
 
-    this.setState({ email: event.target.value });
-  }
-
-  handleInviteSubmit(event: React.FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
-
-    const { email } = this.state;
-
-    this.setState({ submittingInvite: true });
+    setSubmittingInvite(true);
 
     invite({ email })
       .then(() => {
-        this.setState({ email: '', submittingInvite: false });
+        setEmail('');
+        setSubmittingInvite(false);
       })
       .catch((reason) => {
         // eslint-disable-next-line no-alert
         alert(reason);
       });
-  }
+  };
 
-  render(): React.ReactNode {
-    const { email, submittingInvite } = this.state;
-
-    return (
-      <AppContainer>
-        <form onSubmit={this.handleInviteSubmitBound}>
-          <h2>Get started</h2>
-          <label>
-            Email:{' '}
-            <input
-              type="email"
-              placeholder="sophie@example.com"
-              value={email}
-              onChange={this.handleEmailChangeBound}
-              disabled={submittingInvite}
-              required
-            />
-          </label>
-        </form>
-      </AppContainer>
-    );
-  }
-}
+  return (
+    <AppContainer>
+      <form onSubmit={handleInviteSubmit}>
+        <h2>Get started</h2>
+        <label>
+          Email:{' '}
+          <input
+            type="email"
+            placeholder="sophie@example.com"
+            value={email}
+            onChange={handleEmailChange}
+            disabled={submittingInvite}
+            required
+          />
+        </label>
+      </form>
+    </AppContainer>
+  );
+};
 
 export default App;
