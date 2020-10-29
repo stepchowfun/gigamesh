@@ -1,46 +1,50 @@
 import React from 'react';
 import styled from 'styled-components';
-import smiley from './smiley.svg';
-import sum from '../sum/sum';
 import invite from '../api/invite';
-import storageDemo from '../api/storageDemo';
 
 const AppContainer = styled.div`
+  width: 320px;
+  margin: 64px auto;
   color: #333333;
-  text-align: center;
-`;
-
-interface SmileyProps {
-  readonly loaded: boolean;
-}
-
-const SmileyContainer = styled.img<SmileyProps>`
-  cursor: pointer;
-  opacity: ${(props) => (props.loaded ? 1 : 0.1)};
 `;
 
 class App extends React.Component<
   Record<string, unknown>,
-  { loaded: boolean }
+  { email: string; submittingInvite: boolean }
 > {
-  static handleClick(e: React.MouseEvent): void {
-    e.preventDefault();
+  private handleEmailChangeBound: (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => void;
 
-    invite({ email: 'boyerstephan@gmail.com' }).catch((reason) => {
-      // eslint-disable-next-line no-alert
-      alert(reason);
-    });
-  }
+  private handleInviteSubmitBound: (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => void;
 
   constructor(props: Record<string, unknown>) {
     super(props);
-    this.state = { loaded: false };
+
+    this.state = { email: '', submittingInvite: false };
+
+    this.handleEmailChangeBound = this.handleEmailChange.bind(this);
+    this.handleInviteSubmitBound = this.handleInviteSubmit.bind(this);
   }
 
-  componentDidMount(): void {
-    storageDemo({})
+  handleEmailChange(event: React.ChangeEvent<HTMLInputElement>): void {
+    event.preventDefault();
+
+    this.setState({ email: event.target.value });
+  }
+
+  handleInviteSubmit(event: React.FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+
+    const { email } = this.state;
+
+    this.setState({ submittingInvite: true });
+
+    invite({ email })
       .then(() => {
-        this.setState({ loaded: true });
+        this.setState({ email: '', submittingInvite: false });
       })
       .catch((reason) => {
         // eslint-disable-next-line no-alert
@@ -49,20 +53,24 @@ class App extends React.Component<
   }
 
   render(): React.ReactNode {
-    const { loaded } = this.state;
+    const { email, submittingInvite } = this.state;
 
     return (
       <AppContainer>
-        <p>
-          <SmileyContainer
-            src={smiley}
-            alt="Smiley face"
-            // eslint-disable-next-line @typescript-eslint/unbound-method
-            onClick={App.handleClick}
-            loaded={loaded}
-          />
-        </p>
-        <p>1 + 2 = {sum(1, 2)}</p>
+        <form onSubmit={this.handleInviteSubmitBound}>
+          <h2>Get started</h2>
+          <label>
+            Email:{' '}
+            <input
+              type="email"
+              placeholder="sophie@example.com"
+              value={email}
+              onChange={this.handleEmailChangeBound}
+              disabled={submittingInvite}
+              required
+            />
+          </label>
+        </form>
       </AppContainer>
     );
   }
