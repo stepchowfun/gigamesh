@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { Static } from 'runtypes';
-import emailDemo from '../api/emailDemo';
+import invite from '../api/invite';
 import logger from '../logger/logger';
 import storageDemo from '../api/storageDemo';
 import { PostRequest, PostResponse } from '../shared/api/schema';
@@ -21,9 +21,9 @@ async function handlePost(request: Request, response: Response): Promise<void> {
     const apiResponse = await PostRequest.match<
       Promise<Static<typeof PostResponse>>
     >(
-      (emailDemoRequest) =>
-        emailDemo(emailDemoRequest).then((partialPostResponse) => {
-          return { ...partialPostResponse, type: 'EmailDemoResponse' };
+      (inviteRequest) =>
+        invite(inviteRequest).then((partialPostResponse) => {
+          return { ...partialPostResponse, type: 'InviteResponse' };
         }),
       (storageDemoRequest) =>
         storageDemo(storageDemoRequest).then((partialPostResponse) => {

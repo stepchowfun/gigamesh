@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import smiley from './smiley.svg';
 import sum from '../sum/sum';
-import emailDemo from '../api/emailDemo';
+import invite from '../api/invite';
 import storageDemo from '../api/storageDemo';
 
 const AppContainer = styled.div`
@@ -26,15 +26,10 @@ class App extends React.Component<
   static handleClick(e: React.MouseEvent): void {
     e.preventDefault();
 
-    emailDemo({ age: 42 })
-      .then((response) => {
-        // eslint-disable-next-line no-alert
-        alert(response.newAge);
-      })
-      .catch((reason) => {
-        // eslint-disable-next-line no-alert
-        alert(reason);
-      });
+    invite({ email: 'boyerstephan@gmail.com' }).catch((reason) => {
+      // eslint-disable-next-line no-alert
+      alert(reason);
+    });
   }
 
   constructor(props: Record<string, unknown>) {
