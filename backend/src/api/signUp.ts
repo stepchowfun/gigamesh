@@ -1,5 +1,6 @@
 import { Static } from 'runtypes';
 import { SignUpRequest, SignUpResponse } from '../shared/api/schema';
+import { signUpInvitationLifespanMs } from '../constants/constants';
 import getPool from '../storage/storage';
 
 export default async function signUp(
@@ -10,13 +11,25 @@ export default async function signUp(
 
   // Query for the invitation.
   const invitation = (
-    await pool.query<{ email: string; normalizedEmail: string }>(
-      'SELECT email, normalized_email AS normalizedEmail ' +
+    await pool.query<{
+      createdAt: Date;
+      email: string;
+      normalizedEmail: string;
+    }>(
+      'SELECT created_at AS "createdAt", email, normalized_email AS "normalizedEmail" ' +
         'FROM sign_up_invitation ' +
         'WHERE id = $1',
       [request.signUpToken],
     )
   ).rows[0];
+
+  // Check if the invitation has expired.
+  if (
+    invitation.createdAt.valueOf() + signUpInvitationLifespanMs <=
+    Date.now()
+  ) {
+    throw new Error('The sign up invitation has expired.');
+  }
 
   // Create the user.
   const userId = (
