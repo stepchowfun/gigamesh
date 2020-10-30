@@ -20,4 +20,7 @@ export const databaseHostProduction =
 export const databasePortProduction = undefined;
 
 // This is the "from" address for emails.
-export const fromEmailAddress = 'automated@gigamesh.io';
+export const emailSender = {
+  email: 'automated@gigamesh.io',
+  name: 'Gigamesh',
+};

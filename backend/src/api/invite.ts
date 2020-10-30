@@ -1,5 +1,4 @@
 import { Static } from 'runtypes';
-import { fromEmailAddress } from '../constants/constants';
 import { InviteRequest, InviteResponse } from '../shared/api/schema';
 import getPool from '../storage/storage';
 import send from '../email/email';
@@ -40,7 +39,6 @@ export default async function invite(
     // Send the invitation to the user.
     await send({
       to: trimmedEmail,
-      from: fromEmailAddress,
       subject: 'Your Gigamesh invitation',
       text: `Navigate here to get started: ${signUpLink}`,
       html: `Click <a href="${signUpLink}">here</a> to get started!`,
@@ -65,7 +63,6 @@ export default async function invite(
     // Send the invitation to the user.
     await send({
       to: trimmedEmail,
-      from: fromEmailAddress,
       subject: 'Your Gigamesh log in link',
       text: `Navigate here to log in: ${logInLink}`,
       html: `Click <a href="${logInLink}">here</a> to log in!`,
