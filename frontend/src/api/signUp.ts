@@ -1,22 +1,22 @@
 import axios, { AxiosResponse } from 'axios';
 import { Static } from 'runtypes';
-import { StorageDemoRequest, StorageDemoResponse } from '../shared/api/schema';
+import { SignUpRequest, SignUpResponse } from '../shared/api/schema';
 import {
   cloudFunctionsBaseUrlDevelopment,
   cloudFunctionsBaseUrlProduction,
 } from '../constants/constants';
 import { isProduction } from '../shared/environment/environment';
 
-export default async function storageDemo(
-  request: Omit<Static<typeof StorageDemoRequest>, 'type'>,
-): Promise<Omit<Static<typeof StorageDemoResponse>, 'type'>> {
-  const payload: Static<typeof StorageDemoRequest> = {
+export default async function signUp(
+  request: Omit<Static<typeof SignUpRequest>, 'type'>,
+): Promise<Omit<Static<typeof SignUpResponse>, 'type'>> {
+  const payload: Static<typeof SignUpRequest> = {
     ...request,
-    type: 'StorageDemoRequest',
+    type: 'SignUpRequest',
   };
 
   const axiosResponse: AxiosResponse<Static<
-    typeof StorageDemoResponse
+    typeof SignUpResponse
   >> = await axios.post(
     isProduction()
       ? cloudFunctionsBaseUrlProduction
