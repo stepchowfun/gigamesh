@@ -4,13 +4,13 @@ import getPool from '../storage/storage';
 import send from '../email/email';
 
 export default async function invite(
-  request: Omit<Static<typeof InviteRequest>, 'type'>,
-): Promise<Omit<Static<typeof InviteResponse>, 'type'>> {
+  payload: Static<typeof InviteRequest>['payload'],
+): Promise<Static<typeof InviteResponse>['payload']> {
   // Get the database connection pool.
   const pool = await getPool();
 
   // Normalize the email.
-  const trimmedEmail = request.email.trim();
+  const trimmedEmail = payload.email.trim();
   const normalizedEmail = trimmedEmail.toLowerCase().normalize('NFC');
 
   // Query for the user, if it exists.

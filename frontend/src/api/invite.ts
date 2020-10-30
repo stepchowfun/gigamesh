@@ -8,11 +8,11 @@ import {
 import { isProduction } from '../shared/environment/environment';
 
 export default async function invite(
-  request: Omit<Static<typeof InviteRequest>, 'type'>,
-): Promise<Omit<Static<typeof InviteResponse>, 'type'>> {
-  const payload: Static<typeof InviteRequest> = {
-    ...request,
+  payload: Static<typeof InviteRequest>['payload'],
+): Promise<Static<typeof InviteResponse>['payload']> {
+  const envelope: Static<typeof InviteRequest> = {
     type: 'InviteRequest',
+    payload,
   };
 
   const axiosResponse: AxiosResponse<Static<
@@ -21,8 +21,8 @@ export default async function invite(
     isProduction()
       ? cloudFunctionsBaseUrlProduction
       : cloudFunctionsBaseUrlDevelopment,
-    payload,
+    envelope,
   );
 
-  return axiosResponse.data;
+  return axiosResponse.data.payload;
 }

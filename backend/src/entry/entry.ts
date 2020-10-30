@@ -13,27 +13,27 @@ async function handlePost(request: Request, response: Response): Promise<void> {
     isProduction() ? originProduction : originDevelopment,
   );
 
-  const payload = request.body;
+  const { body: requestEnvelope } = request;
 
-  if (PostRequest.guard(payload)) {
-    logger.info('Received valid request.', { request: payload });
+  if (PostRequest.guard(requestEnvelope)) {
+    logger.info('Received valid request.', { requestEnvelope });
 
     const apiResponse = await PostRequest.match<
       Promise<Static<typeof PostResponse>>
     >(
-      (inviteRequest) =>
-        invite(inviteRequest).then((partialPostResponse) => {
-          return { ...partialPostResponse, type: 'InviteResponse' };
+      (refinedEnvelope) =>
+        invite(refinedEnvelope.payload).then((responsePayload) => {
+          return { type: 'InviteResponse', payload: responsePayload };
         }),
-      (signUpRequest) =>
-        signUp(signUpRequest).then((partialPostResponse) => {
-          return { ...partialPostResponse, type: 'SignUpResponse' };
+      (refinedEnvelope) =>
+        signUp(refinedEnvelope.payload).then((responsePayload) => {
+          return { type: 'SignUpResponse', payload: responsePayload };
         }),
-    )(payload);
+    )(requestEnvelope);
 
     response.status(200).send(apiResponse);
   } else {
-    logger.info('Bad request.', { request: payload });
+    logger.info('Bad request.', { requestEnvelope });
     response.status(400).send('Bad Request');
   }
 }

@@ -4,8 +4,8 @@ import { signUpInvitationLifespanMs } from '../constants/constants';
 import getPool from '../storage/storage';
 
 export default async function signUp(
-  request: Omit<Static<typeof SignUpRequest>, 'type'>,
-): Promise<Omit<Static<typeof SignUpResponse>, 'type'>> {
+  payload: Static<typeof SignUpRequest>['payload'],
+): Promise<Static<typeof SignUpResponse>['payload']> {
   // Get the database connection pool.
   const pool = await getPool();
 
@@ -19,7 +19,7 @@ export default async function signUp(
       'SELECT created_at AS "createdAt", email, normalized_email AS "normalizedEmail" ' +
         'FROM sign_up_invitation ' +
         'WHERE id = $1',
-      [request.signUpToken],
+      [payload.signUpToken],
     )
   ).rows[0];
 
