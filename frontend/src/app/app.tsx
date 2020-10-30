@@ -45,7 +45,7 @@ const App: FunctionComponent<{}> = () => {
           setInvitationState(InvitationState.NotSent);
 
           // eslint-disable-next-line no-alert
-          alert(`Something went wrong: ${reason.toString()}`);
+          alert(`Something went wrong.\n\n${reason.toString()}`);
         });
     }
   };
