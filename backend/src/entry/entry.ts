@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { Static } from 'runtypes';
 import invite from '../api/invite';
 import logger from '../logger/logger';
-import storageDemo from '../api/storageDemo';
+import signUp from '../api/signUp';
 import { PostRequest, PostResponse } from '../shared/api/schema';
 import { originDevelopment, originProduction } from '../constants/constants';
 import { isProduction } from '../shared/environment/environment';
@@ -25,9 +25,9 @@ async function handlePost(request: Request, response: Response): Promise<void> {
         invite(inviteRequest).then((partialPostResponse) => {
           return { ...partialPostResponse, type: 'InviteResponse' };
         }),
-      (storageDemoRequest) =>
-        storageDemo(storageDemoRequest).then((partialPostResponse) => {
-          return { ...partialPostResponse, type: 'StorageDemoResponse' };
+      (signUpRequest) =>
+        signUp(signUpRequest).then((partialPostResponse) => {
+          return { ...partialPostResponse, type: 'SignUpResponse' };
         }),
     )(payload);
 

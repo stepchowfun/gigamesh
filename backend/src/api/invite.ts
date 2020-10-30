@@ -69,6 +69,6 @@ export default async function invite(
     });
   }
 
-  // Return a response to the client.
+  // There's nothing useful to return to the client.
   return {};
 }
