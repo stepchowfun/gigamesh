@@ -5,7 +5,7 @@
   "private": true,
   "main": "dist/entry/entry.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --project tsconfig.json",
     "check": "tsc --project tsconfig.json && jest --config jest.config.js && eslint --config .eslintrc.js --ignore-path .gitignore --report-unused-disable-directives --max-warnings 0 './**/*{.js,.ts}' && prettier --config .prettierrc.json --ignore-path .gitignore --check .",
     "development": "tsc --project tsconfig.json && NODE_ENV=development PORT=8081 node dist/entry/entry.js",
     "format": "prettier --config .prettierrc.json --ignore-path .gitignore --write ."
