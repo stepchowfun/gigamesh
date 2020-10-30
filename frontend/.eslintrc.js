@@ -35,10 +35,10 @@ module.exports = {
     'react/jsx-filename-extension': ['error', { extensions: ['.tsx'] }],
     '@typescript-eslint/ban-types': ['error', { types: { '{}': false } }],
     'jsx-a11y/label-has-associated-control': ['error', { assert: 'either' }],
-    // See https://github.com/typescript-eslint/typescript-eslint/issues/2540 for an explanation of
-    // the following two lines:
     'no-use-before-define': 'off',
     '@typescript-eslint/no-use-before-define': 'error',
+    'no-shadow': 'off',
+    '@typescript-eslint/no-shadow': 'error',
   },
   settings: {
     'import/resolver': {
