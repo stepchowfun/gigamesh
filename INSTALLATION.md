@@ -384,7 +384,7 @@
 
         Keep the password for the `api_development` user for your development machine.
     - Set up [SendGrid](https://sendgrid.com/) for sending emails.
-      - Create a [SendGrid](https://sendgrid.com/) account and follow SendGrid's instructions to configure the domain for sending emails.
+      - Create a [SendGrid](https://sendgrid.com/) account and follow SendGrid's instructions to configure the domain for sending emails. You may wish to configure the [Tracking Settings](https://app.sendgrid.com/settings/tracking) to suit your needs; the default configuration causes emails to be modified by SendGrid in some ways.
       - In the SendGrid UI, create an API key with full permissions; we'll refine them later. Store the key in Secret Manager as follows:
 
         ```sh
