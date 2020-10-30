@@ -282,22 +282,30 @@
             email TEXT,
             normalized_email TEXT UNIQUE,
             deleted BOOLEAN NOT NULL DEFAULT false,
-            email_when_deleted TEXT,
 
             CHECK (
               (
                 NOT deleted AND
                 email IS NOT NULL AND
-                normalized_email IS NOT NULL AND
-                email_when_deleted IS NULL
+                normalized_email IS NOT NULL
               ) OR (
                 deleted AND
                 email IS NULL AND
-                normalized_email IS NULL AND
-                email_when_deleted IS NOT NULL
+                normalized_email IS NULL
               )
             )
           );
+
+          CREATE TABLE previous_user_email (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            user_id UUID NOT NULL REFERENCES "user" ON DELETE RESTRICT,
+            email TEXT NOT NULL,
+            normalized_email TEXT NOT NULL
+          );
+
+          CREATE INDEX ON previous_user_email (user_id);
+          CREATE INDEX ON previous_user_email (normalized_email);
 
           CREATE TABLE sign_up_invitation (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
@@ -306,11 +314,15 @@
             normalized_email TEXT NOT NULL
           );
 
+          CREATE INDEX ON sign_up_invitation (normalized_email);
+
           CREATE TABLE log_in_invitation (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             user_id UUID NOT NULL REFERENCES "user" ON DELETE RESTRICT
           );
+
+          CREATE INDEX ON log_in_invitation (user_id);
 
           CREATE TABLE session (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
@@ -321,8 +333,6 @@
             CHECK (refreshed_at >= created_at)
           );
 
-          CREATE INDEX ON sign_up_invitation (normalized_email);
-          CREATE INDEX ON log_in_invitation (user_id);
           CREATE INDEX ON session (user_id);
           ```
 
@@ -338,6 +348,7 @@
 
         -- Grant privileges to the user.
         GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on "user" TO api_production;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on previous_user_email TO api_production;
         GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on sign_up_invitation TO api_production;
         GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on log_in_invitation TO api_production;
         GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on session TO api_production;
@@ -378,7 +389,7 @@
 
         \password api_development;
 
-        GRANT ...;
+        GRANT ... TO api_development;
         ...
         ```
 
