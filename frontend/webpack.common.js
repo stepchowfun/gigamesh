@@ -11,6 +11,7 @@ module.exports = {
   entry: './src/index/index.tsx',
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
+    symlinks: false,
   },
   module: {
     rules: [
