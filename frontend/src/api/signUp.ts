@@ -8,11 +8,11 @@ import {
 import { isProduction } from '../shared/environment/environment';
 
 export default async function signUp(
-  request: Omit<Static<typeof SignUpRequest>, 'type'>,
-): Promise<Omit<Static<typeof SignUpResponse>, 'type'>> {
-  const payload: Static<typeof SignUpRequest> = {
-    ...request,
+  payload: Static<typeof SignUpRequest>['payload'],
+): Promise<Static<typeof SignUpResponse>['payload']> {
+  const envelope: Static<typeof SignUpRequest> = {
     type: 'SignUpRequest',
+    payload,
   };
 
   const axiosResponse: AxiosResponse<Static<
@@ -21,8 +21,8 @@ export default async function signUp(
     isProduction()
       ? cloudFunctionsBaseUrlProduction
       : cloudFunctionsBaseUrlDevelopment,
-    payload,
+    envelope,
   );
 
-  return axiosResponse.data;
+  return axiosResponse.data.payload;
 }

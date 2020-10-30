@@ -1,26 +1,33 @@
-import { Literal, String, Record, Union } from 'runtypes';
+import { Literal, String, Record, Union, Unknown } from 'runtypes';
 
 // The request and response schema for `invite`
 
 export const InviteRequest = Record({
   type: Literal('InviteRequest'),
-  email: String,
+  payload: Record({
+    email: String,
+  }),
 });
 
 export const InviteResponse = Record({
   type: Literal('InviteResponse'),
+  payload: Unknown,
 });
 
 // The request and response schema for `signUp`
 
 export const SignUpRequest = Record({
   type: Literal('SignUpRequest'),
-  signUpToken: String,
+  payload: Record({
+    signUpToken: String,
+  }),
 });
 
 export const SignUpResponse = Record({
   type: Literal('SignUpResponse'),
-  sessionToken: String,
+  payload: Record({
+    sessionToken: String,
+  }),
 });
 
 // The general request and response schemas
