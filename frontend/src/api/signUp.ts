@@ -24,5 +24,7 @@ export default async function signUp(
     envelope,
   );
 
+  SignUpResponse.check(axiosResponse.data);
+
   return axiosResponse.data.payload;
 }

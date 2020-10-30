@@ -61,8 +61,12 @@ app.use(express.json());
 // Disable the `x-powered-by` header.
 app.disable('x-powered-by');
 
-// Set up routes.
-app.post('/', handlePost);
+// Set up the main route.
+app.post('/', (request, response, next) =>
+  handlePost(request, response).catch(next),
+);
+
+// Set up the CORS route.
 app.options('/', handleOptions);
 
 // Start the server.

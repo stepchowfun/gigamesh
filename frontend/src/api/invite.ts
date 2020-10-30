@@ -24,5 +24,7 @@ export default async function invite(
     envelope,
   );
 
+  InviteResponse.check(axiosResponse.data);
+
   return axiosResponse.data.payload;
 }
