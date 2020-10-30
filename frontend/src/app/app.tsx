@@ -2,6 +2,12 @@ import React, { FunctionComponent, useState } from 'react';
 import styled from 'styled-components';
 import invite from '../api/invite';
 
+enum InvitationState {
+  NotSent,
+  Sending,
+  Sent,
+}
+
 const AppContainer = styled.div`
   width: 320px;
   margin: 64px auto;
@@ -10,7 +16,9 @@ const AppContainer = styled.div`
 
 const App: FunctionComponent<{}> = () => {
   const [email, setEmail] = useState('');
-  const [submittingEmail, setSubmittingEmail] = useState(false);
+  const [invitationState, setInvitationState] = useState(
+    InvitationState.NotSent,
+  );
 
   const handleEmailChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -23,21 +31,21 @@ const App: FunctionComponent<{}> = () => {
   const handleEmailKeyDown = (
     event: React.KeyboardEvent<HTMLInputElement>,
   ): void => {
-    if (event.key === 'Enter' && !submittingEmail) {
+    if (invitationState === InvitationState.NotSent && event.key === 'Enter') {
       event.preventDefault();
 
-      setSubmittingEmail(true);
+      setInvitationState(InvitationState.Sending);
 
       invite({ email })
         .then(() => {
           setEmail('');
-          setSubmittingEmail(false);
+          setInvitationState(InvitationState.Sent);
         })
-        .catch((reason) => {
-          setSubmittingEmail(false);
+        .catch((reason: Error) => {
+          setInvitationState(InvitationState.NotSent);
 
           // eslint-disable-next-line no-alert
-          alert(reason);
+          alert(`Something went wrong: ${reason.toString()}`);
         });
     }
   };
@@ -45,19 +53,23 @@ const App: FunctionComponent<{}> = () => {
   return (
     <AppContainer>
       <h2>Get started</h2>
-      <label>
-        Email:{' '}
-        <input
-          type="email"
-          autoComplete="email"
-          placeholder="sophie@example.com"
-          value={email}
-          onChange={handleEmailChange}
-          onKeyDown={handleEmailKeyDown}
-          readOnly={submittingEmail}
-          required
-        />
-      </label>
+      {invitationState === InvitationState.NotSent ? (
+        <label>
+          Email:{' '}
+          <input
+            type="email"
+            autoComplete="email"
+            placeholder="sophie@example.com"
+            value={email}
+            onChange={handleEmailChange}
+            onKeyDown={handleEmailKeyDown}
+            readOnly={invitationState !== InvitationState.NotSent}
+            required
+          />
+        </label>
+      ) : (
+        <p>Check your email!</p>
+      )}
     </AppContainer>
   );
 };
