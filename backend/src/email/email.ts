@@ -1,9 +1,9 @@
 import sendgrid from '@sendgrid/mail';
+import { emailSender } from '../constants/constants';
 import { getSendgridSecret } from '../secrets/secrets';
 
 export default async function send(options: {
   to: string;
-  from: string;
   subject: string;
   text: string;
   html: string;
@@ -12,5 +12,5 @@ export default async function send(options: {
   sendgrid.setApiKey(await getSendgridSecret());
 
   // Send the email.
-  await sendgrid.send(options);
+  await sendgrid.send({ ...options, from: emailSender });
 }
