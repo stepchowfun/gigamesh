@@ -299,8 +299,8 @@ tasks:
 
       # Clean up the Cloud Storage objects created during the build.
       gsutil -m rm -r \
-        "gs://$STAGING_BUCKET/build-logs" \
-        "gs://$STAGING_BUCKET/build-source"
+        "gs://$STAGING_BUCKET/build-logs/" \
+        "gs://$STAGING_BUCKET/build-source/"
 
   deploy_frontend:
     dependencies:
@@ -379,15 +379,26 @@ tasks:
       #        [ref:file_discoverability], the fingerprinted files will not be
       #        requested by clients while the first deploy is in progress.
 
+      # These files will be gzipped.
+      GZIP_FILE_TYPES=html,js,svg,webmanifest,xml
+
       # Authenticate with the Google Cloud SDK.
       GOOGLE_KEY_FILE=~/gcp-credentials.json
       echo "$GCP_DEPLOY_CREDENTIALS" > "$GOOGLE_KEY_FILE"
       gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
 
+      # Clear the relevant subdirectory of the staging bucket. To avoid having
+      # the deletion fail in case there are no objects to delete, we first copy
+      # an arbitrary file into the bucket.
+      gsutil cp frontend/dist/index.html "gs://$STAGING_BUCKET/dist/"
+      gsutil -m rm "gs://$STAGING_BUCKET/dist/**"
+
       # Upload the files to the staging bucket. We use a staging bucket rather
       # than simply uploading the files directly to production because we want
       # to set the object metadata before the files are served to real users.
-      gsutil -m rsync -d -r -c frontend/dist "gs://$STAGING_BUCKET/dist"
+      gsutil -m cp -z "$GZIP_FILE_TYPES" \
+        'frontend/dist/*' \
+        "gs://$STAGING_BUCKET/dist/"
 
       # By default, allow files to be cached for up to an hour
       # [tag:non_fingerprinted_ttl]. In the next step, we'll set a more
@@ -417,14 +428,14 @@ tasks:
       if [ "$PURGE_OLD_ASSETS" = 'true' ]; then
         echo 'Purging old assets…'
         gsutil -m rsync -d -r -c \
-          "gs://$STAGING_BUCKET/dist" \
+          "gs://$STAGING_BUCKET/dist/" \
           "gs://$PRODUCTION_BUCKET"
       else
         echo 'Not purging old assets.'
       fi
 
       # Clean up the Cloud Storage objects created during the deploy.
-      gsutil -m rm -r "gs://$STAGING_BUCKET/dist"
+      gsutil -m rm -r "gs://$STAGING_BUCKET/dist/"
 
   deploy:
     dependencies:
