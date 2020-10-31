@@ -25,9 +25,18 @@ export const SignUpRequest = Record({
 
 export const SignUpResponse = Record({
   type: Literal('SignUpResponse'),
-  payload: Record({
-    sessionId: String,
-  }),
+  payload: Union(
+    Record({
+      type: Literal('SignUpSuccessful'),
+      sessionId: String,
+    }),
+    Record({
+      type: Literal('InvitationExpiredOrInvalid'),
+    }),
+    Record({
+      type: Literal('UserAlreadyExists'),
+    }),
+  ),
 });
 
 // The general request and response schemas

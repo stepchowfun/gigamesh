@@ -1,7 +1,7 @@
 import { Static } from 'runtypes';
 import { SignUpRequest, SignUpResponse } from '../shared/api/schema';
 import { signUpInvitationLifespanMs } from '../constants/constants';
-import getPool from '../storage/storage';
+import { ErrorCode, getPool } from '../storage/storage';
 
 export default async function signUp(
   payload: Static<typeof SignUpRequest>['payload'],
@@ -10,7 +10,7 @@ export default async function signUp(
   const pool = await getPool();
 
   // Query for the invitation.
-  const invitation = (
+  const invitations = (
     await pool.query<{
       createdAt: Date;
       email: string;
@@ -21,25 +21,38 @@ export default async function signUp(
         'WHERE id = $1',
       [payload.signUpInvitationId],
     )
-  ).rows[0];
+  ).rows;
+  if (invitations.length === 0) {
+    return { type: 'InvitationExpiredOrInvalid' };
+  }
+  const invitation = invitations[0];
 
   // Check if the invitation has expired.
   if (
     invitation.createdAt.valueOf() + signUpInvitationLifespanMs <=
     Date.now()
   ) {
-    throw new Error('The sign up invitation has expired.');
+    return { type: 'InvitationExpiredOrInvalid' };
   }
 
   // Create the user.
-  const userId = (
-    await pool.query<{ id: string }>(
-      'INSERT INTO "user" (email, normalized_email) ' +
-        'VALUES ($1, $2) ' +
-        'RETURNING id;',
-      [invitation.email, invitation.normalizedEmail],
-    )
-  ).rows[0].id;
+  let userId;
+  try {
+    userId = (
+      await pool.query<{ id: string }>(
+        'INSERT INTO "user" (email, normalized_email) ' +
+          'VALUES ($1, $2) ' +
+          'RETURNING id;',
+        [invitation.email, invitation.normalizedEmail],
+      )
+    ).rows[0].id;
+  } catch (e) {
+    if (e.code === ErrorCode.UniquenessViolation) {
+      return { type: 'UserAlreadyExists' };
+    }
+
+    throw e;
+  }
 
   // Create a session.
   const sessionId = (
@@ -50,5 +63,5 @@ export default async function signUp(
   ).rows[0].id;
 
   // Return the session token to the client.
-  return { sessionId };
+  return { type: 'SignUpSuccessful', sessionId };
 }

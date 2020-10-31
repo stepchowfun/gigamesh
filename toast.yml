@@ -239,9 +239,10 @@ tasks:
 
       # Start all the servers.
       cloud_sql_proxy \
-        "-instances=$DATABASE_INSTANCE_CONNECTION_NAME=tcp:5432" & \
-        (cd backend && npm run development) & \
-        (cd frontend && npm run development)
+        "-instances=$DATABASE_INSTANCE_CONNECTION_NAME=tcp:5432" &
+      (cd backend && npm run development) &
+      (cd frontend && npm run development) &
+      wait -n
 
   deploy_backend:
     dependencies:
