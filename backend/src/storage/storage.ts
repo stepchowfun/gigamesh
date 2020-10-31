@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Client, Pool } from 'pg';
 
 import {
   databaseConnectionInfo,
@@ -26,10 +26,17 @@ export async function getPool(): Promise<Pool> {
 
 export async function sessionIdToUserId(
   sessionId: string,
+  connection?: Client | Pool,
 ): Promise<string | null> {
+  // Make sure we have a client.
+  let clientOrPool = connection;
+  if (clientOrPool === undefined) {
+    clientOrPool = await getPool();
+  }
+
   // Fetch the session.
   const sessions = (
-    await (await getPool()).query<{
+    await clientOrPool.query<{
       createdAt: Date;
       refreshedAt: Date;
       userId: string;
@@ -54,6 +61,12 @@ export async function sessionIdToUserId(
   ) {
     return null;
   }
+
+  // Refresh the session.
+  await clientOrPool.query<{}>(
+    'UPDATE session SET refreshed_at = now() WHERE id = $1',
+    [sessionId],
+  );
 
   // If we made it this far, the session is legitimate. Return the user ID.
   return session.userId;
