@@ -1,7 +1,8 @@
 import { Static } from 'runtypes';
+
+import { ErrorCode, getPool } from '../storage/storage';
 import { SignUpRequest, SignUpResponse } from '../shared/api/schema';
 import { signUpInvitationLifespanMs } from '../constants/constants';
-import { ErrorCode, getPool } from '../storage/storage';
 
 export default async function signUp(
   payload: Static<typeof SignUpRequest>['payload'],
@@ -47,6 +48,8 @@ export default async function signUp(
       )
     ).rows[0].id;
   } catch (e) {
+    // Warning: TypeScript considers `e` to have type `any`, even though
+    // `unknown` would have been more appropriate.
     if (e.code === ErrorCode.UniquenessViolation) {
       return { type: 'UserAlreadyExists' };
     }

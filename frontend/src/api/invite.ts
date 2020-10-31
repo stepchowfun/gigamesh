@@ -1,11 +1,8 @@
 import axios, { AxiosResponse } from 'axios';
 import { Static } from 'runtypes';
+
+import apiBaseUrl from '../constants/constants';
 import { InviteRequest, InviteResponse } from '../shared/api/schema';
-import {
-  cloudFunctionsBaseUrlDevelopment,
-  cloudFunctionsBaseUrlProduction,
-} from '../constants/constants';
-import isProduction from '../shared/environment/environment';
 
 export default async function invite(
   payload: Static<typeof InviteRequest>['payload'],
@@ -17,12 +14,7 @@ export default async function invite(
 
   const axiosResponse: AxiosResponse<Static<
     typeof InviteResponse
-  >> = await axios.post(
-    isProduction()
-      ? cloudFunctionsBaseUrlProduction
-      : cloudFunctionsBaseUrlDevelopment,
-    envelope,
-  );
+  >> = await axios.post(apiBaseUrl(), envelope);
 
   InviteResponse.check(axiosResponse.data);
 

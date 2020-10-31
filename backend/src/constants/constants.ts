@@ -1,6 +1,13 @@
+import isProduction from '../shared/environment/environment';
+
 // These two constants are used to set CORS headers in API responses.
-export const originDevelopment = 'http://localhost:8080';
-export const originProduction = 'https://www.gigamesh.io';
+export function origin(): string {
+  if (isProduction()) {
+    return 'https://www.gigamesh.io';
+  }
+
+  return 'http://localhost:8080';
+}
 
 // This constant points to the secrets in GCP Secret Manager.
 export const postgresSecretName =
@@ -9,15 +16,28 @@ export const sendgridSecretName =
   'projects/gigamesh-293109/secrets/sendgrid/versions/latest';
 
 // These constants are used for connecting to the database.
-export const databaseUserDevelopment = 'api_development';
-export const databaseNameDevelopment = 'gigamesh_development';
-export const databaseHostDevelopment = '127.0.0.1';
-export const databasePortDevelopment = 5432;
-export const databaseUserProduction = 'api_production';
-export const databaseNameProduction = 'gigamesh_production';
-export const databaseHostProduction =
-  '/cloudsql/gigamesh-293109:us-central1:gigamesh-db';
-export const databasePortProduction = undefined;
+export function databaseConnectionInfo(): {
+  user: string;
+  database: string;
+  host: string;
+  port: number | undefined;
+} {
+  if (isProduction()) {
+    return {
+      user: 'api_production',
+      database: 'gigamesh_production',
+      host: '/cloudsql/gigamesh-293109:us-central1:gigamesh-db',
+      port: undefined,
+    };
+  }
+
+  return {
+    user: 'api_development',
+    database: 'gigamesh_development',
+    host: '127.0.0.1',
+    port: 5432,
+  };
+}
 
 // This is the "from" address for emails.
 export const emailSender = {

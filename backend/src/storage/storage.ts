@@ -1,38 +1,16 @@
 import { Pool } from 'pg';
+
+import { databaseConnectionInfo } from '../constants/constants';
 import { getPostgresSecret } from '../secrets/secrets';
-import isProduction from '../shared/environment/environment';
-import {
-  databaseHostDevelopment,
-  databaseHostProduction,
-  databaseNameDevelopment,
-  databaseNameProduction,
-  databasePortDevelopment,
-  databasePortProduction,
-  databaseUserDevelopment,
-  databaseUserProduction,
-} from '../constants/constants';
 
 let pool: Pool | null = null;
 
 export async function getPool(): Promise<Pool> {
   if (pool === null) {
-    if (isProduction()) {
-      pool = new Pool({
-        user: databaseUserProduction,
-        host: databaseHostProduction,
-        port: databasePortProduction,
-        database: databaseNameProduction,
-        password: await getPostgresSecret(),
-      });
-    } else {
-      pool = new Pool({
-        user: databaseUserDevelopment,
-        host: databaseHostDevelopment,
-        port: databasePortDevelopment,
-        database: databaseNameDevelopment,
-        password: await getPostgresSecret(),
-      });
-    }
+    pool = new Pool({
+      ...databaseConnectionInfo(),
+      password: await getPostgresSecret(),
+    });
   }
 
   return pool;
