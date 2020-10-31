@@ -1,6 +1,8 @@
 import { isProduction } from '../shared/constants/constants';
 
-// These two constants are used to set CORS headers in API responses.
+// These two constants are used for two things:
+// 1. to set CORS headers in API responses and
+// 2. to generate links in emails.
 export function origin(): string {
   if (isProduction()) {
     return 'https://www.gigamesh.io';

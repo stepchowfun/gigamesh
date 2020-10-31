@@ -3,6 +3,7 @@ import { Static } from 'runtypes';
 import send from '../email/email';
 import { InviteRequest, InviteResponse } from '../shared/api/schema';
 import { getPool } from '../storage/storage';
+import { origin } from '../constants/constants';
 import {
   logInHashPrefix,
   signUpHashPrefix,
@@ -39,7 +40,7 @@ export default async function invite(
     ).rows[0].id;
 
     // Construct the sign up link.
-    const signUpLink = `https://www.gigamesh.io/${signUpHashPrefix}${signUpInvitationId}`;
+    const signUpLink = `${origin()}/${signUpHashPrefix}${signUpInvitationId}`;
 
     // Send the invitation to the user.
     await send({
@@ -63,7 +64,7 @@ export default async function invite(
     ).rows[0].id;
 
     // Construct the log in link.
-    const logInLink = `https://www.gigamesh.io/${logInHashPrefix}${logInInvitationId}`;
+    const logInLink = `${origin()}/${logInHashPrefix}${logInInvitationId}`;
 
     // Send the invitation to the user.
     await send({
