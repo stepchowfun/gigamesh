@@ -9,12 +9,6 @@ export default async function deleteUser(
   // Get the database connection pool.
   const pool = await getPool();
 
-  // Fetch the user ID.
-  const userId = await sessionIdToUserId(payload.sessionId);
-  if (userId === null) {
-    return { type: 'NotLoggedIn' };
-  }
-
   // Fetch a client from the pool.
   const client = await pool.connect();
 
@@ -25,6 +19,12 @@ export default async function deleteUser(
     // that the user being (fake) deleted and the `previous_user_email` row
     // being created both happen or neither happens at all.
     await client.query('BEGIN');
+
+    // Fetch the user ID.
+    const userId = await sessionIdToUserId(payload.sessionId, pool);
+    if (userId === null) {
+      return { type: 'NotLoggedIn' };
+    }
 
     // Delete any sessions for the user.
     await client.query<{}>('DELETE FROM session WHERE user_id = $1', [userId]);
