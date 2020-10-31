@@ -53,7 +53,7 @@ const App: FunctionComponent<{}> = () => {
   return (
     <AppContainer>
       <h2>Get started</h2>
-      {invitationState === InvitationState.NotSent ? (
+      {invitationState !== InvitationState.Sent ? (
         <label>
           Email:{' '}
           <input
