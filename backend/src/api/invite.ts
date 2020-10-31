@@ -3,6 +3,7 @@ import { Static } from 'runtypes';
 import send from '../email/email';
 import { InviteRequest, InviteResponse } from '../shared/api/schema';
 import { getPool } from '../storage/storage';
+import { logInHashPrefix } from '../shared/constants/constants';
 
 export default async function invite(
   payload: Static<typeof InviteRequest>['payload'],
@@ -59,7 +60,7 @@ export default async function invite(
     ).rows[0].id;
 
     // Construct the sign up link.
-    const logInLink = `https://www.gigamesh.io/#log-in-${signUpInvitationId}`;
+    const logInLink = `https://www.gigamesh.io/${logInHashPrefix}${signUpInvitationId}`;
 
     // Send the invitation to the user.
     await send({

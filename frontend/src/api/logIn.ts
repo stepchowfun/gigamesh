@@ -4,7 +4,7 @@ import { Static } from 'runtypes';
 import apiBaseUrl from '../constants/constants';
 import { LogInRequest, LogInResponse } from '../shared/api/schema';
 
-export default async function signUp(
+export default async function logIn(
   payload: Static<typeof LogInRequest>['payload'],
 ): Promise<Static<typeof LogInResponse>['payload']> {
   const envelope: Static<typeof LogInRequest> = {

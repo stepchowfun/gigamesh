@@ -1,4 +1,4 @@
-import isProduction from '../shared/environment/environment';
+import { isProduction } from '../shared/constants/constants';
 
 // These two constants are used to set CORS headers in API responses.
 export function origin(): string {
