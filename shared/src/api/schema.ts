@@ -76,6 +76,29 @@ export const LogOutResponse = Record({
   payload: Unknown,
 });
 
+// The request and response schema for `deleteUser`
+
+export const DeleteUserResponsePayload = Union(
+  Record({
+    type: Literal('Success'),
+  }),
+  Record({
+    type: Literal('NotLoggedIn'),
+  }),
+);
+
+export const DeleteUserRequest = Record({
+  type: Literal('DeleteUserRequest'),
+  payload: Record({
+    sessionId: String,
+  }),
+});
+
+export const DeleteUserResponse = Record({
+  type: Literal('DeleteUserResponse'),
+  payload: DeleteUserResponsePayload,
+});
+
 // The general request and response schemata
 
 // The order of the request types here must match any references to
@@ -85,6 +108,7 @@ export const PostRequest = Union(
   SignUpRequest,
   LogInRequest,
   LogOutRequest,
+  DeleteUserRequest,
 );
 
 export const PostResponse = Union(
@@ -92,4 +116,5 @@ export const PostResponse = Union(
   SignUpResponse,
   LogInResponse,
   LogOutResponse,
+  DeleteUserResponse,
 );

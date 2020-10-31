@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { Static } from 'runtypes';
 
+import deleteUser from '../api/deleteUser';
 import invite from '../api/invite';
 import logIn from '../api/logIn';
 import logOut from '../api/logOut';
@@ -41,6 +42,10 @@ async function handlePost(request: Request, response: Response): Promise<void> {
       (refinedEnvelope) =>
         logOut(refinedEnvelope.payload).then((responsePayload) => {
           return { type: 'LogOutResponse', payload: responsePayload };
+        }),
+      (refinedEnvelope) =>
+        deleteUser(refinedEnvelope.payload).then((responsePayload) => {
+          return { type: 'DeleteUserResponse', payload: responsePayload };
         }),
     )(requestEnvelope);
 
