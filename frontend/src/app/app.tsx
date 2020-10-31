@@ -2,6 +2,10 @@ import React, { FunctionComponent, useState } from 'react';
 import styled from 'styled-components';
 
 import invite from '../api/invite';
+import logIn from '../api/logIn';
+import { LogInResponsePayload } from '../shared/api/schema';
+import { getSessionId, setSessionId } from '../storage/storage';
+import { logInHashPrefix } from '../shared/constants/constants';
 
 enum InvitationState {
   NotSent,
@@ -20,6 +24,7 @@ const App: FunctionComponent<{}> = () => {
   const [invitationState, setInvitationState] = useState(
     InvitationState.NotSent,
   );
+  const [loggedIn, setLoggedIn] = useState(getSessionId() !== null);
 
   const handleEmailChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -42,34 +47,75 @@ const App: FunctionComponent<{}> = () => {
           setEmail('');
           setInvitationState(InvitationState.Sent);
         })
-        .catch((reason: Error) => {
+        .catch((e: Error) => {
           setInvitationState(InvitationState.NotSent);
 
           // eslint-disable-next-line no-alert
-          alert(`Something went wrong.\n\n${reason.toString()}`);
+          alert(`Something went wrong.\n\n${e.toString()}`);
         });
     }
   };
 
+  // Check if the user has followed a login link.
+  const { hash } = window.location;
+  if (hash.startsWith(logInHashPrefix)) {
+    // Extract the log in invitation ID.
+    const logInInvitationId = hash.substring(logInHashPrefix.length);
+
+    // Remove the log in invitation ID from the URL because:
+    // - It's secret.
+    // - If the user refreshes the page, we don't want to try to log in again.
+    //   That wouldn't work anyway, since log in invitations are only valid for
+    //   a single use.
+    window.history.replaceState(null, '', '/');
+
+    // Log in.
+    logIn({ logInInvitationId })
+      .then((payload) => {
+        LogInResponsePayload.match(
+          (refinedPayload) => {
+            setSessionId(refinedPayload.sessionId);
+            setLoggedIn(true);
+          },
+          () => {
+            // eslint-disable-next-line no-alert
+            alert(
+              'Unfortunately that login link has expired. Please log in again.',
+            );
+          },
+        )(payload);
+      })
+      .catch((e: Error) => {
+        // eslint-disable-next-line no-alert
+        alert(`Something went wrong.\n\n${e.toString()}`);
+      });
+  }
+
   return (
     <AppContainer>
-      <h2>Get started</h2>
-      {invitationState !== InvitationState.Sent ? (
-        <label>
-          Email:{' '}
-          <input
-            type="email"
-            autoComplete="email"
-            placeholder="sophie@example.com"
-            value={email}
-            onChange={handleEmailChange}
-            onKeyDown={handleEmailKeyDown}
-            readOnly={invitationState !== InvitationState.NotSent}
-            required
-          />
-        </label>
+      {loggedIn ? (
+        <h2>Welcome back</h2>
       ) : (
-        <p>Check your email!</p>
+        <div>
+          <h2>Get started</h2>
+          {invitationState !== InvitationState.Sent ? (
+            <label>
+              Email:{' '}
+              <input
+                type="email"
+                autoComplete="email"
+                placeholder="sophie@example.com"
+                value={email}
+                onChange={handleEmailChange}
+                onKeyDown={handleEmailKeyDown}
+                readOnly={invitationState !== InvitationState.NotSent}
+                required
+              />
+            </label>
+          ) : (
+            <p>Check your email!</p>
+          )}
+        </div>
       )}
     </AppContainer>
   );

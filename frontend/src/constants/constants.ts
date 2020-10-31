@@ -1,4 +1,4 @@
-import isProduction from '../shared/environment/environment';
+import { isProduction } from '../shared/constants/constants';
 
 // This is used when making API calls to the backend.
 export default function apiBaseUrl(): string {

@@ -48,17 +48,19 @@ export const LogInRequest = Record({
   }),
 });
 
+export const LogInResponsePayload = Union(
+  Record({
+    type: Literal('Success'),
+    sessionId: String,
+  }),
+  Record({
+    type: Literal('InvitationExpiredOrInvalid'),
+  }),
+);
+
 export const LogInResponse = Record({
   type: Literal('LogInResponse'),
-  payload: Union(
-    Record({
-      type: Literal('Success'),
-      sessionId: String,
-    }),
-    Record({
-      type: Literal('InvitationExpiredOrInvalid'),
-    }),
-  ),
+  payload: LogInResponsePayload,
 });
 
 // The general request and response schemas
