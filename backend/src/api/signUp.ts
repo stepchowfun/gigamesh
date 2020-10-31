@@ -19,7 +19,7 @@ export default async function signUp(
       'SELECT created_at AS "createdAt", email, normalized_email AS "normalizedEmail" ' +
         'FROM sign_up_invitation ' +
         'WHERE id = $1',
-      [payload.signUpToken],
+      [payload.signUpInvitationId],
     )
   ).rows[0];
 
@@ -42,7 +42,7 @@ export default async function signUp(
   ).rows[0].id;
 
   // Create a session.
-  const sessionToken = (
+  const sessionId = (
     await pool.query<{ id: string }>(
       'INSERT INTO session (user_id) VALUES ($1) RETURNING id;',
       [userId],
@@ -50,5 +50,5 @@ export default async function signUp(
   ).rows[0].id;
 
   // Return the session token to the client.
-  return { sessionToken };
+  return { sessionId };
 }
