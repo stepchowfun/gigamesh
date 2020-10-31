@@ -1,4 +1,5 @@
 import sendgrid from '@sendgrid/mail';
+
 import { emailSender } from '../constants/constants';
 import { getSendgridSecret } from '../secrets/secrets';
 

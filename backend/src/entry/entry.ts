@@ -1,18 +1,19 @@
 import express, { Request, Response } from 'express';
 import { Static } from 'runtypes';
+
 import invite from '../api/invite';
 import logIn from '../api/logIn';
 import logger from '../logger/logger';
 import signUp from '../api/signUp';
 import { PostRequest, PostResponse } from '../shared/api/schema';
-import { originDevelopment, originProduction } from '../constants/constants';
-import isProduction from '../shared/environment/environment';
+import { origin } from '../constants/constants';
+
+function setAllowOrigin(response: Response): void {
+  response.set('Access-Control-Allow-Origin', origin());
+}
 
 async function handlePost(request: Request, response: Response): Promise<void> {
-  response.set(
-    'Access-Control-Allow-Origin',
-    isProduction() ? originProduction : originDevelopment,
-  );
+  setAllowOrigin(response);
 
   const { body: requestEnvelope } = request;
 
@@ -46,10 +47,7 @@ async function handlePost(request: Request, response: Response): Promise<void> {
 }
 
 function handleOptions(request: Request, response: Response): void {
-  response.set(
-    'Access-Control-Allow-Origin',
-    isProduction() ? originProduction : originDevelopment,
-  );
+  setAllowOrigin(response);
   response.set('Access-Control-Allow-Methods', 'POST');
   response.set('Access-Control-Allow-Headers', 'Content-Type');
   response.set('Access-Control-Max-Age', '86400'); // 1 day

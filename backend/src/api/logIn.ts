@@ -1,7 +1,8 @@
 import { Static } from 'runtypes';
+
 import { LogInRequest, LogInResponse } from '../shared/api/schema';
-import { logInInvitationLifespanMs } from '../constants/constants';
 import { getPool } from '../storage/storage';
+import { logInInvitationLifespanMs } from '../constants/constants';
 
 export default async function logIn(
   payload: Static<typeof LogInRequest>['payload'],

@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useState } from 'react';
 import styled from 'styled-components';
+
 import invite from '../api/invite';
 
 enum InvitationState {
