@@ -47,8 +47,18 @@ export const emailSender = {
   name: 'Gigamesh',
 };
 
-// This is the duration in milliseconds for which a sign up invitation is valid.
+// This is the maximum duration in milliseconds for which a sign up invitation
+// is valid.
 export const signUpInvitationLifespanMs = 1000 * 60 * 60 * 24; // 1 day
 
-// This is the duration in milliseconds for which a log in invitation is valid.
+// This is the maximum duration in milliseconds for which a log in invitation
+// is valid.
 export const logInInvitationLifespanMs = 1000 * 60 * 10; // 10 minutes
+
+// This is the maximum duration in milliseconds for which a session is valid
+// since it was created.
+export const sessionLifespanSinceCreationMs = 1000 * 60 * 60 * 24 * 90; // 90 days
+
+// This is the maximum duration in milliseconds for which a session is valid
+// since it was active.
+export const sessionLifespanSinceActiveMs = 1000 * 60 * 60 * 24 * 7; // 7 days
