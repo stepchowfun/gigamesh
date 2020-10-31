@@ -2,6 +2,10 @@ import { Static } from 'runtypes';
 
 import { DeleteUserRequest, DeleteUserResponse } from '../shared/api/schema';
 import { getPool } from '../storage/storage';
+import {
+  sessionLifespanSinceActiveMs,
+  sessionLifespanSinceCreationMs,
+} from '../constants/constants';
 
 export default async function deleteUser(
   payload: Static<typeof DeleteUserRequest>['payload'],
@@ -20,10 +24,17 @@ export default async function deleteUser(
     // being created both happen or neither happens at all.
     await client.query('BEGIN');
 
-    // Fetch the session to get the ID of the user.
+    // Fetch the session.
     const sessions = (
-      await client.query<{ userId: string }>(
-        'SELECT user_id AS "userId" FROM session WHERE id = $1 LIMIT 1',
+      await client.query<{
+        createdAt: Date;
+        refreshedAt: Date;
+        userId: string;
+      }>(
+        'SELECT create_at AS "createdAt", refreshed_at AS "refreshedAt", user_id AS "userId" ' +
+          'FROM session ' +
+          'WHERE id = $1 ' +
+          'LIMIT 1',
         [payload.sessionId],
       )
     ).rows;
@@ -31,14 +42,25 @@ export default async function deleteUser(
       await client.query('ROLLBACK');
       return { type: 'NotLoggedIn' };
     }
-    const { userId } = sessions[0];
+    const session = sessions[0];
+
+    // Make sure the session hasn't expired.
+    if (
+      session.createdAt.valueOf() + sessionLifespanSinceCreationMs <=
+        Date.now() ||
+      session.refreshedAt.valueOf() + sessionLifespanSinceActiveMs <= Date.now()
+    ) {
+      return { type: 'NotLoggedIn' };
+    }
 
     // Delete any sessions for the user.
-    await client.query<{}>('DELETE FROM session WHERE user_id = $1', [userId]);
+    await client.query<{}>('DELETE FROM session WHERE user_id = $1', [
+      session.userId,
+    ]);
 
     // Delete any log in invitations for the user.
     await client.query<{}>('DELETE FROM log_in_invitation WHERE user_id = $1', [
-      userId,
+      session.userId,
     ]);
 
     // Fetch the user.
@@ -52,7 +74,7 @@ export default async function deleteUser(
           'FROM "user" ' +
           'WHERE id = $1 ' +
           'LIMIT 1',
-        [userId],
+        [session.userId],
       )
     ).rows[0];
 
@@ -60,7 +82,7 @@ export default async function deleteUser(
     await client.query<{}>(
       'INSERT INTO previous_user_email (user_id, email, normalized_email) ' +
         'VALUES ($1, $2, $3)',
-      [userId, user.email, user.normalizedEmail],
+      [session.userId, user.email, user.normalizedEmail],
     );
 
     // Mark the user as deleted.
@@ -68,7 +90,7 @@ export default async function deleteUser(
       'UPDATE "user" ' +
         'SET email = NULL, normalized_email = NULL, deleted = true ' +
         'WHERE id = $1',
-      [userId],
+      [session.userId],
     );
 
     // Commit the transaction.
