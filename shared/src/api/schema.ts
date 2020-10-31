@@ -62,14 +62,34 @@ export const LogInResponse = Record({
   payload: LogInResponsePayload,
 });
 
-// The general request and response schemas
+// The request and response schema for `logOut`
+
+export const LogOutRequest = Record({
+  type: Literal('LogOutRequest'),
+  payload: Record({
+    sessionId: String,
+  }),
+});
+
+export const LogOutResponse = Record({
+  type: Literal('LogOutResponse'),
+  payload: Unknown,
+});
+
+// The general request and response schemata
 
 // The order of the request types here must match any references to
 // [tag:request_type_union_order].
-export const PostRequest = Union(InviteRequest, SignUpRequest, LogInRequest);
+export const PostRequest = Union(
+  InviteRequest,
+  SignUpRequest,
+  LogInRequest,
+  LogOutRequest,
+);
 
 export const PostResponse = Union(
   InviteResponse,
   SignUpResponse,
   LogInResponse,
+  LogOutResponse,
 );

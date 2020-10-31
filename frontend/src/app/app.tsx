@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import invite from '../api/invite';
 import logIn from '../api/logIn';
+import logOut from '../api/logOut';
 import signUp from '../api/signUp';
 import {
   LogInResponsePayload,
@@ -32,6 +33,7 @@ const App: FunctionComponent<{}> = () => {
     InvitationState.NotSent,
   );
   const [loggedIn, setLoggedIn] = useState(() => getSessionId() !== null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     // This hash in the URL will determine if we need to take any action when the page loads.
@@ -138,10 +140,43 @@ const App: FunctionComponent<{}> = () => {
     }
   };
 
+  const handleLogOutClick = (): void => {
+    if (!loggingOut) {
+      setLoggingOut(true);
+
+      // The `!` is safe because the "Log out" button should only be visible when
+      // we have a session ID.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      logOut({ sessionId: getSessionId()! })
+        .then(() => {
+          setSessionId(null);
+          setLoggedIn(false);
+          setLoggingOut(false);
+        })
+        .catch((e: Error) => {
+          setLoggingOut(false);
+
+          // eslint-disable-next-line no-alert
+          alert(`Something went wrong.\n\n${e.toString()}`);
+        });
+    }
+  };
+
   return (
     <AppContainer>
       {loggedIn ? (
-        <h2>Welcome back</h2>
+        <div>
+          <h2>Welcome back</h2>
+          <p>
+            <button
+              type="button"
+              disabled={loggingOut}
+              onClick={handleLogOutClick}
+            >
+              Log out
+            </button>
+          </p>
+        </div>
       ) : (
         <div>
           <h2>Get started</h2>

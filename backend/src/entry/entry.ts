@@ -3,6 +3,7 @@ import { Static } from 'runtypes';
 
 import invite from '../api/invite';
 import logIn from '../api/logIn';
+import logOut from '../api/logOut';
 import logger from '../logger/logger';
 import signUp from '../api/signUp';
 import { PostRequest, PostResponse } from '../shared/api/schema';
@@ -36,6 +37,10 @@ async function handlePost(request: Request, response: Response): Promise<void> {
       (refinedEnvelope) =>
         logIn(refinedEnvelope.payload).then((responsePayload) => {
           return { type: 'LogInResponse', payload: responsePayload };
+        }),
+      (refinedEnvelope) =>
+        logOut(refinedEnvelope.payload).then((responsePayload) => {
+          return { type: 'LogOutResponse', payload: responsePayload };
         }),
     )(requestEnvelope);
 
