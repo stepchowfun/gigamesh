@@ -31,7 +31,7 @@ export default async function deleteUser(
         refreshedAt: Date;
         userId: string;
       }>(
-        'SELECT create_at AS "createdAt", refreshed_at AS "refreshedAt", user_id AS "userId" ' +
+        'SELECT created_at AS "createdAt", refreshed_at AS "refreshedAt", user_id AS "userId" ' +
           'FROM session ' +
           'WHERE id = $1 ' +
           'LIMIT 1',
