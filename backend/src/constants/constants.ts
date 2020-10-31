@@ -27,3 +27,6 @@ export const emailSender = {
 
 // This is the duration in milliseconds for which a sign up invitation is valid.
 export const signUpInvitationLifespanMs = 1000 * 60 * 10; // 10 minutes
+
+// This is the duration in milliseconds for which a log in invitation is valid.
+export const logInInvitationLifespanMs = 1000 * 60 * 10; // 10 minutes

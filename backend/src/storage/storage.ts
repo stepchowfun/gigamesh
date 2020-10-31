@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { getPostgresSecret } from '../secrets/secrets';
-import { isProduction } from '../shared/environment/environment';
+import isProduction from '../shared/environment/environment';
 import {
   databaseHostDevelopment,
   databaseHostProduction,

@@ -1,4 +1,4 @@
-import { isProduction } from './environment';
+import isProduction from './environment';
 
 describe('environment', () => {
   it('isProduction() returns false', () => {
