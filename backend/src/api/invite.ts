@@ -1,6 +1,6 @@
 import { Static } from 'runtypes';
 import { InviteRequest, InviteResponse } from '../shared/api/schema';
-import getPool from '../storage/storage';
+import { getPool } from '../storage/storage';
 import send from '../email/email';
 
 export default async function invite(

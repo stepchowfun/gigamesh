@@ -14,7 +14,7 @@ import {
 
 let pool: Pool | null = null;
 
-export default async function getPool(): Promise<Pool> {
+export async function getPool(): Promise<Pool> {
   if (pool === null) {
     if (isProduction()) {
       pool = new Pool({
@@ -36,4 +36,8 @@ export default async function getPool(): Promise<Pool> {
   }
 
   return pool;
+}
+
+export const enum ErrorCode {
+  UniquenessViolation = '23505',
 }
