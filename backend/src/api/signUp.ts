@@ -51,7 +51,7 @@ export default async function signUp(
     // Warning: TypeScript considers `e` to have type `any`, even though
     // `unknown` would have been more appropriate.
     if (e.code === ErrorCode.UniquenessViolation) {
-      return { type: 'UserAlreadyExists' };
+      return { type: 'InvitationExpiredOrInvalid' };
     }
 
     throw e;
