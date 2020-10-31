@@ -24,7 +24,7 @@ export default async function invite(
   // Is the user missing?
   if (matchingUsers.length === 0) {
     // The user doesn't exist yet. Create an invitation to sign up.
-    const invitationId = (
+    const signUpInvitationId = (
       await pool.query<{ id: string }>(
         'INSERT INTO sign_up_invitation (email, normalized_email) ' +
           'VALUES ($1, $2) ' +
@@ -34,7 +34,7 @@ export default async function invite(
     ).rows[0].id;
 
     // Construct the sign up link.
-    const signUpLink = `https://www.gigamesh.io/#sign-up-${invitationId}`;
+    const signUpLink = `https://www.gigamesh.io/#sign-up-${signUpInvitationId}`;
 
     // Send the invitation to the user.
     await send({
@@ -48,7 +48,7 @@ export default async function invite(
     const userId = matchingUsers[0].id;
 
     // Create an invitation to log in.
-    const invitationId = (
+    const signUpInvitationId = (
       await pool.query<{ id: string }>(
         'INSERT INTO log_in_invitation (user_id) ' +
           'VALUES ($1) ' +
@@ -58,7 +58,7 @@ export default async function invite(
     ).rows[0].id;
 
     // Construct the sign up link.
-    const logInLink = `https://www.gigamesh.io/#log-in-${invitationId}`;
+    const logInLink = `https://www.gigamesh.io/#log-in-${signUpInvitationId}`;
 
     // Send the invitation to the user.
     await send({

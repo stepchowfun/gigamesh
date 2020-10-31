@@ -19,14 +19,14 @@ export const InviteResponse = Record({
 export const SignUpRequest = Record({
   type: Literal('SignUpRequest'),
   payload: Record({
-    signUpToken: String,
+    signUpInvitationId: String,
   }),
 });
 
 export const SignUpResponse = Record({
   type: Literal('SignUpResponse'),
   payload: Record({
-    sessionToken: String,
+    sessionId: String,
   }),
 });
 
