@@ -22,7 +22,7 @@ export default async function invite(
   // Query for the user, if it exists.
   const matchingUsers = (
     await pool.query<{ id: string }>(
-      'SELECT id FROM "user" WHERE normalized_email = $1',
+      'SELECT id FROM "user" WHERE normalized_email = $1 LIMIT 1',
       [normalizedEmail],
     )
   ).rows;

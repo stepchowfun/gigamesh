@@ -27,11 +27,23 @@ export default async function logIn(
   }
   const invitation = invitations[0];
 
-  // Check if the invitation has expired.
+  // Make sure the invitation hasn't expired.
   if (
     invitation.createdAt.valueOf() + logInInvitationLifespanMs <=
     Date.now()
   ) {
+    return { type: 'InvitationExpiredOrInvalid' };
+  }
+
+  // Fetch the user.
+  const user = (
+    await pool.query<{
+      deleted: boolean;
+    }>('SELECT deleted FROM "user" WHERE id = $1 LIMIT 1', [invitation.userId])
+  ).rows[0];
+
+  // Make sure the user exists.
+  if (user.deleted) {
     return { type: 'InvitationExpiredOrInvalid' };
   }
 

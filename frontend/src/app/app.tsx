@@ -1,11 +1,13 @@
 import React, { FunctionComponent, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import deleteUser from '../api/deleteUser';
 import invite from '../api/invite';
 import logIn from '../api/logIn';
 import logOut from '../api/logOut';
 import signUp from '../api/signUp';
 import {
+  DeleteUserResponsePayload,
   LogInResponsePayload,
   SignUpResponsePayload,
 } from '../shared/api/schema';
@@ -34,6 +36,7 @@ const App: FunctionComponent<{}> = () => {
   );
   const [loggedIn, setLoggedIn] = useState(() => getSessionId() !== null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(false);
 
   useEffect(() => {
     // This hash in the URL will determine if we need to take any action when the page loads.
@@ -151,13 +154,45 @@ const App: FunctionComponent<{}> = () => {
         .then(() => {
           setSessionId(null);
           setLoggedIn(false);
-          setLoggingOut(false);
         })
         .catch((e: Error) => {
-          setLoggingOut(false);
-
           // eslint-disable-next-line no-alert
           alert(`Something went wrong.\n\n${e.toString()}`);
+        })
+        .finally(() => {
+          setLoggingOut(false);
+        });
+    }
+  };
+
+  const handleDeleteUserClick = (): void => {
+    if (!loggingOut) {
+      setDeletingUser(true);
+
+      // The `!` is safe because the "Delete account" button should only be
+      // visible when we have a session ID.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      deleteUser({ sessionId: getSessionId()! })
+        .then((payload) => {
+          DeleteUserResponsePayload.match(
+            () => {
+              // The deletion was successful.
+            },
+            () => {
+              // eslint-disable-next-line no-alert
+              alert('You are not logged in. Please log in and try again.');
+            },
+          )(payload);
+
+          setSessionId(null);
+          setLoggedIn(false);
+        })
+        .catch((e: Error) => {
+          // eslint-disable-next-line no-alert
+          alert(`Something went wrong.\n\n${e.toString()}`);
+        })
+        .finally(() => {
+          setDeletingUser(false);
         });
     }
   };
@@ -174,6 +209,13 @@ const App: FunctionComponent<{}> = () => {
               onClick={handleLogOutClick}
             >
               Log out
+            </button>{' '}
+            <button
+              type="button"
+              disabled={deletingUser}
+              onClick={handleDeleteUserClick}
+            >
+              Delete account
             </button>
           </p>
         </div>
