@@ -3,7 +3,10 @@ import { Static } from 'runtypes';
 import send from '../email/email';
 import { InviteRequest, InviteResponse } from '../shared/api/schema';
 import { getPool } from '../storage/storage';
-import { logInHashPrefix } from '../shared/constants/constants';
+import {
+  logInHashPrefix,
+  signUpHashPrefix,
+} from '../shared/constants/constants';
 
 export default async function invite(
   payload: Static<typeof InviteRequest>['payload'],
@@ -36,7 +39,7 @@ export default async function invite(
     ).rows[0].id;
 
     // Construct the sign up link.
-    const signUpLink = `https://www.gigamesh.io/#sign-up-${signUpInvitationId}`;
+    const signUpLink = `https://www.gigamesh.io/${signUpHashPrefix}${signUpInvitationId}`;
 
     // Send the invitation to the user.
     await send({
@@ -50,7 +53,7 @@ export default async function invite(
     const userId = matchingUsers[0].id;
 
     // Create an invitation to log in.
-    const signUpInvitationId = (
+    const logInInvitationId = (
       await pool.query<{ id: string }>(
         'INSERT INTO log_in_invitation (user_id) ' +
           'VALUES ($1) ' +
@@ -59,8 +62,8 @@ export default async function invite(
       )
     ).rows[0].id;
 
-    // Construct the sign up link.
-    const logInLink = `https://www.gigamesh.io/${logInHashPrefix}${signUpInvitationId}`;
+    // Construct the log in link.
+    const logInLink = `https://www.gigamesh.io/${logInHashPrefix}${logInInvitationId}`;
 
     // Send the invitation to the user.
     await send({

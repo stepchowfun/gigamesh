@@ -3,9 +3,16 @@ import styled from 'styled-components';
 
 import invite from '../api/invite';
 import logIn from '../api/logIn';
-import { LogInResponsePayload } from '../shared/api/schema';
+import signUp from '../api/signUp';
+import {
+  LogInResponsePayload,
+  SignUpResponsePayload,
+} from '../shared/api/schema';
 import { getSessionId, setSessionId } from '../storage/storage';
-import { logInHashPrefix } from '../shared/constants/constants';
+import {
+  logInHashPrefix,
+  signUpHashPrefix,
+} from '../shared/constants/constants';
 
 enum InvitationState {
   NotSent,
@@ -56,17 +63,55 @@ const App: FunctionComponent<{}> = () => {
     }
   };
 
-  // Check if the user has followed a login link.
+  // This hash in the URL will determine if we need to take any action when the page loads.
   const { hash } = window.location;
+
+  // Check if the user has followed a signup link.
+  if (hash.startsWith(signUpHashPrefix)) {
+    // Extract the log in invitation ID.
+    const signUpInvitationId = hash.substring(signUpHashPrefix.length);
+
+    // Remove the sign up invitation ID from the URL because:
+    // - If the user refreshes the page, we don't want to try to sign up again.
+    //   That wouldn't work anyway, since signup invitations are only valid for
+    //   a single use.
+    // - It's secret (until it's used, which will happen immediately).
+    // - It's ugly.
+    window.history.replaceState(null, '', '/');
+
+    // Sign up.
+    signUp({ signUpInvitationId })
+      .then((payload) => {
+        SignUpResponsePayload.match(
+          (refinedPayload) => {
+            setSessionId(refinedPayload.sessionId);
+            setLoggedIn(true);
+          },
+          () => {
+            // eslint-disable-next-line no-alert
+            alert(
+              'Unfortunately that signup link has expired. Please sign up again.',
+            );
+          },
+        )(payload);
+      })
+      .catch((e: Error) => {
+        // eslint-disable-next-line no-alert
+        alert(`Something went wrong.\n\n${e.toString()}`);
+      });
+  }
+
+  // Check if the user has followed a login link.
   if (hash.startsWith(logInHashPrefix)) {
     // Extract the log in invitation ID.
     const logInInvitationId = hash.substring(logInHashPrefix.length);
 
     // Remove the log in invitation ID from the URL because:
-    // - It's secret.
     // - If the user refreshes the page, we don't want to try to log in again.
     //   That wouldn't work anyway, since log in invitations are only valid for
     //   a single use.
+    // - It's secret (until it's used, which will happen immediately).
+    // - It's ugly.
     window.history.replaceState(null, '', '/');
 
     // Log in.

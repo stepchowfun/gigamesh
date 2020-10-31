@@ -23,20 +23,19 @@ export const SignUpRequest = Record({
   }),
 });
 
+export const SignUpResponsePayload = Union(
+  Record({
+    type: Literal('Success'),
+    sessionId: String,
+  }),
+  Record({
+    type: Literal('InvitationExpiredOrInvalid'),
+  }),
+);
+
 export const SignUpResponse = Record({
   type: Literal('SignUpResponse'),
-  payload: Union(
-    Record({
-      type: Literal('Success'),
-      sessionId: String,
-    }),
-    Record({
-      type: Literal('InvitationExpiredOrInvalid'),
-    }),
-    Record({
-      type: Literal('UserAlreadyExists'),
-    }),
-  ),
+  payload: SignUpResponsePayload,
 });
 
 // The request and response schema for `logIn`
