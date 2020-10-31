@@ -27,7 +27,7 @@ export const SignUpResponse = Record({
   type: Literal('SignUpResponse'),
   payload: Union(
     Record({
-      type: Literal('SignUpSuccessful'),
+      type: Literal('Success'),
       sessionId: String,
     }),
     Record({
@@ -39,8 +39,36 @@ export const SignUpResponse = Record({
   ),
 });
 
+// The request and response schema for `logIn`
+
+export const LogInRequest = Record({
+  type: Literal('LogInRequest'),
+  payload: Record({
+    logInInvitationId: String,
+  }),
+});
+
+export const LogInResponse = Record({
+  type: Literal('LogInResponse'),
+  payload: Union(
+    Record({
+      type: Literal('Success'),
+      sessionId: String,
+    }),
+    Record({
+      type: Literal('InvitationExpiredOrInvalid'),
+    }),
+  ),
+});
+
 // The general request and response schemas
 
-export const PostRequest = Union(InviteRequest, SignUpRequest);
+// The order of the request types here must match any references to
+// [tag:request_type_union_order].
+export const PostRequest = Union(InviteRequest, SignUpRequest, LogInRequest);
 
-export const PostResponse = Union(InviteResponse, SignUpResponse);
+export const PostResponse = Union(
+  InviteResponse,
+  SignUpResponse,
+  LogInResponse,
+);

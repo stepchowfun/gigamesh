@@ -1,11 +1,12 @@
 import express, { Request, Response } from 'express';
 import { Static } from 'runtypes';
 import invite from '../api/invite';
+import logIn from '../api/logIn';
 import logger from '../logger/logger';
 import signUp from '../api/signUp';
 import { PostRequest, PostResponse } from '../shared/api/schema';
 import { originDevelopment, originProduction } from '../constants/constants';
-import { isProduction } from '../shared/environment/environment';
+import isProduction from '../shared/environment/environment';
 
 async function handlePost(request: Request, response: Response): Promise<void> {
   response.set(
@@ -21,6 +22,8 @@ async function handlePost(request: Request, response: Response): Promise<void> {
     const apiResponse = await PostRequest.match<
       Promise<Static<typeof PostResponse>>
     >(
+      // The functions here must be in the same order as
+      // [ref:request_type_union_order].
       (refinedEnvelope) =>
         invite(refinedEnvelope.payload).then((responsePayload) => {
           return { type: 'InviteResponse', payload: responsePayload };
@@ -28,6 +31,10 @@ async function handlePost(request: Request, response: Response): Promise<void> {
       (refinedEnvelope) =>
         signUp(refinedEnvelope.payload).then((responsePayload) => {
           return { type: 'SignUpResponse', payload: responsePayload };
+        }),
+      (refinedEnvelope) =>
+        logIn(refinedEnvelope.payload).then((responsePayload) => {
+          return { type: 'LogInResponse', payload: responsePayload };
         }),
     )(requestEnvelope);
 

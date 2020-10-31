@@ -9,16 +9,16 @@ export default async function signUp(
   // Get the database connection pool.
   const pool = await getPool();
 
-  // Query for the invitation.
+  // Fetch and delete the invitation.
   const invitations = (
     await pool.query<{
       createdAt: Date;
       email: string;
       normalizedEmail: string;
     }>(
-      'SELECT created_at AS "createdAt", email, normalized_email AS "normalizedEmail" ' +
-        'FROM sign_up_invitation ' +
-        'WHERE id = $1',
+      'DELETE FROM sign_up_invitation ' +
+        'WHERE id = $1 ' +
+        'RETURNING created_at AS "createdAt", email, normalized_email AS "normalizedEmail" ',
       [payload.signUpInvitationId],
     )
   ).rows;
@@ -63,5 +63,5 @@ export default async function signUp(
   ).rows[0].id;
 
   // Return the session token to the client.
-  return { type: 'SignUpSuccessful', sessionId };
+  return { type: 'Success', sessionId };
 }

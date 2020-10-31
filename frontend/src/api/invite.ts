@@ -5,7 +5,7 @@ import {
   cloudFunctionsBaseUrlDevelopment,
   cloudFunctionsBaseUrlProduction,
 } from '../constants/constants';
-import { isProduction } from '../shared/environment/environment';
+import isProduction from '../shared/environment/environment';
 
 export default async function invite(
   payload: Static<typeof InviteRequest>['payload'],

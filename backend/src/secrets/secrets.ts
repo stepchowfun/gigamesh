@@ -1,6 +1,6 @@
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
-import { isProduction } from '../shared/environment/environment';
 import { postgresSecretName, sendgridSecretName } from '../constants/constants';
+import isProduction from '../shared/environment/environment';
 
 // Create a secret manager once rather than in every request.
 const secretManager = new SecretManagerServiceClient();
