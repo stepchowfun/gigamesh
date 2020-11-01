@@ -24,7 +24,7 @@ enum InvitationState {
 }
 
 const AppContainer = styled.div`
-  width: 320px;
+  width: 480px;
   margin: 64px auto;
   color: #333333;
 `;
@@ -122,10 +122,8 @@ const App: FunctionComponent<{}> = () => {
     setEmail(event.target.value);
   };
 
-  const handleEmailKeyDown = (
-    event: React.KeyboardEvent<HTMLInputElement>,
-  ): void => {
-    if (invitationState === InvitationState.NotSent && event.key === 'Enter') {
+  const handleEmailSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+    if (invitationState === InvitationState.NotSent) {
       event.preventDefault();
 
       setInvitationState(InvitationState.Sending);
@@ -222,21 +220,28 @@ const App: FunctionComponent<{}> = () => {
         </div>
       ) : (
         <div>
-          <h2>Get started</h2>
+          <h2>Hello there</h2>
           {invitationState !== InvitationState.Sent ? (
-            <label>
-              Email:{' '}
-              <input
-                type="email"
-                autoComplete="email"
-                placeholder="sophie@example.com"
-                value={email}
-                onChange={handleEmailChange}
-                onKeyDown={handleEmailKeyDown}
-                readOnly={invitationState !== InvitationState.NotSent}
-                required
-              />
-            </label>
+            <form onSubmit={handleEmailSubmit}>
+              <label>
+                Email:{' '}
+                <input
+                  type="email"
+                  autoComplete="email"
+                  placeholder="sophie@example.com"
+                  value={email}
+                  onChange={handleEmailChange}
+                  readOnly={invitationState !== InvitationState.NotSent}
+                  required
+                />
+              </label>{' '}
+              <button
+                type="submit"
+                disabled={invitationState !== InvitationState.NotSent}
+              >
+                Get started
+              </button>
+            </form>
           ) : (
             <p>Check your email!</p>
           )}
