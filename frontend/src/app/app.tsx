@@ -35,8 +35,9 @@ const App: FunctionComponent<{}> = () => {
     InvitationState.NotSent,
   );
   const [loggedIn, setLoggedIn] = useState(() => getSessionId() !== null);
-  const [loggingOut, setLoggingOut] = useState(false);
-  const [deletingUser, setDeletingUser] = useState(false);
+  const [loggingOutOrDeletingUser, setLoggingOutOrDeletingUser] = useState(
+    false,
+  );
 
   useEffect(() => {
     // This hash in the URL will determine if we need to take any action when the page loads.
@@ -144,8 +145,8 @@ const App: FunctionComponent<{}> = () => {
   };
 
   const handleLogOutClick = (): void => {
-    if (!loggingOut) {
-      setLoggingOut(true);
+    if (!loggingOutOrDeletingUser) {
+      setLoggingOutOrDeletingUser(true);
 
       // The `!` is safe because the "Log out" button should only be visible when
       // we have a session ID.
@@ -160,14 +161,14 @@ const App: FunctionComponent<{}> = () => {
           alert(`Something went wrong.\n\n${e.toString()}`);
         })
         .finally(() => {
-          setLoggingOut(false);
+          setLoggingOutOrDeletingUser(false);
         });
     }
   };
 
   const handleDeleteUserClick = (): void => {
-    if (!loggingOut) {
-      setDeletingUser(true);
+    if (!loggingOutOrDeletingUser) {
+      setLoggingOutOrDeletingUser(true);
 
       // The `!` is safe because the "Delete account" button should only be
       // visible when we have a session ID.
@@ -192,7 +193,7 @@ const App: FunctionComponent<{}> = () => {
           alert(`Something went wrong.\n\n${e.toString()}`);
         })
         .finally(() => {
-          setDeletingUser(false);
+          setLoggingOutOrDeletingUser(false);
         });
     }
   };
@@ -205,14 +206,14 @@ const App: FunctionComponent<{}> = () => {
           <p>
             <button
               type="button"
-              disabled={loggingOut}
+              disabled={loggingOutOrDeletingUser}
               onClick={handleLogOutClick}
             >
               Log out
             </button>{' '}
             <button
               type="button"
-              disabled={deletingUser}
+              disabled={loggingOutOrDeletingUser}
               onClick={handleDeleteUserClick}
             >
               Delete account
