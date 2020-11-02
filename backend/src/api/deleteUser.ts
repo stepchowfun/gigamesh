@@ -1,7 +1,8 @@
 import { Static } from 'runtypes';
 
 import { DeleteUserRequest, DeleteUserResponse } from '../shared/api/schema';
-import { getPool, sessionIdToUserId } from '../storage/storage';
+import { getPool } from '../storage/storage';
+import validateSession from '../session/session';
 
 export default async function deleteUser(
   payload: Static<typeof DeleteUserRequest>['payload'],
@@ -12,16 +13,11 @@ export default async function deleteUser(
   // Fetch a client from the pool.
   const client = await pool.connect();
 
-  // Wrap everything in a try/catch/finally block so we can roll back the
-  // transaction if needed and release the client back to the pool.
+  // Wrap everything in a try/finally block to ensure the client is released in
+  // the end.
   try {
-    // Start the transaction. The motivation for the transaction is to ensure
-    // that the user being (fake) deleted and the `previous_user_email` row
-    // being created both happen or neither happens at all.
-    await client.query('BEGIN');
-
     // Fetch the user ID.
-    const userId = await sessionIdToUserId(payload.sessionId, pool);
+    const userId = await validateSession(payload.sessionId, client);
     if (userId === null) {
       return { type: 'NotLoggedIn' };
     }
@@ -49,29 +45,36 @@ export default async function deleteUser(
       )
     ).rows[0];
 
-    // Create a record of the user's email.
-    await client.query<{}>(
-      'INSERT INTO previous_user_email (user_id, email, normalized_email) ' +
-        'VALUES ($1, $2, $3)',
-      [userId, user.email, user.normalizedEmail],
-    );
+    // The next two operations should happen together or not at all, so we wrap
+    // them in a transaction.
+    try {
+      // Start the transaction.
+      await client.query('BEGIN');
 
-    // Mark the user as deleted.
-    await client.query<{}>(
-      'UPDATE "user" ' +
-        'SET email = NULL, normalized_email = NULL, deleted = true ' +
-        'WHERE id = $1',
-      [userId],
-    );
+      // Create a record of the user's email.
+      await client.query<{}>(
+        'INSERT INTO previous_user_email (user_id, email, normalized_email) ' +
+          'VALUES ($1, $2, $3)',
+        [userId, user.email, user.normalizedEmail],
+      );
 
-    // Commit the transaction.
-    await client.query('COMMIT');
-  } catch (e) {
-    // Something went wrong. Roll back the transaction and rethrow the error.
-    await client.query('ROLLBACK');
-    throw e;
+      // Mark the user as deleted.
+      await client.query<{}>(
+        'UPDATE "user" ' +
+          'SET email = NULL, normalized_email = NULL, deleted = true ' +
+          'WHERE id = $1',
+        [userId],
+      );
+
+      // Commit the transaction.
+      await client.query('COMMIT');
+    } catch (e) {
+      // Something went wrong. Roll back the transaction and rethrow the error.
+      await client.query('ROLLBACK');
+      throw e;
+    }
   } finally {
-    // Release the client back to the pool no matter what.
+    // Release the client back to the pool.
     client.release();
   }
 
