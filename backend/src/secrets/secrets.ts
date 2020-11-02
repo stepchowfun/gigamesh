@@ -3,6 +3,18 @@ import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 import { isProduction } from '../shared/constants/constants';
 import { postgresSecretName, sendgridSecretName } from '../constants/constants';
 
+// These API fields are scrubbed from logs.
+export const secretFields = [
+  'logInInvitationId',
+  'sessionId',
+  'signUpInvitationId',
+];
+
+// These environment variables provide the secrets in development mode.
+// [tag:secret_names_development]
+const postgresSecretNameDevelopment = 'POSTGRES_SECRET';
+const sendgridSecretNameDevelopment = 'SENDGRID_SECRET';
+
 // Create a secret manager once rather than in every request.
 const secretManager = new SecretManagerServiceClient();
 
@@ -49,11 +61,9 @@ async function readSecret(
 }
 
 export async function getPostgresSecret(): Promise<string> {
-  // [tag:POSTGRES_SECRET]
-  return readSecret(postgresSecretName, 'POSTGRES_SECRET');
+  return readSecret(postgresSecretName, postgresSecretNameDevelopment);
 }
 
 export async function getSendgridSecret(): Promise<string> {
-  // [tag:SENDGRID_SECRET]
-  return readSecret(sendgridSecretName, 'SENDGRID_SECRET');
+  return readSecret(sendgridSecretName, sendgridSecretNameDevelopment);
 }

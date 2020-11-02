@@ -2,7 +2,7 @@ import _ from 'lodash';
 import traverse from 'traverse';
 import { createLogger, format, transports } from 'winston';
 
-const secretFields = ['logInInvitationId', 'sessionId', 'signUpInvitationId'];
+import { secretFields } from '../secrets/secrets';
 
 const redactedValue = '[REDACTED]';
 
