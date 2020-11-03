@@ -10,7 +10,7 @@ export default async function logOut(
   const pool = await getPool();
 
   // Delete the session if it exists.
-  await pool.query<{}>('DELETE FROM session WHERE id = $1 ', [
+  await pool.query<{}>('DELETE FROM session WHERE id = $1', [
     payload.sessionId,
   ]);
 

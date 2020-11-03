@@ -42,14 +42,25 @@ export default async function deleteUser(
           id: string;
           email: string;
           normalizedEmail: string;
+          deleted: boolean;
         }>(
-          'SELECT id, email, normalized_email as "normalizedEmail" ' +
+          'SELECT id, email, normalized_email as "normalizedEmail", deleted ' +
             'FROM "user" ' +
             'WHERE id = $1 ' +
-            'LIMIT 1',
+            'LIMIT 1 ' +
+            'FOR UPDATE',
           [userId],
         )
       ).rows[0];
+
+      // Make sure the user hasn't already been deleted. The `validateSession`
+      // call above already performed this check, but we do it again here while
+      // the user row is locked to prevent multiple deletions of the same user
+      // (which would result in duplicate rows being inserted into the
+      // `previous_user_email` table).
+      if (user.deleted) {
+        return { type: 'NotLoggedIn' };
+      }
 
       // Create a record of the user's email.
       await client.query<{}>(

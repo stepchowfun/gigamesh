@@ -72,7 +72,8 @@ export default async function changeEmail(
           'SELECT id, email, normalized_email as "normalizedEmail" ' +
             'FROM "user" ' +
             'WHERE id = $1 ' +
-            'LIMIT 1',
+            'LIMIT 1 ' +
+            'FOR UPDATE',
           [userId],
         )
       ).rows[0];
