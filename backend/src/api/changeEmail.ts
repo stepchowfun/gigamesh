@@ -2,7 +2,7 @@ import { Static } from 'runtypes';
 
 import validateSession from '../session/session';
 import { ChangeEmailRequest, ChangeEmailResponse } from '../shared/api/schema';
-import { changeEmailinvitationLifespanSinceActiveMs } from '../constants/constants';
+import { changeEmailInvitationLifespanMs } from '../constants/constants';
 import { getPool } from '../storage/storage';
 import { normalizeEmail } from '../email/email';
 
@@ -44,8 +44,7 @@ export default async function changeEmail(
 
     // Make sure the invitation hasn't expired.
     if (
-      invitation.createdAt.valueOf() +
-        changeEmailinvitationLifespanSinceActiveMs <=
+      invitation.createdAt.valueOf() + changeEmailInvitationLifespanMs <=
       Date.now()
     ) {
       return { type: 'InvitationExpiredOrInvalid' };
