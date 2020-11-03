@@ -1,6 +1,5 @@
 import { Static } from 'runtypes';
 
-import send from '../email/email';
 import { InviteRequest, InviteResponse } from '../shared/api/schema';
 import { getPool } from '../storage/storage';
 import { origin } from '../constants/constants';
@@ -8,22 +7,22 @@ import {
   logInHashPrefix,
   signUpHashPrefix,
 } from '../shared/constants/constants';
+import { normalizeEmail, send } from '../email/email';
 
 export default async function invite(
   payload: Static<typeof InviteRequest>['payload'],
 ): Promise<Static<typeof InviteResponse>['payload']> {
+  // Always trim user-provided input.
+  const trimmedEmail = payload.email.trim();
+
   // Get the database connection pool.
   const pool = await getPool();
-
-  // Normalize the email.
-  const trimmedEmail = payload.email.trim();
-  const normalizedEmail = trimmedEmail.toLowerCase().normalize('NFC');
 
   // Query for the user, if it exists.
   const matchingUsers = (
     await pool.query<{ id: string }>(
       'SELECT id FROM "user" WHERE normalized_email = $1 LIMIT 1',
-      [normalizedEmail],
+      [normalizeEmail(trimmedEmail)],
     )
   ).rows;
 
@@ -32,10 +31,8 @@ export default async function invite(
     // The user doesn't exist yet. Create an invitation to sign up.
     const signUpInvitationId = (
       await pool.query<{ id: string }>(
-        'INSERT INTO sign_up_invitation (email, normalized_email) ' +
-          'VALUES ($1, $2) ' +
-          'RETURNING id;',
-        [trimmedEmail, normalizedEmail],
+        'INSERT INTO sign_up_invitation (email) VALUES ($1) RETURNING id;',
+        [trimmedEmail],
       )
     ).rows[0].id;
 

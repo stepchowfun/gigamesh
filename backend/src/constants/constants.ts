@@ -62,3 +62,8 @@ export const sessionLifespanSinceCreationMs = 1000 * 60 * 60 * 24 * 90; // 90 da
 // This is the maximum duration in milliseconds for which a session is valid
 // since it was active.
 export const sessionLifespanSinceActiveMs = 1000 * 60 * 60 * 24 * 7; // 7 days
+
+// This is the maximum duration in milliseconds for which an change email
+// request is valid since it was active.
+export const changeEmailinvitationLifespanSinceActiveMs =
+  1000 * 60 * 60 * 24 * 7; // 7 days

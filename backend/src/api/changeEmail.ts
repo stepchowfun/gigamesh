@@ -1,12 +1,14 @@
 import { Static } from 'runtypes';
 
 import validateSession from '../session/session';
-import { DeleteUserRequest, DeleteUserResponse } from '../shared/api/schema';
+import { ChangeEmailRequest, ChangeEmailResponse } from '../shared/api/schema';
+import { changeEmailinvitationLifespanSinceActiveMs } from '../constants/constants';
 import { getPool } from '../storage/storage';
+import { normalizeEmail } from '../email/email';
 
-export default async function deleteUser(
-  payload: Static<typeof DeleteUserRequest>['payload'],
-): Promise<Static<typeof DeleteUserResponse>['payload']> {
+export default async function changeEmail(
+  payload: Static<typeof ChangeEmailRequest>['payload'],
+): Promise<Static<typeof ChangeEmailResponse>['payload']> {
   // Get the database connection pool.
   const pool = await getPool();
 
@@ -22,13 +24,37 @@ export default async function deleteUser(
       return { type: 'NotLoggedIn' };
     }
 
-    // Delete any sessions for the user.
-    await client.query<{}>('DELETE FROM session WHERE user_id = $1', [userId]);
+    // Fetch and delete the invitation.
+    const invitations = (
+      await client.query<{
+        createdAt: Date;
+        userId: string;
+        newEmail: string;
+      }>(
+        'DELETE FROM change_email_invitation ' +
+          'WHERE id = $1 ' +
+          'RETURNING created_at AS "createdAt", user_id AS "userId", new_email AS "newEmail"',
+        [payload.changeEmailInvitationId],
+      )
+    ).rows;
+    if (invitations.length === 0) {
+      return { type: 'InvitationExpiredOrInvalid' };
+    }
+    const invitation = invitations[0];
 
-    // Delete any log in invitations for the user.
-    await client.query<{}>('DELETE FROM log_in_invitation WHERE user_id = $1', [
-      userId,
-    ]);
+    // Make sure the invitation hasn't expired.
+    if (
+      invitation.createdAt.valueOf() +
+        changeEmailinvitationLifespanSinceActiveMs <=
+      Date.now()
+    ) {
+      return { type: 'InvitationExpiredOrInvalid' };
+    }
+
+    // Make sure the invitation is for this user.
+    if (userId !== invitation.userId) {
+      return { type: 'InvitationExpiredOrInvalid' };
+    }
 
     // The following operations should happen together or not at all, so we
     // wrap them in a transaction.
@@ -58,12 +84,10 @@ export default async function deleteUser(
         [userId, user.email, user.normalizedEmail],
       );
 
-      // Mark the user as deleted.
+      // Update the user's email.
       await client.query<{}>(
-        'UPDATE "user" ' +
-          'SET email = NULL, normalized_email = NULL, deleted = true ' +
-          'WHERE id = $1',
-        [userId],
+        'UPDATE "user" SET email = $1, normalized_email = $2 WHERE id = $3',
+        [invitation.newEmail, normalizeEmail(invitation.newEmail), userId],
       );
 
       // Commit the transaction.
@@ -78,6 +102,6 @@ export default async function deleteUser(
     client.release();
   }
 
-  // If we made it this far, the deletion was successful.
+  // If we made it this far, the email has been changed.
   return { type: 'Success' };
 }

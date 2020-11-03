@@ -5,3 +5,5 @@ export function isProduction(): boolean {
 export const logInHashPrefix = '#log-in-';
 
 export const signUpHashPrefix = '#sign-up-';
+
+export const changeEmailHashPrefix = '#change-email-';
