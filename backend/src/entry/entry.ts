@@ -1,11 +1,13 @@
 import express, { Request, Response } from 'express';
 import { Static } from 'runtypes';
 
+import changeEmail from '../api/changeEmail';
 import deleteUser from '../api/deleteUser';
 import invite from '../api/invite';
 import logIn from '../api/logIn';
 import logOut from '../api/logOut';
 import logger from '../logger/logger';
+import requestChangeEmail from '../api/requestChangeEmail';
 import signUp from '../api/signUp';
 import { PostRequest, PostResponse } from '../shared/api/schema';
 import { origin } from '../constants/constants';
@@ -46,6 +48,17 @@ async function handlePost(request: Request, response: Response): Promise<void> {
       (refinedEnvelope) =>
         deleteUser(refinedEnvelope.payload).then((responsePayload) => {
           return { type: 'DeleteUserResponse', payload: responsePayload };
+        }),
+      (refinedEnvelope) =>
+        requestChangeEmail(refinedEnvelope.payload).then((responsePayload) => {
+          return {
+            type: 'RequestChangeEmailResponse',
+            payload: responsePayload,
+          };
+        }),
+      (refinedEnvelope) =>
+        changeEmail(refinedEnvelope.payload).then((responsePayload) => {
+          return { type: 'ChangeEmailResponse', payload: responsePayload };
         }),
     )(requestEnvelope);
 

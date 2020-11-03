@@ -2,6 +2,7 @@ import { Static } from 'runtypes';
 
 import { ErrorCode, getPool } from '../storage/storage';
 import { SignUpRequest, SignUpResponse } from '../shared/api/schema';
+import { normalizeEmail } from '../email/email';
 import { signUpInvitationLifespanMs } from '../constants/constants';
 
 export default async function signUp(
@@ -15,11 +16,10 @@ export default async function signUp(
     await pool.query<{
       createdAt: Date;
       email: string;
-      normalizedEmail: string;
     }>(
       'DELETE FROM sign_up_invitation ' +
         'WHERE id = $1 ' +
-        'RETURNING created_at AS "createdAt", email, normalized_email AS "normalizedEmail" ',
+        'RETURNING created_at AS "createdAt", email',
       [payload.signUpInvitationId],
     )
   ).rows;
@@ -44,7 +44,7 @@ export default async function signUp(
         'INSERT INTO "user" (email, normalized_email) ' +
           'VALUES ($1, $2) ' +
           'RETURNING id;',
-        [invitation.email, invitation.normalizedEmail],
+        [invitation.email, normalizeEmail(invitation.email)],
       )
     ).rows[0].id;
   } catch (e) {

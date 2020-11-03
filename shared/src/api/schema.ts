@@ -78,6 +78,13 @@ export const LogOutResponse = Record({
 
 // The request and response schema for `deleteUser`
 
+export const DeleteUserRequest = Record({
+  type: Literal('DeleteUserRequest'),
+  payload: Record({
+    sessionId: String,
+  }),
+});
+
 export const DeleteUserResponsePayload = Union(
   Record({
     type: Literal('Success'),
@@ -87,16 +94,60 @@ export const DeleteUserResponsePayload = Union(
   }),
 );
 
-export const DeleteUserRequest = Record({
-  type: Literal('DeleteUserRequest'),
-  payload: Record({
-    sessionId: String,
-  }),
-});
-
 export const DeleteUserResponse = Record({
   type: Literal('DeleteUserResponse'),
   payload: DeleteUserResponsePayload,
+});
+
+// The request and response schema for `requestChangeEmail`
+
+export const RequestChangeEmailRequest = Record({
+  type: Literal('RequestChangeEmailRequest'),
+  payload: Record({
+    sessionId: String,
+    newEmail: String,
+  }),
+});
+
+export const RequestChangeEmailResponsePayload = Union(
+  Record({
+    type: Literal('Success'),
+  }),
+  Record({
+    type: Literal('NotLoggedIn'),
+  }),
+);
+
+export const RequestChangeEmailResponse = Record({
+  type: Literal('RequestChangeEmailResponse'),
+  payload: RequestChangeEmailResponsePayload,
+});
+
+// The request and response schema for `changeEmail`
+
+export const ChangeEmailRequest = Record({
+  type: Literal('ChangeEmailRequest'),
+  payload: Record({
+    sessionId: String,
+    changeEmailInvitationId: String,
+  }),
+});
+
+export const ChangeEmailResponsePayload = Union(
+  Record({
+    type: Literal('Success'),
+  }),
+  Record({
+    type: Literal('NotLoggedIn'),
+  }),
+  Record({
+    type: Literal('InvitationExpiredOrInvalid'),
+  }),
+);
+
+export const ChangeEmailResponse = Record({
+  type: Literal('ChangeEmailResponse'),
+  payload: ChangeEmailResponsePayload,
 });
 
 // The general request and response schemata
@@ -109,6 +160,8 @@ export const PostRequest = Union(
   LogInRequest,
   LogOutRequest,
   DeleteUserRequest,
+  RequestChangeEmailRequest,
+  ChangeEmailRequest,
 );
 
 export const PostResponse = Union(
@@ -117,4 +170,6 @@ export const PostResponse = Union(
   LogInResponse,
   LogOutResponse,
   DeleteUserResponse,
+  RequestChangeEmailResponse,
+  ChangeEmailResponse,
 );

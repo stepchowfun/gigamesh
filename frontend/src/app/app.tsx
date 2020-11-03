@@ -1,18 +1,23 @@
 import React, { FunctionComponent, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import changeEmail from '../api/changeEmail';
 import deleteUser from '../api/deleteUser';
 import invite from '../api/invite';
 import logIn from '../api/logIn';
 import logOut from '../api/logOut';
+import requestChangeEmail from '../api/requestChangeEmail';
 import signUp from '../api/signUp';
 import {
+  ChangeEmailResponsePayload,
   DeleteUserResponsePayload,
   LogInResponsePayload,
+  RequestChangeEmailResponsePayload,
   SignUpResponsePayload,
 } from '../shared/api/schema';
 import { getSessionId, setSessionId } from '../storage/storage';
 import {
+  changeEmailHashPrefix,
   logInHashPrefix,
   signUpHashPrefix,
 } from '../shared/constants/constants';
@@ -31,13 +36,12 @@ const AppContainer = styled.div`
 
 const App: FunctionComponent<{}> = () => {
   const [email, setEmail] = useState('');
+  const [newEmail, setNewEmail] = useState('');
   const [invitationState, setInvitationState] = useState(
     InvitationState.NotSent,
   );
   const [loggedIn, setLoggedIn] = useState(() => getSessionId() !== null);
-  const [loggingOutOrDeletingUser, setLoggingOutOrDeletingUser] = useState(
-    false,
-  );
+  const [updatingSettings, setUpdatingSettings] = useState(false);
 
   useEffect(() => {
     // This hash in the URL will determine if we need to take any action when the page loads.
@@ -66,9 +70,7 @@ const App: FunctionComponent<{}> = () => {
             },
             () => {
               // eslint-disable-next-line no-alert
-              alert(
-                'Unfortunately that signup link has expired. Please sign up again.',
-              );
+              alert('Unfortunately that link has expired.');
             },
           )(payload);
         })
@@ -101,9 +103,7 @@ const App: FunctionComponent<{}> = () => {
             },
             () => {
               // eslint-disable-next-line no-alert
-              alert(
-                'Unfortunately that login link has expired. Please log in again.',
-              );
+              alert('Unfortunately that link has expired.');
             },
           )(payload);
         })
@@ -112,9 +112,54 @@ const App: FunctionComponent<{}> = () => {
           alert(`Something went wrong.\n\n${e.toString()}`);
         });
     }
+
+    // Check if the user has followed a change email link.
+    if (hash.startsWith(changeEmailHashPrefix)) {
+      // Extract the change email invitation ID.
+      const changeEmailInvitationId = hash.substring(
+        changeEmailHashPrefix.length,
+      );
+
+      // Remove the change email invitation ID from the URL because:
+      // - If the user refreshes the page, we don't want to try the operation
+      //   again. That wouldn't work anyway, since change email invitations are
+      //   only valid for a single use.
+      // - It's ugly.
+      window.history.replaceState(null, '', '/');
+
+      // Make sure we are logged in before proceeding.
+      const sessionId = getSessionId();
+      if (sessionId === null) {
+        // eslint-disable-next-line no-alert
+        alert('You must be logged in to perform that operation.');
+      } else {
+        // Change the email.
+        changeEmail({ sessionId, changeEmailInvitationId })
+          .then((payload) => {
+            ChangeEmailResponsePayload.match(
+              () => {
+                // eslint-disable-next-line no-alert
+                alert('Your email has been updated.');
+              },
+              () => {
+                // eslint-disable-next-line no-alert
+                alert('You must be logged in to perform that operation.');
+              },
+              () => {
+                // eslint-disable-next-line no-alert
+                alert('Unfortunately that link has expired.');
+              },
+            )(payload);
+          })
+          .catch((e: Error) => {
+            // eslint-disable-next-line no-alert
+            alert(`Something went wrong.\n\n${e.toString()}`);
+          });
+      }
+    }
   });
 
-  const handleEmailChange = (
+  const handleChangeEmail = (
     event: React.ChangeEvent<HTMLInputElement>,
   ): void => {
     event.preventDefault();
@@ -143,8 +188,8 @@ const App: FunctionComponent<{}> = () => {
   };
 
   const handleLogOutClick = (): void => {
-    if (!loggingOutOrDeletingUser) {
-      setLoggingOutOrDeletingUser(true);
+    if (!updatingSettings) {
+      setUpdatingSettings(true);
 
       // The `!` is safe because the "Log out" button should only be visible when
       // we have a session ID.
@@ -159,14 +204,14 @@ const App: FunctionComponent<{}> = () => {
           alert(`Something went wrong.\n\n${e.toString()}`);
         })
         .finally(() => {
-          setLoggingOutOrDeletingUser(false);
+          setUpdatingSettings(false);
         });
     }
   };
 
   const handleDeleteUserClick = (): void => {
-    if (!loggingOutOrDeletingUser) {
-      setLoggingOutOrDeletingUser(true);
+    if (!updatingSettings) {
+      setUpdatingSettings(true);
 
       // The `!` is safe because the "Delete account" button should only be
       // visible when we have a session ID.
@@ -191,7 +236,51 @@ const App: FunctionComponent<{}> = () => {
           alert(`Something went wrong.\n\n${e.toString()}`);
         })
         .finally(() => {
-          setLoggingOutOrDeletingUser(false);
+          setUpdatingSettings(false);
+        });
+    }
+  };
+
+  const handleChangeNewEmail = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ): void => {
+    event.preventDefault();
+
+    setNewEmail(event.target.value);
+  };
+
+  const handleChangeEmailSubmit = (
+    event: React.FormEvent<HTMLFormElement>,
+  ): void => {
+    if (!updatingSettings) {
+      event.preventDefault();
+
+      setUpdatingSettings(true);
+
+      // The `!` is safe because the "Delete account" button should only be
+      // visible when we have a session ID.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      requestChangeEmail({ sessionId: getSessionId()!, newEmail })
+        .then((payload) => {
+          RequestChangeEmailResponsePayload.match(
+            () => {
+              setNewEmail('');
+
+              // eslint-disable-next-line no-alert
+              alert('Check your email!');
+            },
+            () => {
+              // eslint-disable-next-line no-alert
+              alert('You are not logged in. Please log in and try again.');
+            },
+          )(payload);
+        })
+        .catch((e: Error) => {
+          // eslint-disable-next-line no-alert
+          alert(`Something went wrong.\n\n${e.toString()}`);
+        })
+        .finally(() => {
+          setUpdatingSettings(false);
         });
     }
   };
@@ -200,27 +289,44 @@ const App: FunctionComponent<{}> = () => {
     <AppContainer>
       {loggedIn ? (
         <div>
-          <h2>Welcome back</h2>
+          <h2>Welcome back!</h2>
           <p>
             <button
               type="button"
-              disabled={loggingOutOrDeletingUser}
+              disabled={updatingSettings}
               onClick={handleLogOutClick}
             >
               Log out
             </button>{' '}
             <button
               type="button"
-              disabled={loggingOutOrDeletingUser}
+              disabled={updatingSettings}
               onClick={handleDeleteUserClick}
             >
               Delete account
             </button>
           </p>
+          <form onSubmit={handleChangeEmailSubmit}>
+            <label>
+              New email:{' '}
+              <input
+                type="email"
+                autoComplete="email"
+                placeholder="sophie@example.com"
+                value={newEmail}
+                onChange={handleChangeNewEmail}
+                readOnly={updatingSettings}
+                required
+              />
+            </label>{' '}
+            <button type="submit" disabled={updatingSettings}>
+              Change email
+            </button>
+          </form>
         </div>
       ) : (
         <div>
-          <h2>Hello there</h2>
+          <h2>Hello there!</h2>
           {invitationState !== InvitationState.Sent ? (
             <form onSubmit={handleEmailSubmit}>
               <label>
@@ -230,7 +336,7 @@ const App: FunctionComponent<{}> = () => {
                   autoComplete="email"
                   placeholder="sophie@example.com"
                   value={email}
-                  onChange={handleEmailChange}
+                  onChange={handleChangeEmail}
                   readOnly={invitationState !== InvitationState.NotSent}
                   required
                 />

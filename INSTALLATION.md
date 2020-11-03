@@ -310,11 +310,8 @@
           CREATE TABLE sign_up_invitation (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            email TEXT NOT NULL,
-            normalized_email TEXT NOT NULL
+            email TEXT NOT NULL
           );
-
-          CREATE INDEX ON sign_up_invitation (normalized_email);
 
           CREATE TABLE log_in_invitation (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
@@ -334,6 +331,15 @@
           );
 
           CREATE INDEX ON session (user_id);
+
+          CREATE TABLE change_email_invitation (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            user_id UUID NOT NULL REFERENCES "user" ON DELETE RESTRICT,
+            new_email TEXT NOT NULL
+          );
+
+          CREATE INDEX ON change_email_invitation (user_id);
           ```
 
           Keep the database connection open for the next step.
@@ -352,6 +358,7 @@
         GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on sign_up_invitation TO api_production;
         GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on log_in_invitation TO api_production;
         GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on session TO api_production;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on change_email_invitation TO api_production;
         ```
 
         Store the password in [Secret Manager](https://cloud.google.com/secret-manager) as follows:
