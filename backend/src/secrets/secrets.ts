@@ -5,6 +5,7 @@ import { postgresSecretName, sendgridSecretName } from '../constants/constants';
 
 // These API fields are scrubbed from logs.
 export const secretFields = [
+  'emailChangeProposalId',
   'loginProposalId',
   'sessionId',
   'signupProposalId',

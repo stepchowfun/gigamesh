@@ -67,8 +67,13 @@ export default async function changeEmail(
           id: string;
           email: string;
           normalizedEmail: string;
+          previousUserEmailId: string | null;
         }>(
-          'SELECT id, email, normalized_email as "normalizedEmail" ' +
+          'SELECT ' +
+            '  id, ' +
+            '  email, ' +
+            '  normalized_email as "normalizedEmail", ' +
+            '  previous_user_email_id AS "previousUserEmailId" ' +
             'FROM "user" ' +
             'WHERE id = $1 ' +
             'LIMIT 1 ' +
@@ -78,16 +83,29 @@ export default async function changeEmail(
       ).rows[0];
 
       // Create a record of the user's email.
-      await client.query<{}>(
-        'INSERT INTO previous_user_email (user_id, email, normalized_email) ' +
-          'VALUES ($1, $2, $3)',
-        [userId, user.email, user.normalizedEmail],
-      );
+      const newPreviousUserEmailId = (
+        await client.query<{ id: string }>(
+          'INSERT INTO previous_user_email (email, normalized_email, previous_user_email_id) ' +
+            'VALUES ($1, $2, $3) ' +
+            'RETURNING id;',
+          [user.email, user.normalizedEmail, user.previousUserEmailId],
+        )
+      ).rows[0].id;
 
       // Update the user's email.
       await client.query<{}>(
-        'UPDATE "user" SET email = $1, normalized_email = $2 WHERE id = $3',
-        [proposal.newEmail, normalizeEmail(proposal.newEmail), userId],
+        'UPDATE "user" ' +
+          'SET ' +
+          '  email = $1, ' +
+          '  normalized_email = $2, ' +
+          '  previous_user_email_id = $3 ' +
+          'WHERE id = $4',
+        [
+          proposal.newEmail,
+          normalizeEmail(proposal.newEmail),
+          newPreviousUserEmailId,
+          userId,
+        ],
       );
 
       // Commit the transaction.

@@ -276,11 +276,24 @@
         - Enter the following:
 
           ```sql
+          CREATE TABLE previous_user_email (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            email TEXT NOT NULL,
+            normalized_email TEXT NOT NULL,
+            previous_user_email_id UUID
+              REFERENCES "previous_user_email" ON DELETE RESTRICT
+          );
+
+          CREATE INDEX ON previous_user_email (normalized_email);
+
           CREATE TABLE "user" (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             email TEXT,
             normalized_email TEXT UNIQUE,
+            previous_user_email_id UUID
+              REFERENCES "previous_user_email" ON DELETE RESTRICT,
             deleted BOOLEAN NOT NULL DEFAULT false,
 
             CHECK (
@@ -291,21 +304,11 @@
               ) OR (
                 deleted AND
                 email IS NULL AND
-                normalized_email IS NULL
+                normalized_email IS NULL AND
+                previous_user_email_id IS NOT NULL
               )
             )
           );
-
-          CREATE TABLE previous_user_email (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            user_id UUID NOT NULL REFERENCES "user" ON DELETE RESTRICT,
-            email TEXT NOT NULL,
-            normalized_email TEXT NOT NULL
-          );
-
-          CREATE INDEX ON previous_user_email (user_id);
-          CREATE INDEX ON previous_user_email (normalized_email);
 
           CREATE TABLE signup_proposal (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
@@ -333,7 +336,7 @@
           CREATE INDEX ON session (user_id);
 
           CREATE TABLE email_change_proposal (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             user_id UUID NOT NULL REFERENCES "user" ON DELETE RESTRICT,
             new_email TEXT NOT NULL

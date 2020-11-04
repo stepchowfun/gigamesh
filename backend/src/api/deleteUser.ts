@@ -42,9 +42,15 @@ export default async function deleteUser(
           id: string;
           email: string;
           normalizedEmail: string;
+          previousUserEmailId: string | null;
           deleted: boolean;
         }>(
-          'SELECT id, email, normalized_email as "normalizedEmail", deleted ' +
+          'SELECT ' +
+            '  id, ' +
+            '  email, ' +
+            '  normalized_email as "normalizedEmail", ' +
+            '  deleted, ' +
+            '  previous_user_email_id AS "previousUserEmailId" ' +
             'FROM "user" ' +
             'WHERE id = $1 ' +
             'LIMIT 1 ' +
@@ -63,18 +69,25 @@ export default async function deleteUser(
       }
 
       // Create a record of the user's email.
-      await client.query<{}>(
-        'INSERT INTO previous_user_email (user_id, email, normalized_email) ' +
-          'VALUES ($1, $2, $3)',
-        [userId, user.email, user.normalizedEmail],
-      );
+      const newPreviousUserEmailId = (
+        await client.query<{ id: string }>(
+          'INSERT INTO previous_user_email (email, normalized_email, previous_user_email_id) ' +
+            'VALUES ($1, $2, $3) ' +
+            'RETURNING id;',
+          [user.email, user.normalizedEmail, user.previousUserEmailId],
+        )
+      ).rows[0].id;
 
       // Mark the user as deleted.
       await client.query<{}>(
         'UPDATE "user" ' +
-          'SET email = NULL, normalized_email = NULL, deleted = true ' +
-          'WHERE id = $1',
-        [userId],
+          'SET ' +
+          '  email = NULL, ' +
+          '  normalized_email = NULL, ' +
+          '  previous_user_email_id = $1, ' +
+          '  deleted = true ' +
+          'WHERE id = $2',
+        [newPreviousUserEmailId, userId],
       );
 
       // Commit the transaction.
