@@ -150,6 +150,30 @@ export const ChangeEmailResponse = Record({
   payload: ChangeEmailResponsePayload,
 });
 
+// The request and response schema for `getUser`
+
+export const GetUserRequest = Record({
+  type: Literal('GetUserRequest'),
+  payload: Record({
+    sessionId: String,
+  }),
+});
+
+export const GetUserResponsePayload = Union(
+  Record({
+    type: Literal('Success'),
+    email: String,
+  }),
+  Record({
+    type: Literal('NotLoggedIn'),
+  }),
+);
+
+export const GetUserResponse = Record({
+  type: Literal('GetUserResponse'),
+  payload: GetUserResponsePayload,
+});
+
 // The general request and response schemata
 
 // The order of the request types here must match any references to
@@ -162,6 +186,7 @@ export const PostRequest = Union(
   DeleteUserRequest,
   ProposeEmailChangeRequest,
   ChangeEmailRequest,
+  GetUserRequest,
 );
 
 export const PostResponse = Union(
@@ -172,4 +197,5 @@ export const PostResponse = Union(
   DeleteUserResponse,
   ProposeEmailChangeResponse,
   ChangeEmailResponse,
+  GetUserResponse,
 );
