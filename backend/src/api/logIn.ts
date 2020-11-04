@@ -2,7 +2,7 @@ import { Static } from 'runtypes';
 
 import { LogInRequest, LogInResponse } from '../shared/api/schema';
 import { getPool } from '../storage/storage';
-import { logInInvitationLifespanMs } from '../constants/constants';
+import { loginProposalLifespanMs } from '../constants/constants';
 
 export default async function logIn(
   payload: Static<typeof LogInRequest>['payload'],
@@ -10,48 +10,45 @@ export default async function logIn(
   // Get the database connection pool.
   const pool = await getPool();
 
-  // Fetch and delete the invitation.
-  const invitations = (
+  // Fetch and delete the proposal.
+  const proposals = (
     await pool.query<{
       createdAt: Date;
       userId: string;
     }>(
-      'DELETE FROM log_in_invitation ' +
+      'DELETE FROM login_proposal ' +
         'WHERE id = $1 ' +
         'RETURNING created_at AS "createdAt", user_id AS "userId"',
-      [payload.logInInvitationId],
+      [payload.loginProposalId],
     )
   ).rows;
-  if (invitations.length === 0) {
-    return { type: 'InvitationExpiredOrInvalid' };
+  if (proposals.length === 0) {
+    return { type: 'ProposalExpiredOrInvalid' };
   }
-  const invitation = invitations[0];
+  const proposal = proposals[0];
 
-  // Make sure the invitation hasn't expired.
-  if (
-    invitation.createdAt.valueOf() + logInInvitationLifespanMs <=
-    Date.now()
-  ) {
-    return { type: 'InvitationExpiredOrInvalid' };
+  // Make sure the proposal hasn't expired.
+  if (proposal.createdAt.valueOf() + loginProposalLifespanMs <= Date.now()) {
+    return { type: 'ProposalExpiredOrInvalid' };
   }
 
   // Fetch the user.
   const user = (
     await pool.query<{
       deleted: boolean;
-    }>('SELECT deleted FROM "user" WHERE id = $1 LIMIT 1', [invitation.userId])
+    }>('SELECT deleted FROM "user" WHERE id = $1 LIMIT 1', [proposal.userId])
   ).rows[0];
 
   // Make sure the user exists.
   if (user.deleted) {
-    return { type: 'InvitationExpiredOrInvalid' };
+    return { type: 'ProposalExpiredOrInvalid' };
   }
 
   // Create a session.
   const sessionId = (
     await pool.query<{ id: string }>(
       'INSERT INTO session (user_id) VALUES ($1) RETURNING id;',
-      [invitation.userId],
+      [proposal.userId],
     )
   ).rows[0].id;
 

@@ -2,7 +2,7 @@ import { Static } from 'runtypes';
 
 import validateSession from '../session/session';
 import { ChangeEmailRequest, ChangeEmailResponse } from '../shared/api/schema';
-import { changeEmailInvitationLifespanMs } from '../constants/constants';
+import { emailChangeProposalLifespanMs } from '../constants/constants';
 import { getPool } from '../storage/storage';
 import { normalizeEmail } from '../email/email';
 
@@ -24,35 +24,35 @@ export default async function changeEmail(
       return { type: 'NotLoggedIn' };
     }
 
-    // Fetch and delete the invitation.
-    const invitations = (
+    // Fetch and delete the proposal.
+    const proposals = (
       await client.query<{
         createdAt: Date;
         userId: string;
         newEmail: string;
       }>(
-        'DELETE FROM change_email_invitation ' +
+        'DELETE FROM email_change_proposal ' +
           'WHERE id = $1 ' +
           'RETURNING created_at AS "createdAt", user_id AS "userId", new_email AS "newEmail"',
-        [payload.changeEmailInvitationId],
+        [payload.emailChangeProposalId],
       )
     ).rows;
-    if (invitations.length === 0) {
-      return { type: 'InvitationExpiredOrInvalid' };
+    if (proposals.length === 0) {
+      return { type: 'ProposalExpiredOrInvalid' };
     }
-    const invitation = invitations[0];
+    const proposal = proposals[0];
 
-    // Make sure the invitation hasn't expired.
+    // Make sure the proposal hasn't expired.
     if (
-      invitation.createdAt.valueOf() + changeEmailInvitationLifespanMs <=
+      proposal.createdAt.valueOf() + emailChangeProposalLifespanMs <=
       Date.now()
     ) {
-      return { type: 'InvitationExpiredOrInvalid' };
+      return { type: 'ProposalExpiredOrInvalid' };
     }
 
-    // Make sure the invitation is for this user.
-    if (userId !== invitation.userId) {
-      return { type: 'InvitationExpiredOrInvalid' };
+    // Make sure the proposal is for this user.
+    if (userId !== proposal.userId) {
+      return { type: 'ProposalExpiredOrInvalid' };
     }
 
     // The following operations should happen together or not at all, so we
@@ -87,7 +87,7 @@ export default async function changeEmail(
       // Update the user's email.
       await client.query<{}>(
         'UPDATE "user" SET email = $1, normalized_email = $2 WHERE id = $3',
-        [invitation.newEmail, normalizeEmail(invitation.newEmail), userId],
+        [proposal.newEmail, normalizeEmail(proposal.newEmail), userId],
       );
 
       // Commit the transaction.

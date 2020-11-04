@@ -2,17 +2,17 @@ import { Static } from 'runtypes';
 
 import validateSession from '../session/session';
 import {
-  RequestChangeEmailRequest,
-  RequestChangeEmailResponse,
+  ProposeEmailChangeRequest,
+  ProposeEmailChangeResponse,
 } from '../shared/api/schema';
 import { changeEmailHashPrefix } from '../shared/constants/constants';
 import { getPool } from '../storage/storage';
 import { origin } from '../constants/constants';
 import { send } from '../email/email';
 
-export default async function requestChangeEmail(
-  payload: Static<typeof RequestChangeEmailRequest>['payload'],
-): Promise<Static<typeof RequestChangeEmailResponse>['payload']> {
+export default async function proposeEmailChange(
+  payload: Static<typeof ProposeEmailChangeRequest>['payload'],
+): Promise<Static<typeof ProposeEmailChangeResponse>['payload']> {
   // Always trim user-provided input.
   const trimmedEmail = payload.newEmail.trim();
 
@@ -25,10 +25,10 @@ export default async function requestChangeEmail(
     return { type: 'NotLoggedIn' };
   }
 
-  // Create an invitation to change the email.
-  const changeEmailInvitationId = (
+  // Create an proposal to change the email.
+  const emailChangeProposalId = (
     await pool.query<{ id: string }>(
-      'INSERT INTO change_email_invitation (user_id, new_email) ' +
+      'INSERT INTO email_change_proposal (user_id, new_email) ' +
         'VALUES ($1, $2) ' +
         'RETURNING id;',
       [userId, trimmedEmail],
@@ -36,9 +36,9 @@ export default async function requestChangeEmail(
   ).rows[0].id;
 
   // Construct the email change link.
-  const changeEmailLink = `${origin()}/${changeEmailHashPrefix}${changeEmailInvitationId}`;
+  const changeEmailLink = `${origin()}/${changeEmailHashPrefix}${emailChangeProposalId}`;
 
-  // Send the invitation to the user.
+  // Send the proposal to the user.
   await send({
     to: trimmedEmail,
     subject: 'Confirm your new email',
@@ -46,6 +46,6 @@ export default async function requestChangeEmail(
     html: `Click <a href="${changeEmailLink}">here</a> to confirm your new email.`,
   });
 
-  // If we made it this far, the invitation has been sent.
+  // If we made it this far, the proposal has been sent.
   return { type: 'Success' };
 }
