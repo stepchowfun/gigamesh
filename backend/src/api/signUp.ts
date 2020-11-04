@@ -3,7 +3,7 @@ import { Static } from 'runtypes';
 import { ErrorCode, getPool } from '../storage/storage';
 import { SignUpRequest, SignUpResponse } from '../shared/api/schema';
 import { normalizeEmail } from '../email/email';
-import { signUpInvitationLifespanMs } from '../constants/constants';
+import { signupProposalLifespanMs } from '../constants/constants';
 
 export default async function signUp(
   payload: Static<typeof SignUpRequest>['payload'],
@@ -11,29 +11,26 @@ export default async function signUp(
   // Get the database connection pool.
   const pool = await getPool();
 
-  // Fetch and delete the invitation.
-  const invitations = (
+  // Fetch and delete the proposal.
+  const proposals = (
     await pool.query<{
       createdAt: Date;
       email: string;
     }>(
-      'DELETE FROM sign_up_invitation ' +
+      'DELETE FROM signup_proposal ' +
         'WHERE id = $1 ' +
         'RETURNING created_at AS "createdAt", email',
-      [payload.signUpInvitationId],
+      [payload.signupProposalId],
     )
   ).rows;
-  if (invitations.length === 0) {
-    return { type: 'InvitationExpiredOrInvalid' };
+  if (proposals.length === 0) {
+    return { type: 'ProposalExpiredOrInvalid' };
   }
-  const invitation = invitations[0];
+  const proposal = proposals[0];
 
-  // Check if the invitation has expired.
-  if (
-    invitation.createdAt.valueOf() + signUpInvitationLifespanMs <=
-    Date.now()
-  ) {
-    return { type: 'InvitationExpiredOrInvalid' };
+  // Check if the proposal has expired.
+  if (proposal.createdAt.valueOf() + signupProposalLifespanMs <= Date.now()) {
+    return { type: 'ProposalExpiredOrInvalid' };
   }
 
   // Create the user.
@@ -44,14 +41,14 @@ export default async function signUp(
         'INSERT INTO "user" (email, normalized_email) ' +
           'VALUES ($1, $2) ' +
           'RETURNING id;',
-        [invitation.email, normalizeEmail(invitation.email)],
+        [proposal.email, normalizeEmail(proposal.email)],
       )
     ).rows[0].id;
   } catch (e) {
     // Warning: TypeScript considers `e` to have type `any`, even though
     // `unknown` would have been more appropriate.
     if (e.code === ErrorCode.UniquenessViolation) {
-      return { type: 'InvitationExpiredOrInvalid' };
+      return { type: 'ProposalExpiredOrInvalid' };
     }
 
     throw e;

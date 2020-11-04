@@ -6,13 +6,13 @@ import deleteUser from '../api/deleteUser';
 import invite from '../api/invite';
 import logIn from '../api/logIn';
 import logOut from '../api/logOut';
-import requestChangeEmail from '../api/requestChangeEmail';
+import proposeEmailChange from '../api/proposeEmailChange';
 import signUp from '../api/signUp';
 import {
   ChangeEmailResponsePayload,
   DeleteUserResponsePayload,
   LogInResponsePayload,
-  RequestChangeEmailResponsePayload,
+  ProposeEmailChangeResponsePayload,
   SignUpResponsePayload,
 } from '../shared/api/schema';
 import { getSessionId, setSessionId } from '../storage/storage';
@@ -22,7 +22,7 @@ import {
   signUpHashPrefix,
 } from '../shared/constants/constants';
 
-enum InvitationState {
+enum ProposalState {
   NotSent,
   Sending,
   Sent,
@@ -37,9 +37,7 @@ const AppContainer = styled.div`
 const App: FunctionComponent<{}> = () => {
   const [email, setEmail] = useState('');
   const [newEmail, setNewEmail] = useState('');
-  const [invitationState, setInvitationState] = useState(
-    InvitationState.NotSent,
-  );
+  const [proposalState, setProposalState] = useState(ProposalState.NotSent);
   const [loggedIn, setLoggedIn] = useState(() => getSessionId() !== null);
   const [updatingSettings, setUpdatingSettings] = useState(false);
 
@@ -49,19 +47,19 @@ const App: FunctionComponent<{}> = () => {
 
     // Check if the user has followed a signup link.
     if (hash.startsWith(signUpHashPrefix)) {
-      // Extract the log in invitation ID.
-      const signUpInvitationId = hash.substring(signUpHashPrefix.length);
+      // Extract the signup proposal ID.
+      const signupProposalId = hash.substring(signUpHashPrefix.length);
 
-      // Remove the sign up invitation ID from the URL because:
+      // Remove the signup proposal ID from the URL because:
       // - If the user refreshes the page, we don't want to try to sign up again.
-      //   That wouldn't work anyway, since signup invitations are only valid for
+      //   That wouldn't work anyway, since signup proposals are only valid for
       //   a single use.
       // - It's secret (until it's used, which will happen immediately).
       // - It's ugly.
       window.history.replaceState(null, '', '/');
 
       // Sign up.
-      signUp({ signUpInvitationId })
+      signUp({ signupProposalId })
         .then((payload) => {
           SignUpResponsePayload.match(
             (refinedPayload) => {
@@ -82,19 +80,19 @@ const App: FunctionComponent<{}> = () => {
 
     // Check if the user has followed a login link.
     if (hash.startsWith(logInHashPrefix)) {
-      // Extract the log in invitation ID.
-      const logInInvitationId = hash.substring(logInHashPrefix.length);
+      // Extract the login proposal ID.
+      const loginProposalId = hash.substring(logInHashPrefix.length);
 
-      // Remove the log in invitation ID from the URL because:
+      // Remove the login proposal ID from the URL because:
       // - If the user refreshes the page, we don't want to try to log in again.
-      //   That wouldn't work anyway, since log in invitations are only valid for
+      //   That wouldn't work anyway, since login proposals are only valid for
       //   a single use.
       // - It's secret (until it's used, which will happen immediately).
       // - It's ugly.
       window.history.replaceState(null, '', '/');
 
       // Log in.
-      logIn({ logInInvitationId })
+      logIn({ loginProposalId })
         .then((payload) => {
           LogInResponsePayload.match(
             (refinedPayload) => {
@@ -115,14 +113,14 @@ const App: FunctionComponent<{}> = () => {
 
     // Check if the user has followed a change email link.
     if (hash.startsWith(changeEmailHashPrefix)) {
-      // Extract the change email invitation ID.
-      const changeEmailInvitationId = hash.substring(
+      // Extract the change email proposal ID.
+      const emailChangeProposalId = hash.substring(
         changeEmailHashPrefix.length,
       );
 
-      // Remove the change email invitation ID from the URL because:
+      // Remove the change email proposal ID from the URL because:
       // - If the user refreshes the page, we don't want to try the operation
-      //   again. That wouldn't work anyway, since change email invitations are
+      //   again. That wouldn't work anyway, since change email proposals are
       //   only valid for a single use.
       // - It's ugly.
       window.history.replaceState(null, '', '/');
@@ -134,7 +132,7 @@ const App: FunctionComponent<{}> = () => {
         alert('You must be logged in to perform that operation.');
       } else {
         // Change the email.
-        changeEmail({ sessionId, changeEmailInvitationId })
+        changeEmail({ sessionId, emailChangeProposalId })
           .then((payload) => {
             ChangeEmailResponsePayload.match(
               () => {
@@ -168,18 +166,18 @@ const App: FunctionComponent<{}> = () => {
   };
 
   const handleEmailSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
-    if (invitationState === InvitationState.NotSent) {
+    if (proposalState === ProposalState.NotSent) {
       event.preventDefault();
 
-      setInvitationState(InvitationState.Sending);
+      setProposalState(ProposalState.Sending);
 
       invite({ email })
         .then(() => {
           setEmail('');
-          setInvitationState(InvitationState.Sent);
+          setProposalState(ProposalState.Sent);
         })
         .catch((e: Error) => {
-          setInvitationState(InvitationState.NotSent);
+          setProposalState(ProposalState.NotSent);
 
           // eslint-disable-next-line no-alert
           alert(`Something went wrong.\n\n${e.toString()}`);
@@ -260,9 +258,9 @@ const App: FunctionComponent<{}> = () => {
       // The `!` is safe because the "Delete account" button should only be
       // visible when we have a session ID.
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      requestChangeEmail({ sessionId: getSessionId()!, newEmail })
+      proposeEmailChange({ sessionId: getSessionId()!, newEmail })
         .then((payload) => {
-          RequestChangeEmailResponsePayload.match(
+          ProposeEmailChangeResponsePayload.match(
             () => {
               setNewEmail('');
 
@@ -327,7 +325,7 @@ const App: FunctionComponent<{}> = () => {
       ) : (
         <div>
           <h2>Hello there!</h2>
-          {invitationState !== InvitationState.Sent ? (
+          {proposalState !== ProposalState.Sent ? (
             <form onSubmit={handleEmailSubmit}>
               <label>
                 Email:{' '}
@@ -337,13 +335,13 @@ const App: FunctionComponent<{}> = () => {
                   placeholder="sophie@example.com"
                   value={email}
                   onChange={handleChangeEmail}
-                  readOnly={invitationState !== InvitationState.NotSent}
+                  readOnly={proposalState !== ProposalState.NotSent}
                   required
                 />
               </label>{' '}
               <button
                 type="submit"
-                disabled={invitationState !== InvitationState.NotSent}
+                disabled={proposalState !== ProposalState.NotSent}
               >
                 Get started
               </button>

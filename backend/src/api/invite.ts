@@ -28,45 +28,45 @@ export default async function invite(
 
   // Is the user missing?
   if (matchingUsers.length === 0) {
-    // The user doesn't exist yet. Create an invitation to sign up.
-    const signUpInvitationId = (
+    // The user doesn't exist yet. Create an proposal to sign up.
+    const signupProposalId = (
       await pool.query<{ id: string }>(
-        'INSERT INTO sign_up_invitation (email) VALUES ($1) RETURNING id;',
+        'INSERT INTO signup_proposal (email) VALUES ($1) RETURNING id;',
         [trimmedEmail],
       )
     ).rows[0].id;
 
-    // Construct the sign up link.
-    const signUpLink = `${origin()}/${signUpHashPrefix}${signUpInvitationId}`;
+    // Construct the signup link.
+    const signupLink = `${origin()}/${signUpHashPrefix}${signupProposalId}`;
 
-    // Send the invitation to the user.
+    // Send the proposal to the user.
     await send({
       to: trimmedEmail,
       subject: 'Your Gigamesh invitation',
-      text: `Navigate here to get started: ${signUpLink}`,
-      html: `Click <a href="${signUpLink}">here</a> to get started!`,
+      text: `Navigate here to get started: ${signupLink}`,
+      html: `Click <a href="${signupLink}">here</a> to get started!`,
     });
   } else {
     // The user exists already. Get the user's ID.
     const userId = matchingUsers[0].id;
 
-    // Create an invitation to log in.
-    const logInInvitationId = (
+    // Create an proposal to log in.
+    const loginProposalId = (
       await pool.query<{ id: string }>(
-        'INSERT INTO log_in_invitation (user_id) ' +
+        'INSERT INTO login_proposal (user_id) ' +
           'VALUES ($1) ' +
           'RETURNING id;',
         [userId],
       )
     ).rows[0].id;
 
-    // Construct the log in link.
-    const logInLink = `${origin()}/${logInHashPrefix}${logInInvitationId}`;
+    // Construct the login link.
+    const logInLink = `${origin()}/${logInHashPrefix}${loginProposalId}`;
 
-    // Send the invitation to the user.
+    // Send the proposal to the user.
     await send({
       to: trimmedEmail,
-      subject: 'Your Gigamesh log in link',
+      subject: 'Your Gigamesh login link',
       text: `Navigate here to log in: ${logInLink}`,
       html: `Click <a href="${logInLink}">here</a> to log in!`,
     });

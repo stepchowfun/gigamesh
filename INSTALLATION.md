@@ -307,19 +307,19 @@
           CREATE INDEX ON previous_user_email (user_id);
           CREATE INDEX ON previous_user_email (normalized_email);
 
-          CREATE TABLE sign_up_invitation (
+          CREATE TABLE signup_proposal (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             email TEXT NOT NULL
           );
 
-          CREATE TABLE log_in_invitation (
+          CREATE TABLE login_proposal (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             user_id UUID NOT NULL REFERENCES "user" ON DELETE RESTRICT
           );
 
-          CREATE INDEX ON log_in_invitation (user_id);
+          CREATE INDEX ON login_proposal (user_id);
 
           CREATE TABLE session (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Secret
@@ -332,14 +332,14 @@
 
           CREATE INDEX ON session (user_id);
 
-          CREATE TABLE change_email_invitation (
+          CREATE TABLE email_change_proposal (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             user_id UUID NOT NULL REFERENCES "user" ON DELETE RESTRICT,
             new_email TEXT NOT NULL
           );
 
-          CREATE INDEX ON change_email_invitation (user_id);
+          CREATE INDEX ON email_change_proposal (user_id);
           ```
 
           Keep the database connection open for the next step.
@@ -355,10 +355,10 @@
         -- Grant privileges to the user.
         GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on "user" TO api_production;
         GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on previous_user_email TO api_production;
-        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on sign_up_invitation TO api_production;
-        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on log_in_invitation TO api_production;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on signup_proposal TO api_production;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on login_proposal TO api_production;
         GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on session TO api_production;
-        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on change_email_invitation TO api_production;
+        GRANT SELECT, INSERT, UPDATE, DELETE, REFERENCES on email_change_proposal TO api_production;
         ```
 
         Store the password in [Secret Manager](https://cloud.google.com/secret-manager) as follows:

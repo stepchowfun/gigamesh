@@ -25,8 +25,8 @@ export default async function deleteUser(
     // Delete any sessions for the user.
     await client.query<{}>('DELETE FROM session WHERE user_id = $1', [userId]);
 
-    // Delete any log in invitations for the user.
-    await client.query<{}>('DELETE FROM log_in_invitation WHERE user_id = $1', [
+    // Delete any login proposals for the user.
+    await client.query<{}>('DELETE FROM login_proposal WHERE user_id = $1', [
       userId,
     ]);
 

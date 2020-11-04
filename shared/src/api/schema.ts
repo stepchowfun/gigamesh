@@ -19,7 +19,7 @@ export const InviteResponse = Record({
 export const SignUpRequest = Record({
   type: Literal('SignUpRequest'),
   payload: Record({
-    signUpInvitationId: String,
+    signupProposalId: String,
   }),
 });
 
@@ -29,7 +29,7 @@ export const SignUpResponsePayload = Union(
     sessionId: String,
   }),
   Record({
-    type: Literal('InvitationExpiredOrInvalid'),
+    type: Literal('ProposalExpiredOrInvalid'),
   }),
 );
 
@@ -43,7 +43,7 @@ export const SignUpResponse = Record({
 export const LogInRequest = Record({
   type: Literal('LogInRequest'),
   payload: Record({
-    logInInvitationId: String,
+    loginProposalId: String,
   }),
 });
 
@@ -53,7 +53,7 @@ export const LogInResponsePayload = Union(
     sessionId: String,
   }),
   Record({
-    type: Literal('InvitationExpiredOrInvalid'),
+    type: Literal('ProposalExpiredOrInvalid'),
   }),
 );
 
@@ -99,17 +99,17 @@ export const DeleteUserResponse = Record({
   payload: DeleteUserResponsePayload,
 });
 
-// The request and response schema for `requestChangeEmail`
+// The request and response schema for `proposeEmailChange`
 
-export const RequestChangeEmailRequest = Record({
-  type: Literal('RequestChangeEmailRequest'),
+export const ProposeEmailChangeRequest = Record({
+  type: Literal('ProposeEmailChangeRequest'),
   payload: Record({
     sessionId: String,
     newEmail: String,
   }),
 });
 
-export const RequestChangeEmailResponsePayload = Union(
+export const ProposeEmailChangeResponsePayload = Union(
   Record({
     type: Literal('Success'),
   }),
@@ -118,9 +118,9 @@ export const RequestChangeEmailResponsePayload = Union(
   }),
 );
 
-export const RequestChangeEmailResponse = Record({
-  type: Literal('RequestChangeEmailResponse'),
-  payload: RequestChangeEmailResponsePayload,
+export const ProposeEmailChangeResponse = Record({
+  type: Literal('ProposeEmailChangeResponse'),
+  payload: ProposeEmailChangeResponsePayload,
 });
 
 // The request and response schema for `changeEmail`
@@ -129,7 +129,7 @@ export const ChangeEmailRequest = Record({
   type: Literal('ChangeEmailRequest'),
   payload: Record({
     sessionId: String,
-    changeEmailInvitationId: String,
+    emailChangeProposalId: String,
   }),
 });
 
@@ -141,7 +141,7 @@ export const ChangeEmailResponsePayload = Union(
     type: Literal('NotLoggedIn'),
   }),
   Record({
-    type: Literal('InvitationExpiredOrInvalid'),
+    type: Literal('ProposalExpiredOrInvalid'),
   }),
 );
 
@@ -160,7 +160,7 @@ export const PostRequest = Union(
   LogInRequest,
   LogOutRequest,
   DeleteUserRequest,
-  RequestChangeEmailRequest,
+  ProposeEmailChangeRequest,
   ChangeEmailRequest,
 );
 
@@ -170,6 +170,6 @@ export const PostResponse = Union(
   LogInResponse,
   LogOutResponse,
   DeleteUserResponse,
-  RequestChangeEmailResponse,
+  ProposeEmailChangeResponse,
   ChangeEmailResponse,
 );

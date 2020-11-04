@@ -7,7 +7,7 @@ import invite from '../api/invite';
 import logIn from '../api/logIn';
 import logOut from '../api/logOut';
 import logger from '../logger/logger';
-import requestChangeEmail from '../api/requestChangeEmail';
+import proposeEmailChange from '../api/proposeEmailChange';
 import signUp from '../api/signUp';
 import { PostRequest, PostResponse } from '../shared/api/schema';
 import { origin } from '../constants/constants';
@@ -50,9 +50,9 @@ async function handlePost(request: Request, response: Response): Promise<void> {
           return { type: 'DeleteUserResponse', payload: responsePayload };
         }),
       (refinedEnvelope) =>
-        requestChangeEmail(refinedEnvelope.payload).then((responsePayload) => {
+        proposeEmailChange(refinedEnvelope.payload).then((responsePayload) => {
           return {
-            type: 'RequestChangeEmailResponse',
+            type: 'ProposeEmailChangeResponse',
             payload: responsePayload,
           };
         }),
