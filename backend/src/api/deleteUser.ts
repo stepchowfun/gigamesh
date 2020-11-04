@@ -3,6 +3,7 @@ import { Static } from 'runtypes';
 import validateSession from '../session/session';
 import { DeleteUserRequest, DeleteUserResponse } from '../shared/api/schema';
 import { getPool } from '../storage/storage';
+import { send } from '../email/email';
 
 export default async function deleteUser(
   payload: Static<typeof DeleteUserRequest>['payload'],
@@ -92,6 +93,14 @@ export default async function deleteUser(
 
       // Commit the transaction.
       await client.query('COMMIT');
+
+      // Send an email notification to the user.
+      await send({
+        to: user.email, // The old email
+        subject: 'Your Gigamesh account has been deleted',
+        text: 'At your request, your Gigamesh account has been deleted.',
+        html: 'At your request, your Gigamesh account has been deleted.',
+      });
     } catch (e) {
       // Something went wrong. Roll back the transaction and rethrow the error.
       await client.query('ROLLBACK');
