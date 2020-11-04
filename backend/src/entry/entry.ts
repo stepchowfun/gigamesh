@@ -3,6 +3,7 @@ import { Static } from 'runtypes';
 
 import changeEmail from '../api/changeEmail';
 import deleteUser from '../api/deleteUser';
+import getUser from '../api/getUser';
 import invite from '../api/invite';
 import logIn from '../api/logIn';
 import logOut from '../api/logOut';
@@ -59,6 +60,10 @@ async function handlePost(request: Request, response: Response): Promise<void> {
       (refinedEnvelope) =>
         changeEmail(refinedEnvelope.payload).then((responsePayload) => {
           return { type: 'ChangeEmailResponse', payload: responsePayload };
+        }),
+      (refinedEnvelope) =>
+        getUser(refinedEnvelope.payload).then((responsePayload) => {
+          return { type: 'GetUserResponse', payload: responsePayload };
         }),
     )(requestEnvelope);
 
