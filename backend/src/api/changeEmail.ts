@@ -4,7 +4,7 @@ import validateSession from '../session/session';
 import { ChangeEmailRequest, ChangeEmailResponse } from '../shared/api/schema';
 import { emailChangeProposalLifespanMs } from '../constants/constants';
 import { getPool } from '../storage/storage';
-import { normalizeEmail } from '../email/email';
+import { normalizeEmail, send } from '../email/email';
 
 export default async function changeEmail(
   payload: Static<typeof ChangeEmailRequest>['payload'],
@@ -110,6 +110,16 @@ export default async function changeEmail(
 
       // Commit the transaction.
       await client.query('COMMIT');
+
+      // Send an email notification to the user.
+      await send({
+        to: user.email, // The old email
+        subject: 'Your Gigamesh email address has changed',
+        text:
+          "The email address on your Gigamesh account has been changed. It's no longer this address.",
+        html:
+          "The email address on your Gigamesh account has been changed. It's no longer this address.",
+      });
     } catch (e) {
       // Something went wrong. Roll back the transaction and rethrow the error.
       await client.query('ROLLBACK');
