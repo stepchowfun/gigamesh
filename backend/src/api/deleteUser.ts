@@ -101,6 +101,9 @@ export default async function deleteUser(
         text: 'At your request, your Gigamesh account has been deleted.',
         html: 'At your request, your Gigamesh account has been deleted.',
       });
+
+      // If we made it this far, the deletion was successful.
+      return { type: 'Success' };
     } catch (e) {
       // Something went wrong. Roll back the transaction and rethrow the error.
       await client.query('ROLLBACK');
@@ -110,7 +113,4 @@ export default async function deleteUser(
     // Release the client back to the pool.
     client.release();
   }
-
-  // If we made it this far, the deletion was successful.
-  return { type: 'Success' };
 }

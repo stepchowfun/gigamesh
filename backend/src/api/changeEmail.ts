@@ -120,6 +120,9 @@ export default async function changeEmail(
         html:
           "The email address on your Gigamesh account has been changed. It's no longer this address.",
       });
+
+      // If we made it this far, the email has been changed.
+      return { type: 'Success', user: { email: proposal.newEmail } };
     } catch (e) {
       // Something went wrong. Roll back the transaction and rethrow the error.
       await client.query('ROLLBACK');
@@ -129,7 +132,4 @@ export default async function changeEmail(
     // Release the client back to the pool.
     client.release();
   }
-
-  // If we made it this far, the email has been changed.
-  return { type: 'Success' };
 }
