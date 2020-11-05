@@ -63,5 +63,5 @@ export default async function signUp(
   ).rows[0].id;
 
   // Return the session token to the client.
-  return { type: 'Success', sessionId };
+  return { type: 'Success', sessionId, user: { email: proposal.email } };
 }

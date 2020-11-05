@@ -24,5 +24,5 @@ export default async function getUser(
   ).rows[0];
 
   // If we made it this far, the deletion was successful.
-  return { type: 'Success', email: user.email };
+  return { type: 'Success', user: { email: user.email } };
 }

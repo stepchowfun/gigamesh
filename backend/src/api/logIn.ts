@@ -35,8 +35,11 @@ export default async function logIn(
   // Fetch the user.
   const user = (
     await pool.query<{
+      email: string;
       deleted: boolean;
-    }>('SELECT deleted FROM "user" WHERE id = $1 LIMIT 1', [proposal.userId])
+    }>('SELECT email, deleted FROM "user" WHERE id = $1 LIMIT 1', [
+      proposal.userId,
+    ])
   ).rows[0];
 
   // Make sure the user exists.
@@ -53,5 +56,5 @@ export default async function logIn(
   ).rows[0].id;
 
   // Return the session token to the client.
-  return { type: 'Success', sessionId };
+  return { type: 'Success', sessionId, user: { email: user.email } };
 }

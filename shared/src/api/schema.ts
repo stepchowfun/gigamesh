@@ -1,5 +1,11 @@
 import { Literal, String, Record, Union, Unknown } from 'runtypes';
 
+// This struct represents a user and is used by several APIs below.
+
+export const User = Record({
+  email: String,
+});
+
 // The request and response schema for `invite`
 
 export const InviteRequest = Record({
@@ -27,6 +33,7 @@ export const SignUpResponsePayload = Union(
   Record({
     type: Literal('Success'),
     sessionId: String,
+    user: User,
   }),
   Record({
     type: Literal('ProposalExpiredOrInvalid'),
@@ -51,6 +58,7 @@ export const LogInResponsePayload = Union(
   Record({
     type: Literal('Success'),
     sessionId: String,
+    user: User,
   }),
   Record({
     type: Literal('ProposalExpiredOrInvalid'),
@@ -136,6 +144,7 @@ export const ChangeEmailRequest = Record({
 export const ChangeEmailResponsePayload = Union(
   Record({
     type: Literal('Success'),
+    user: User,
   }),
   Record({
     type: Literal('NotLoggedIn'),
@@ -162,7 +171,7 @@ export const GetUserRequest = Record({
 export const GetUserResponsePayload = Union(
   Record({
     type: Literal('Success'),
-    email: String,
+    user: User,
   }),
   Record({
     type: Literal('NotLoggedIn'),
