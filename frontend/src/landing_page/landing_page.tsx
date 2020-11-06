@@ -4,11 +4,21 @@ import styled from 'styled-components';
 import invite from '../api/invite';
 import { didNotCancel, useCancel } from '../use_cancel/use_cancel';
 
-enum ProposalState {
-  NotSent,
-  Sending,
-  Sent,
+interface NotSent {
+  type: 'NotSent';
+  email: string;
 }
+
+interface Sending {
+  type: 'Sending';
+  email: string;
+}
+
+interface Sent {
+  type: 'Sent';
+}
+
+type State = NotSent | Sending | Sent;
 
 const LandingPageContainer = styled.div`
   width: 480px;
@@ -18,31 +28,29 @@ const LandingPageContainer = styled.div`
 
 const LandingPage: FunctionComponent<{}> = () => {
   const cancelToken = useCancel();
-  const [email, setEmail] = useState('');
-  const [proposalState, setProposalState] = useState(ProposalState.NotSent);
+  const [state, setState] = useState<State>({ type: 'NotSent', email: '' });
 
   const handleChangeEmail = (
     event: React.ChangeEvent<HTMLInputElement>,
   ): void => {
-    event.preventDefault();
-
-    setEmail(event.target.value);
+    if (state.type === 'NotSent') {
+      setState({ ...state, email: event.target.value });
+    }
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
-    if (proposalState === ProposalState.NotSent) {
+    if (state.type === 'NotSent') {
       event.preventDefault();
 
-      setProposalState(ProposalState.Sending);
+      setState({ type: 'Sending', email: state.email });
 
-      invite({ email }, cancelToken)
+      invite({ email: state.email }, cancelToken)
         .then(() => {
-          setEmail('');
-          setProposalState(ProposalState.Sent);
+          setState({ type: 'Sent' });
         })
         .catch((e: Error) => {
           if (didNotCancel(e)) {
-            setProposalState(ProposalState.NotSent);
+            setState({ type: 'NotSent', email: state.email });
 
             // eslint-disable-next-line no-alert
             alert(`Something went wrong.\n\n${e.toString()}`);
@@ -54,7 +62,9 @@ const LandingPage: FunctionComponent<{}> = () => {
   return (
     <LandingPageContainer>
       <h2>Welcome to Gigamesh!</h2>
-      {proposalState !== ProposalState.Sent ? (
+      {state.type === 'Sent' ? (
+        <p>Check your email!</p>
+      ) : (
         <form onSubmit={handleSubmit}>
           <label>
             Email:{' '}
@@ -62,21 +72,16 @@ const LandingPage: FunctionComponent<{}> = () => {
               type="email"
               autoComplete="email"
               placeholder="sophie@example.com"
-              value={email}
+              value={state.email}
               onChange={handleChangeEmail}
-              readOnly={proposalState !== ProposalState.NotSent}
+              readOnly={state.type === 'Sending'}
               required
             />
           </label>{' '}
-          <button
-            type="submit"
-            disabled={proposalState !== ProposalState.NotSent}
-          >
+          <button type="submit" disabled={state.type === 'Sending'}>
             Get started
           </button>
         </form>
-      ) : (
-        <p>Check your email!</p>
       )}
     </LandingPageContainer>
   );

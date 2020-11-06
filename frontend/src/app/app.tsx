@@ -47,8 +47,6 @@ const App: FunctionComponent<{
   const handleChangeNewEmail = (
     event: React.ChangeEvent<HTMLInputElement>,
   ): void => {
-    event.preventDefault();
-
     setNewEmail(event.target.value);
   };
 
@@ -62,48 +60,20 @@ const App: FunctionComponent<{
 
       proposeEmailChange({ sessionId, newEmail }, cancelToken)
         .then((payload) => {
+          setUpdatingSettings(false);
+
           ProposeEmailChangeResponsePayload.match(
             () => {
               setNewEmail('');
 
               // eslint-disable-next-line no-alert
-              alert('Check your email!');
+              alert('Please check your email to confirm the change.');
             },
             () => {
               // eslint-disable-next-line no-alert
               alert('You are not logged in. Please log in and try again.');
             },
           )(payload);
-        })
-        .catch((e: Error) => {
-          if (didNotCancel(e)) {
-            // eslint-disable-next-line no-alert
-            alert(`Something went wrong.\n\n${e.toString()}`);
-          }
-        })
-        .finally(() => {
-          setUpdatingSettings(false);
-        });
-    }
-  };
-
-  const handleDeleteUserClick = (): void => {
-    if (!updatingSettings) {
-      setUpdatingSettings(true);
-
-      deleteUser({ sessionId }, cancelToken)
-        .then((payload) => {
-          DeleteUserResponsePayload.match(
-            () => {
-              // The deletion was successful.
-            },
-            () => {
-              // eslint-disable-next-line no-alert
-              alert('You are not logged in. Please log in and try again.');
-            },
-          )(payload);
-
-          onLogOut();
         })
         .catch((e: Error) => {
           if (didNotCancel(e)) {
@@ -113,6 +83,38 @@ const App: FunctionComponent<{
             alert(`Something went wrong.\n\n${e.toString()}`);
           }
         });
+    }
+  };
+
+  const handleDeleteUserClick = (): void => {
+    if (!updatingSettings) {
+      // eslint-disable-next-line no-alert
+      if (window.confirm('Are you sure you want to delete your account?')) {
+        setUpdatingSettings(true);
+
+        deleteUser({ sessionId }, cancelToken)
+          .then((payload) => {
+            DeleteUserResponsePayload.match(
+              () => {
+                // The deletion was successful.
+              },
+              () => {
+                // eslint-disable-next-line no-alert
+                alert('You are not logged in. Please log in and try again.');
+              },
+            )(payload);
+
+            onLogOut();
+          })
+          .catch((e: Error) => {
+            if (didNotCancel(e)) {
+              setUpdatingSettings(false);
+
+              // eslint-disable-next-line no-alert
+              alert(`Something went wrong.\n\n${e.toString()}`);
+            }
+          });
+      }
     }
   };
 
