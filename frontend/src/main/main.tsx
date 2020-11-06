@@ -38,14 +38,14 @@ interface LoggedIn {
   user: Static<typeof User>;
 }
 
-type MainState = Loading | NotLoggedIn | LoggedIn;
+type State = Loading | NotLoggedIn | LoggedIn;
 
 const Main: FunctionComponent<{}> = () => {
   // This is used to cancel any requests if the component is destroyed.
   const cancelToken = useCancel();
 
   // Start out in the loading state.
-  const [appState, setMainState] = useState<MainState>({ type: 'Loading' });
+  const [state, setState] = useState<State>({ type: 'Loading' });
 
   // This function should be called whenever we discover that the user is
   // logged in.
@@ -60,7 +60,7 @@ const Main: FunctionComponent<{}> = () => {
       // they page is reloaded.
     }
 
-    setMainState({
+    setState({
       type: 'LoggedIn',
       sessionId,
       user,
@@ -72,12 +72,12 @@ const Main: FunctionComponent<{}> = () => {
   const onLogOut = () => {
     window.localStorage.removeItem(sessionIdKey);
 
-    setMainState({ type: 'NotLoggedIn' });
+    setState({ type: 'NotLoggedIn' });
   };
 
   useEffect(() => {
     // Did we just start loading the page?
-    if (appState.type === 'Loading') {
+    if (state.type === 'Loading') {
       // Fetch the session ID, if there is one.
       const sessionId = window.localStorage.getItem(sessionIdKey);
 
@@ -245,7 +245,7 @@ const Main: FunctionComponent<{}> = () => {
   });
 
   // Use the state to choose which view to render.
-  switch (appState.type) {
+  switch (state.type) {
     case 'Loading': {
       return <LoadingPage />;
     }
@@ -255,14 +255,14 @@ const Main: FunctionComponent<{}> = () => {
     case 'LoggedIn': {
       return (
         <App
-          sessionId={appState.sessionId}
-          user={appState.user}
+          sessionId={state.sessionId}
+          user={state.user}
           onLogOut={onLogOut}
         />
       );
     }
     default: {
-      const exhaustivenessCheck: never = appState;
+      const exhaustivenessCheck: never = state;
       return exhaustivenessCheck;
     }
   }
