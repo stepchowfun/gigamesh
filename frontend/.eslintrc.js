@@ -35,6 +35,7 @@ module.exports = {
     'react/jsx-filename-extension': ['error', { extensions: ['.tsx'] }],
     '@typescript-eslint/ban-types': ['error', { types: { '{}': false } }],
     'jsx-a11y/label-has-associated-control': ['error', { assert: 'either' }],
+    'react/prop-types': 'off',
     'no-use-before-define': 'off',
     '@typescript-eslint/no-use-before-define': 'error',
     'no-shadow': 'off',
