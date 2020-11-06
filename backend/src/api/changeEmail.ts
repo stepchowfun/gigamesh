@@ -2,8 +2,8 @@ import { Static } from 'runtypes';
 
 import validateSession from '../session/session';
 import { ChangeEmailRequest, ChangeEmailResponse } from '../shared/api/schema';
+import { ErrorCode, getPool } from '../storage/storage';
 import { emailChangeProposalLifespanMs } from '../constants/constants';
-import { getPool } from '../storage/storage';
 import { normalizeEmail, send } from '../email/email';
 
 export default async function changeEmail(
@@ -126,6 +126,13 @@ export default async function changeEmail(
     } catch (e) {
       // Something went wrong. Roll back the transaction and rethrow the error.
       await client.query('ROLLBACK');
+
+      // Warning: TypeScript considers `e` to have type `any`, even though
+      // `unknown` would have been more appropriate.
+      if (e.code === ErrorCode.UniquenessViolation) {
+        return { type: 'ProposalExpiredOrInvalid' };
+      }
+
       throw e;
     }
   } finally {

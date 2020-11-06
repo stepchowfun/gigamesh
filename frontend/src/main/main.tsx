@@ -134,7 +134,7 @@ const Main: FunctionComponent<{}> = () => {
                 onLogOut();
 
                 // eslint-disable-next-line no-alert
-                alert('Unfortunately that link has expired.');
+                alert('Unfortunately that link is invalid or expired.');
               },
             )(payload);
           })
@@ -172,7 +172,7 @@ const Main: FunctionComponent<{}> = () => {
                 onLogOut();
 
                 // eslint-disable-next-line no-alert
-                alert('Unfortunately that link has expired.');
+                alert('Unfortunately that link is invalid or expired.');
               },
             )(payload);
           })
@@ -227,7 +227,7 @@ const Main: FunctionComponent<{}> = () => {
                   onLogOut();
 
                   // eslint-disable-next-line no-alert
-                  alert('Unfortunately that link has expired.');
+                  alert('Unfortunately that link is invalid or expired.');
                 },
               )(payload);
             })
