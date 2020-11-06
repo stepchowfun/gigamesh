@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, CancelToken } from 'axios';
 import { Static } from 'runtypes';
 
 import apiBaseUrl from '../constants/constants';
@@ -9,6 +9,7 @@ import {
 
 export default async function proposeEmailChange(
   payload: Static<typeof ProposeEmailChangeRequest>['payload'],
+  cancelToken: CancelToken,
 ): Promise<Static<typeof ProposeEmailChangeResponse>['payload']> {
   const envelope: Static<typeof ProposeEmailChangeRequest> = {
     type: 'ProposeEmailChangeRequest',
@@ -17,7 +18,7 @@ export default async function proposeEmailChange(
 
   const axiosResponse: AxiosResponse<Static<
     typeof ProposeEmailChangeResponse
-  >> = await axios.post(apiBaseUrl(), envelope);
+  >> = await axios.post(apiBaseUrl(), envelope, { cancelToken });
 
   ProposeEmailChangeResponse.check(axiosResponse.data);
 

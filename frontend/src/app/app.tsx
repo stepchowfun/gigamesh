@@ -19,12 +19,13 @@ import {
   SignUpResponsePayload,
   User,
 } from '../shared/api/schema';
-import { getSessionId, setSessionId } from '../storage/storage';
 import {
   changeEmailHashPrefix,
   logInHashPrefix,
   signUpHashPrefix,
 } from '../shared/constants/constants';
+import { getSessionId, setSessionId } from '../storage/storage';
+import { didNotCancel, useCancel } from '../use_cancel/use_cancel';
 
 const LoadingPageContainer = styled.div`
   width: 480px;
@@ -49,6 +50,7 @@ const LandingPageContainer = styled.div`
 `;
 
 const LandingPage: FunctionComponent<{}> = () => {
+  const cancelToken = useCancel();
   const [email, setEmail] = useState('');
   const [proposalState, setProposalState] = useState(ProposalState.NotSent);
 
@@ -66,16 +68,18 @@ const LandingPage: FunctionComponent<{}> = () => {
 
       setProposalState(ProposalState.Sending);
 
-      invite({ email })
+      invite({ email }, cancelToken)
         .then(() => {
           setEmail('');
           setProposalState(ProposalState.Sent);
         })
         .catch((e: Error) => {
-          setProposalState(ProposalState.NotSent);
+          if (didNotCancel(e)) {
+            setProposalState(ProposalState.NotSent);
 
-          // eslint-disable-next-line no-alert
-          alert(`Something went wrong.\n\n${e.toString()}`);
+            // eslint-disable-next-line no-alert
+            alert(`Something went wrong.\n\n${e.toString()}`);
+          }
         });
     }
   };
@@ -122,6 +126,7 @@ const MainPage: FunctionComponent<{
   user: Static<typeof User>;
   onLogOut: () => void;
 }> = ({ sessionId, user, onLogOut }) => {
+  const cancelToken = useCancel();
   const [newEmail, setNewEmail] = useState('');
   const [updatingSettings, setUpdatingSettings] = useState(false);
 
@@ -129,13 +134,15 @@ const MainPage: FunctionComponent<{
     if (!updatingSettings) {
       setUpdatingSettings(true);
 
-      logOut({ sessionId })
+      logOut({ sessionId }, cancelToken)
         .then(onLogOut)
         .catch((e: Error) => {
-          setUpdatingSettings(false);
+          if (didNotCancel(e)) {
+            setUpdatingSettings(false);
 
-          // eslint-disable-next-line no-alert
-          alert(`Something went wrong.\n\n${e.toString()}`);
+            // eslint-disable-next-line no-alert
+            alert(`Something went wrong.\n\n${e.toString()}`);
+          }
         });
     }
   };
@@ -156,10 +163,7 @@ const MainPage: FunctionComponent<{
 
       setUpdatingSettings(true);
 
-      // The `!` is safe because the "Delete account" button should only be
-      // visible when we have a session ID.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      proposeEmailChange({ sessionId: getSessionId()!, newEmail })
+      proposeEmailChange({ sessionId, newEmail }, cancelToken)
         .then((payload) => {
           ProposeEmailChangeResponsePayload.match(
             () => {
@@ -175,8 +179,10 @@ const MainPage: FunctionComponent<{
           )(payload);
         })
         .catch((e: Error) => {
-          // eslint-disable-next-line no-alert
-          alert(`Something went wrong.\n\n${e.toString()}`);
+          if (didNotCancel(e)) {
+            // eslint-disable-next-line no-alert
+            alert(`Something went wrong.\n\n${e.toString()}`);
+          }
         })
         .finally(() => {
           setUpdatingSettings(false);
@@ -188,10 +194,7 @@ const MainPage: FunctionComponent<{
     if (!updatingSettings) {
       setUpdatingSettings(true);
 
-      // The `!` is safe because the "Delete account" button should only be
-      // visible when we have a session ID.
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      deleteUser({ sessionId: getSessionId()! })
+      deleteUser({ sessionId }, cancelToken)
         .then((payload) => {
           DeleteUserResponsePayload.match(
             () => {
@@ -206,10 +209,12 @@ const MainPage: FunctionComponent<{
           onLogOut();
         })
         .catch((e: Error) => {
-          setUpdatingSettings(false);
+          if (didNotCancel(e)) {
+            setUpdatingSettings(false);
 
-          // eslint-disable-next-line no-alert
-          alert(`Something went wrong.\n\n${e.toString()}`);
+            // eslint-disable-next-line no-alert
+            alert(`Something went wrong.\n\n${e.toString()}`);
+          }
         });
     }
   };
@@ -274,6 +279,9 @@ interface LoggedIn {
 type AppState = Loading | NotLoggedIn | LoggedIn;
 
 const App: FunctionComponent<{}> = () => {
+  // This is used to cancel any requests if the component is destroyed.
+  const cancelToken = useCancel();
+
   // Start out in the loading state.
   const [appState, setAppState] = useState<AppState>({ type: 'Loading' });
 
@@ -287,22 +295,22 @@ const App: FunctionComponent<{}> = () => {
   useEffect(() => {
     // Did we just start loading the page?
     if (appState.type === 'Loading') {
+      // Fetch the session ID, if there is one.
+      const sessionId = getSessionId();
+
       // This hash in the URL will determine if we need to take any action when
       // the page loads.
       const { hash } = window.location;
 
       // No hash?
       if (hash === '') {
-        // Fetch the session ID, if there is one.
-        const sessionId = getSessionId();
-
         // Are we logged out?
         if (sessionId === null) {
           // Go to the landing page.
           onLogOut();
         } else {
           // Fetch the user.
-          getUser({ sessionId })
+          getUser({ sessionId }, cancelToken)
             .then((payload) => {
               GetUserResponsePayload.match((refinedPayload) => {
                 setAppState({
@@ -313,10 +321,12 @@ const App: FunctionComponent<{}> = () => {
               }, onLogOut)(payload);
             })
             .catch((e: Error) => {
-              onLogOut();
+              if (didNotCancel(e)) {
+                onLogOut();
 
-              // eslint-disable-next-line no-alert
-              alert(`Something went wrong.\n\n${e.toString()}`);
+                // eslint-disable-next-line no-alert
+                alert(`Something went wrong.\n\n${e.toString()}`);
+              }
             });
         }
       }
@@ -335,7 +345,7 @@ const App: FunctionComponent<{}> = () => {
         window.history.replaceState(null, '', '/');
 
         // Sign up.
-        signUp({ signupProposalId })
+        signUp({ signupProposalId }, cancelToken)
           .then((payload) => {
             SignUpResponsePayload.match(
               (refinedPayload) => {
@@ -355,10 +365,12 @@ const App: FunctionComponent<{}> = () => {
             )(payload);
           })
           .catch((e: Error) => {
-            onLogOut();
+            if (didNotCancel(e)) {
+              onLogOut();
 
-            // eslint-disable-next-line no-alert
-            alert(`Something went wrong.\n\n${e.toString()}`);
+              // eslint-disable-next-line no-alert
+              alert(`Something went wrong.\n\n${e.toString()}`);
+            }
           });
       }
 
@@ -376,7 +388,7 @@ const App: FunctionComponent<{}> = () => {
         window.history.replaceState(null, '', '/');
 
         // Log in.
-        logIn({ loginProposalId })
+        logIn({ loginProposalId }, cancelToken)
           .then((payload) => {
             LogInResponsePayload.match(
               (refinedPayload) => {
@@ -396,10 +408,12 @@ const App: FunctionComponent<{}> = () => {
             )(payload);
           })
           .catch((e: Error) => {
-            onLogOut();
+            if (didNotCancel(e)) {
+              onLogOut();
 
-            // eslint-disable-next-line no-alert
-            alert(`Something went wrong.\n\n${e.toString()}`);
+              // eslint-disable-next-line no-alert
+              alert(`Something went wrong.\n\n${e.toString()}`);
+            }
           });
       }
 
@@ -418,7 +432,6 @@ const App: FunctionComponent<{}> = () => {
         window.history.replaceState(null, '', '/');
 
         // Make sure we are logged in before proceeding.
-        const sessionId = getSessionId();
         if (sessionId === null) {
           onLogOut();
 
@@ -426,7 +439,7 @@ const App: FunctionComponent<{}> = () => {
           alert('You must be logged in to perform that operation.');
         } else {
           // Change the email.
-          changeEmail({ sessionId, emailChangeProposalId })
+          changeEmail({ sessionId, emailChangeProposalId }, cancelToken)
             .then((payload) => {
               ChangeEmailResponsePayload.match(
                 (refinedPayload) => {
@@ -454,10 +467,12 @@ const App: FunctionComponent<{}> = () => {
               )(payload);
             })
             .catch((e: Error) => {
-              onLogOut();
+              if (didNotCancel(e)) {
+                onLogOut();
 
-              // eslint-disable-next-line no-alert
-              alert(`Something went wrong.\n\n${e.toString()}`);
+                // eslint-disable-next-line no-alert
+                alert(`Something went wrong.\n\n${e.toString()}`);
+              }
             });
         }
       }
