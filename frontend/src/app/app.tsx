@@ -24,8 +24,9 @@ import {
   logInHashPrefix,
   signUpHashPrefix,
 } from '../shared/constants/constants';
-import { getSessionId, setSessionId } from '../storage/storage';
 import { didNotCancel, useCancel } from '../use_cancel/use_cancel';
+
+const sessionIdKey = 'sessionId';
 
 const LoadingPageContainer = styled.div`
   width: 480px;
@@ -285,10 +286,31 @@ const App: FunctionComponent<{}> = () => {
   // Start out in the loading state.
   const [appState, setAppState] = useState<AppState>({ type: 'Loading' });
 
-  // This is a convenience function for dropping the current session (e.g.,
-  // because the user logged out or the session expired).
+  // This function should be called whenever we discover that the user is
+  // logged in.
+  const onLogIn = (sessionId: string, user: Static<typeof User>) => {
+    try {
+      window.localStorage.setItem(sessionIdKey, sessionId);
+    } catch (_) {
+      // An error might occur if the storage is full. Note that in Mobile
+      // Safari, the storage is always full in private mode. If we cannot
+      // persist the session ID, then the application will continue to work as
+      // long as the page is open, but the user may need to re-authenticate if
+      // they page is reloaded.
+    }
+
+    setAppState({
+      type: 'LoggedIn',
+      sessionId,
+      user,
+    });
+  };
+
+  // This function should be called whenever we discover that the user is
+  // logged out.
   const onLogOut = () => {
-    setSessionId(null);
+    window.localStorage.removeItem(sessionIdKey);
+
     setAppState({ type: 'NotLoggedIn' });
   };
 
@@ -296,7 +318,7 @@ const App: FunctionComponent<{}> = () => {
     // Did we just start loading the page?
     if (appState.type === 'Loading') {
       // Fetch the session ID, if there is one.
-      const sessionId = getSessionId();
+      const sessionId = window.localStorage.getItem(sessionIdKey);
 
       // This hash in the URL will determine if we need to take any action when
       // the page loads.
@@ -313,11 +335,7 @@ const App: FunctionComponent<{}> = () => {
           getUser({ sessionId }, cancelToken)
             .then((payload) => {
               GetUserResponsePayload.match((refinedPayload) => {
-                setAppState({
-                  type: 'LoggedIn',
-                  sessionId,
-                  user: refinedPayload.user,
-                });
+                onLogIn(sessionId, refinedPayload.user);
               }, onLogOut)(payload);
             })
             .catch((e: Error) => {
@@ -349,12 +367,7 @@ const App: FunctionComponent<{}> = () => {
           .then((payload) => {
             SignUpResponsePayload.match(
               (refinedPayload) => {
-                setSessionId(refinedPayload.sessionId);
-                setAppState({
-                  type: 'LoggedIn',
-                  sessionId: refinedPayload.sessionId,
-                  user: refinedPayload.user,
-                });
+                onLogIn(refinedPayload.sessionId, refinedPayload.user);
               },
               () => {
                 onLogOut();
@@ -392,12 +405,7 @@ const App: FunctionComponent<{}> = () => {
           .then((payload) => {
             LogInResponsePayload.match(
               (refinedPayload) => {
-                setSessionId(refinedPayload.sessionId);
-                setAppState({
-                  type: 'LoggedIn',
-                  sessionId: refinedPayload.sessionId,
-                  user: refinedPayload.user,
-                });
+                onLogIn(refinedPayload.sessionId, refinedPayload.user);
               },
               () => {
                 onLogOut();
@@ -443,11 +451,7 @@ const App: FunctionComponent<{}> = () => {
             .then((payload) => {
               ChangeEmailResponsePayload.match(
                 (refinedPayload) => {
-                  setAppState({
-                    type: 'LoggedIn',
-                    sessionId,
-                    user: refinedPayload.user,
-                  });
+                  onLogIn(sessionId, refinedPayload.user);
 
                   // eslint-disable-next-line no-alert
                   alert('Your email has been updated.');
@@ -490,12 +494,7 @@ const App: FunctionComponent<{}> = () => {
     case 'LoggedIn': {
       return (
         <MainPage
-          sessionId={
-            // The `!` is safe because this state is active only when there is
-            // a session.
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            getSessionId()!
-          }
+          sessionId={appState.sessionId}
           user={appState.user}
           onLogOut={onLogOut}
         />
