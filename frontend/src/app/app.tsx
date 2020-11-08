@@ -12,7 +12,7 @@ import {
 } from '../shared/api/schema';
 import { didNotCancel, useCancel } from '../use_cancel/use_cancel';
 
-const AppContainer = styled.div`
+const Container = styled.div`
   width: 480px;
   margin: 64px auto;
   color: #333333;
@@ -119,7 +119,7 @@ const App: FunctionComponent<{
   };
 
   return (
-    <AppContainer>
+    <Container>
       <h2>Hello there!</h2>
       <p>Your email is: {user.email}</p>
       <p>
@@ -157,7 +157,7 @@ const App: FunctionComponent<{
           Delete account
         </button>
       </p>
-    </AppContainer>
+    </Container>
   );
 };
 

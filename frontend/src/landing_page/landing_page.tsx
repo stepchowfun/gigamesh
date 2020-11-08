@@ -20,10 +20,99 @@ interface Sent {
 
 type State = NotSent | Sending | Sent;
 
-const LandingPageContainer = styled.div`
-  width: 480px;
-  margin: 64px auto;
+const containerPadding = 16;
+const maxInnerWidth = 400;
+
+const Container = styled.div`
+  padding: ${containerPadding}px;
   color: #333333;
+`;
+
+const Heading = styled.h2`
+  max-width: 512px;
+  margin: 64px auto;
+  line-height: 1;
+  text-align: center;
+
+  font-size: 64px;
+
+  @media (max-width: ${maxInnerWidth + containerPadding * 2 - 1}px) {
+    font-size: 48px;
+  }
+`;
+
+const InviteFormCompleted = styled.div`
+  text-align: center;
+`;
+
+const inviteFormHeight = 64;
+const inviteFormBorderWidth = 2;
+const inviteFormPaddingWidth = 8;
+const inviteFormInnerHeight =
+  inviteFormHeight - inviteFormBorderWidth * 2 - inviteFormPaddingWidth * 2;
+
+const InviteForm = styled.form`
+  display: flex;
+  max-width: ${maxInnerWidth}px;
+  height: ${inviteFormHeight}px;
+  overflow: hidden;
+  margin: 0 auto;
+  padding: ${inviteFormPaddingWidth}px;
+  border: ${inviteFormBorderWidth}px solid #eee;
+  border-radius: ${inviteFormHeight / 2}px;
+  background-color: #ffffff;
+`;
+
+const Email = styled.label`
+  flex-grow: 100;
+`;
+
+const inviteFormEmailLabelHeight = 16;
+const inviteFormLeftPadding = inviteFormInnerHeight / 2;
+
+const EmailLabel = styled.div`
+  width: 100%;
+  height: ${inviteFormEmailLabelHeight}px;
+  padding-left: ${inviteFormLeftPadding}px;
+  font-size: 13px;
+  font-weight: bold;
+`;
+
+const emailInputHeight = inviteFormInnerHeight - inviteFormEmailLabelHeight;
+
+const EmailInput = styled.input`
+  display: block;
+  width: 100%;
+  height: ${emailInputHeight}px;
+  padding: 0 0 0 ${inviteFormLeftPadding}px;
+  border: none;
+  outline: none;
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    box-shadow: inset 0 0 0 ${Math.ceil(emailInputHeight / 2)}px #ffffff;
+  }
+`;
+
+const InviteSubmit = styled.button`
+  display: block;
+  width: ${inviteFormInnerHeight}px;
+  height: ${inviteFormInnerHeight}px;
+  padding: 0;
+  line-height: ${inviteFormInnerHeight}px;
+  border: none;
+  border-radius: ${inviteFormInnerHeight / 2}px;
+  outline: none;
+  color: #ffffff;
+  cursor: pointer;
+
+  background-color: #92c3ff;
+
+  &:hover {
+    background-color: #b5d6ff;
+  }
 `;
 
 const LandingPage: FunctionComponent<{}> = () => {
@@ -60,30 +149,30 @@ const LandingPage: FunctionComponent<{}> = () => {
   };
 
   return (
-    <LandingPageContainer>
-      <h2>Welcome to Gigamesh!</h2>
+    <Container>
+      <Heading>A home for all your notes.</Heading>
       {state.type === 'Sent' ? (
-        <p>Check your email!</p>
+        <InviteFormCompleted>Check your email!</InviteFormCompleted>
       ) : (
-        <form onSubmit={handleSubmit}>
-          <label>
-            Email:{' '}
-            <input
+        <InviteForm onSubmit={handleSubmit}>
+          <Email>
+            <EmailLabel>Email</EmailLabel>
+            <EmailInput
               type="email"
               autoComplete="email"
-              placeholder="sophie@example.com"
+              placeholder="me@example.com"
               value={state.email}
               onChange={handleChangeEmail}
               readOnly={state.type === 'Sending'}
               required
             />
-          </label>{' '}
-          <button type="submit" disabled={state.type === 'Sending'}>
-            Get started
-          </button>
-        </form>
+          </Email>
+          <InviteSubmit type="submit" disabled={state.type === 'Sending'}>
+            Go
+          </InviteSubmit>
+        </InviteForm>
       )}
-    </LandingPageContainer>
+    </Container>
   );
 };
 
