@@ -44,8 +44,18 @@ const Main: FunctionComponent<{}> = () => {
   // This is used to cancel any requests if the component is destroyed.
   const cancelToken = useCancel();
 
-  // Start out in the loading state.
-  const [state, setState] = useState<State>({ type: 'Loading' });
+  // This hash in the URL will determine if we need to take any action when
+  // the page loads.
+  const { hash } = window.location;
+
+  // Fetch the session ID, if there is one.
+  const originalSessionId = window.localStorage.getItem(sessionIdKey);
+
+  // If we don't have a session, start out on the landing page. Otherwise,
+  // start out on the loading page.
+  const [state, setState] = useState<State>({
+    type: hash === '' && originalSessionId === null ? 'NotLoggedIn' : 'Loading',
+  });
 
   // This function should be called whenever we discover that the user is
   // logged in.
@@ -78,25 +88,15 @@ const Main: FunctionComponent<{}> = () => {
   useEffect(() => {
     // Did we just start loading the page?
     if (state.type === 'Loading') {
-      // Fetch the session ID, if there is one.
-      const sessionId = window.localStorage.getItem(sessionIdKey);
-
-      // This hash in the URL will determine if we need to take any action when
-      // the page loads.
-      const { hash } = window.location;
-
       // No hash?
       if (hash === '') {
-        // Are we logged out?
-        if (sessionId === null) {
-          // Go to the landing page.
-          onLogOut();
-        } else {
+        // Do we have a session?
+        if (originalSessionId !== null) {
           // Fetch the user.
-          getUser({ sessionId }, cancelToken)
+          getUser({ sessionId: originalSessionId }, cancelToken)
             .then((payload) => {
               GetUserResponsePayload.match((refinedPayload) => {
-                onLogIn(sessionId, refinedPayload.user);
+                onLogIn(originalSessionId, refinedPayload.user);
               }, onLogOut)(payload);
             })
             .catch((e: Error) => {
@@ -201,18 +201,21 @@ const Main: FunctionComponent<{}> = () => {
         window.history.replaceState(null, '', '/');
 
         // Make sure we are logged in before proceeding.
-        if (sessionId === null) {
+        if (originalSessionId === null) {
           onLogOut();
 
           // eslint-disable-next-line no-alert
           alert('You must be logged in to perform that operation.');
         } else {
           // Change the email.
-          changeEmail({ sessionId, emailChangeProposalId }, cancelToken)
+          changeEmail(
+            { sessionId: originalSessionId, emailChangeProposalId },
+            cancelToken,
+          )
             .then((payload) => {
               ChangeEmailResponsePayload.match(
                 (refinedPayload) => {
-                  onLogIn(sessionId, refinedPayload.user);
+                  onLogIn(originalSessionId, refinedPayload.user);
 
                   // eslint-disable-next-line no-alert
                   alert('Your email has been updated.');
