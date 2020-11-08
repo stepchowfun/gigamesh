@@ -46,15 +46,18 @@ const Main: FunctionComponent<{}> = () => {
 
   // This hash in the URL will determine if we need to take any action when
   // the page loads.
-  const { hash } = window.location;
+  const originalHash = window.location.hash;
 
   // Fetch the session ID, if there is one.
   const originalSessionId = window.localStorage.getItem(sessionIdKey);
 
-  // If we don't have a session, start out on the landing page. Otherwise,
-  // start out on the loading page.
+  // If we don't have a URL hash or session, start out on the landing page.
+  // Otherwise, start out on the loading page.
   const [state, setState] = useState<State>({
-    type: hash === '' && originalSessionId === null ? 'NotLoggedIn' : 'Loading',
+    type:
+      originalHash === '' && originalSessionId === null
+        ? 'NotLoggedIn'
+        : 'Loading',
   });
 
   // This function should be called whenever we discover that the user is
@@ -89,7 +92,7 @@ const Main: FunctionComponent<{}> = () => {
     // Did we just start loading the page?
     if (state.type === 'Loading') {
       // No hash?
-      if (hash === '') {
+      if (originalHash === '') {
         // Do we have a session?
         if (originalSessionId !== null) {
           // Fetch the user.
@@ -111,9 +114,11 @@ const Main: FunctionComponent<{}> = () => {
       }
 
       // Check if the user has followed a signup link.
-      if (hash.startsWith(signUpHashPrefix)) {
+      if (originalHash.startsWith(signUpHashPrefix)) {
         // Extract the signup proposal ID.
-        const signupProposalId = hash.substring(signUpHashPrefix.length);
+        const signupProposalId = originalHash.substring(
+          signUpHashPrefix.length,
+        );
 
         // Remove the signup proposal ID from the URL because:
         // - If the user refreshes the page, we don't want to try to sign up again.
@@ -149,9 +154,9 @@ const Main: FunctionComponent<{}> = () => {
       }
 
       // Check if the user has followed a login link.
-      if (hash.startsWith(logInHashPrefix)) {
+      if (originalHash.startsWith(logInHashPrefix)) {
         // Extract the login proposal ID.
-        const loginProposalId = hash.substring(logInHashPrefix.length);
+        const loginProposalId = originalHash.substring(logInHashPrefix.length);
 
         // Remove the login proposal ID from the URL because:
         // - If the user refreshes the page, we don't want to try to log in again.
@@ -187,9 +192,9 @@ const Main: FunctionComponent<{}> = () => {
       }
 
       // Check if the user has followed a change email link.
-      if (hash.startsWith(changeEmailHashPrefix)) {
+      if (originalHash.startsWith(changeEmailHashPrefix)) {
         // Extract the change email proposal ID.
-        const emailChangeProposalId = hash.substring(
+        const emailChangeProposalId = originalHash.substring(
           changeEmailHashPrefix.length,
         );
 
