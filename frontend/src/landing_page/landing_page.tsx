@@ -58,7 +58,7 @@ const InviteForm = styled.form`
   overflow: hidden;
   margin: 0 auto;
   padding: ${inviteFormPaddingWidth}px;
-  border: ${inviteFormBorderWidth}px solid #eee;
+  border: ${inviteFormBorderWidth}px solid #dddddd;
   border-radius: ${inviteFormHeight / 2}px;
   background-color: #ffffff;
 `;
@@ -115,6 +115,13 @@ const InviteSubmit = styled.button`
   }
 `;
 
+const InviteFormSubtext = styled.p`
+  max-width: ${maxInnerWidth - inviteFormHeight}px;
+  margin: 8px auto 0 auto;
+  font-size: 13px;
+  color: #999999;
+`;
+
 const LandingPage: FunctionComponent<{}> = () => {
   const cancelToken = useCancel();
   const [state, setState] = useState<State>({ type: 'NotSent', email: '' });
@@ -154,23 +161,29 @@ const LandingPage: FunctionComponent<{}> = () => {
       {state.type === 'Sent' ? (
         <InviteFormCompleted>Check your email!</InviteFormCompleted>
       ) : (
-        <InviteForm onSubmit={handleSubmit}>
-          <Email>
-            <EmailLabel>Email</EmailLabel>
-            <EmailInput
-              type="email"
-              autoComplete="email"
-              placeholder="me@example.com"
-              value={state.email}
-              onChange={handleChangeEmail}
-              readOnly={state.type === 'Sending'}
-              required
-            />
-          </Email>
-          <InviteSubmit type="submit" disabled={state.type === 'Sending'}>
-            Go
-          </InviteSubmit>
-        </InviteForm>
+        <div>
+          <InviteForm onSubmit={handleSubmit}>
+            <Email>
+              <EmailLabel>Email</EmailLabel>
+              <EmailInput
+                type="email"
+                autoComplete="email"
+                placeholder="me@example.com"
+                value={state.email}
+                onChange={handleChangeEmail}
+                readOnly={state.type === 'Sending'}
+                required
+              />
+            </Email>
+            <InviteSubmit type="submit" disabled={state.type === 'Sending'}>
+              Go
+            </InviteSubmit>
+          </InviteForm>
+          <InviteFormSubtext>
+            New to Gigamesh? Returning to log in? Either way, you’re in the
+            right place.
+          </InviteFormSubtext>
+        </div>
       )}
     </Container>
   );
