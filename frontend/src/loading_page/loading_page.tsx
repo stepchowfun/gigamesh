@@ -19,7 +19,7 @@ const planetOffset =
   planetRadius -
   orbitBorderWidth / 2;
 
-const LoadingPageContainer = styled.div`
+const Container = styled.div`
   width: ${orbitRadius * 2}px;
   height: ${orbitRadius * 2}px;
   position: absolute;
@@ -45,7 +45,7 @@ const LoadingPageContainer = styled.div`
 `;
 
 const LoadingPage: FunctionComponent<{}> = () => {
-  return <LoadingPageContainer />;
+  return <Container />;
 };
 
 export default LoadingPage;
