@@ -149,13 +149,6 @@ const InviteSubmitIcon = styled.img`
   display: block;
 `;
 
-const InviteFormSubtext = styled.p`
-  max-width: ${maxInnerWidth - inviteFormHeight}px;
-  margin: 8px auto 0 auto;
-  font-size: 13px;
-  color: ${lightLine};
-`;
-
 const InviteFormSubmitting = styled.div`
   max-width: ${maxInnerWidth}px;
   height: ${inviteFormHeight}px;
@@ -248,10 +241,6 @@ const LandingPage: FunctionComponent<{}> = () => {
             <InviteSubmitIcon src={chevron} alt="Go" />
           </InviteSubmit>
         </InviteForm>
-        <InviteFormSubtext>
-          New to Gigamesh? Returning to log in? Either way, you’re in the right
-          place.
-        </InviteFormSubtext>
       </div>
     );
   }
