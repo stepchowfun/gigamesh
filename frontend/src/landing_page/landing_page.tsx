@@ -24,6 +24,7 @@ type State = NotSent | Sending | Sent;
 const darkLine = '#444444';
 const darkerLine = '#222222';
 const lightLine = '#999999';
+const lighterLine = '#cccccc';
 const buttonColor = '#31a3f5';
 const buttonColorHover = '#56b8ff';
 const buttonColorActive = '#0c8fec';
@@ -77,9 +78,14 @@ const InviteForm = styled.form`
   overflow: hidden;
   margin: 0 auto;
   padding: ${inviteFormPaddingWidth}px;
-  border: ${inviteFormBorderWidth}px solid ${formOutlineColor};
   border-radius: ${inviteFormHeight / 2}px;
   cursor: text;
+
+  border: ${inviteFormBorderWidth}px solid ${lighterLine};
+
+  &:focus-within {
+    border: ${inviteFormBorderWidth}px solid ${formOutlineColor};
+  }
 `;
 
 const Email = styled.label`
@@ -136,6 +142,7 @@ const InviteSubmit = styled.button`
 
   background-color: ${buttonColor};
 
+  &:focus,
   &:hover {
     background-color: ${buttonColorHover};
   }
