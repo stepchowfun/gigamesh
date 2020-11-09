@@ -1,7 +1,7 @@
 import axios, { AxiosResponse, CancelToken } from 'axios';
 import { Static } from 'runtypes';
 
-import apiBaseUrl from '../constants/constants';
+import { apiBaseUrl } from '../constants/constants';
 import {
   ProposeEmailChangeRequest,
   ProposeEmailChangeResponse,

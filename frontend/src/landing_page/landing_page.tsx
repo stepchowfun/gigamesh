@@ -1,6 +1,16 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
-import styled, { keyframes } from 'styled-components';
+import styled, { css, keyframes } from 'styled-components';
 
+import {
+  buttonActiveColor,
+  buttonDefaultColor,
+  buttonHoverColor,
+  lineDarkColor,
+  lineDarkerColor,
+  lineFocusColor,
+  lineLightColor,
+  lineLighterColor,
+} from '../constants/constants';
 import chevron from './chevron.svg';
 import invite from '../api/invite';
 import { didNotCancel, useCancel } from '../use_cancel/use_cancel';
@@ -21,46 +31,33 @@ interface Sent {
 
 type State = NotSent | Sending | Sent;
 
-const darkLine = '#444444';
-const darkerLine = '#222222';
-const lightLine = '#999999';
-const lighterLine = '#cccccc';
-const buttonColor = '#31a3f5';
-const buttonColorHover = '#56b8ff';
-const buttonColorActive = '#0c8fec';
-const formOutlineColor = buttonColorHover;
-
 const wobble = keyframes`
-    from {
-      background-position-x: 0%;
-    }
+  from {
+    background-position-x: 0%;
+  }
 
-    50% {
-      background-position-x: 100%;
-    }
-
-    to {
-      background-position-x: 0%;
-    }
+  to {
+    background-position-x: 100%;
+  }
 `;
 
 const containerPadding = 16;
-const maxInnerWidth = 400;
 
 const Container = styled.div`
   padding: ${containerPadding}px;
 `;
+
+const inviteFormMaxWidth = 400;
 
 const Heading = styled.h2`
   max-width: 512px;
   margin: 64px auto;
   line-height: 1;
   text-align: center;
-  color: ${darkerLine};
-
+  color: ${lineDarkerColor};
   font-size: 64px;
 
-  @media (max-width: ${maxInnerWidth + containerPadding * 2 - 1}px) {
+  @media (max-width: ${inviteFormMaxWidth + containerPadding * 2 - 1}px) {
     font-size: 48px;
   }
 `;
@@ -71,20 +68,23 @@ const inviteFormPaddingWidth = 8;
 const inviteFormInnerHeight =
   inviteFormHeight - inviteFormBorderWidth * 2 - inviteFormPaddingWidth * 2;
 
+const inviteFormLayout = css`
+  max-width: ${inviteFormMaxWidth}px;
+  height: ${inviteFormHeight}px;
+  margin: 0 auto;
+  border-radius: ${inviteFormHeight / 2}px;
+  overflow: hidden;
+`;
+
 const InviteForm = styled.form`
   display: flex;
-  max-width: ${maxInnerWidth}px;
-  height: ${inviteFormHeight}px;
-  overflow: hidden;
-  margin: 0 auto;
+  ${inviteFormLayout}
   padding: ${inviteFormPaddingWidth}px;
-  border-radius: ${inviteFormHeight / 2}px;
+  border: ${inviteFormBorderWidth}px solid ${lineLighterColor};
   cursor: text;
 
-  border: ${inviteFormBorderWidth}px solid ${lighterLine};
-
   &:focus-within {
-    border: ${inviteFormBorderWidth}px solid ${formOutlineColor};
+    border: ${inviteFormBorderWidth}px solid ${lineFocusColor};
   }
 `;
 
@@ -95,27 +95,27 @@ const Email = styled.label`
 const emailInputHeight = inviteFormInnerHeight / 2;
 const inviteFormLeftPadding = inviteFormInnerHeight / 2;
 
-const EmailLabel = styled.div`
-  width: 100%;
-  height: ${emailInputHeight}px;
-  line-height: ${emailInputHeight}px;
-  padding-left: ${inviteFormLeftPadding}px;
-  font-size: 13px;
-  font-weight: bold;
-  color: ${darkLine};
-  cursor: text;
-`;
-
-const EmailInput = styled.input`
+const emailSectionLayout = css`
   display: block;
   width: 100%;
   height: ${emailInputHeight}px;
   line-height: ${emailInputHeight}px;
   padding: 0 0 0 ${inviteFormLeftPadding}px;
+`;
+
+const EmailLabel = styled.div`
+  ${emailSectionLayout}
+  font-size: 13px;
+  font-weight: bold;
+  color: ${lineDarkColor};
+  cursor: text;
+`;
+
+const EmailInput = styled.input`
+  ${emailSectionLayout}
   border: none;
   outline: none;
-  color: ${darkLine};
-
+  color: ${lineDarkColor};
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
   &:-webkit-autofill:focus,
@@ -124,7 +124,7 @@ const EmailInput = styled.input`
   }
 
   &::placeholder {
-    color: ${lightLine};
+    color: ${lineLightColor};
     opacity: 1;
   }
 `;
@@ -134,21 +134,19 @@ const InviteSubmit = styled.button`
   width: ${inviteFormInnerHeight}px;
   height: ${inviteFormInnerHeight}px;
   padding: 0;
-  line-height: ${inviteFormInnerHeight}px;
   border: none;
   border-radius: ${inviteFormInnerHeight / 2}px;
   outline: none;
   cursor: pointer;
-
-  background-color: ${buttonColor};
+  background-color: ${buttonDefaultColor};
 
   &:focus,
   &:hover {
-    background-color: ${buttonColorHover};
+    background-color: ${buttonHoverColor};
   }
 
   &:active {
-    background-color: ${buttonColorActive};
+    background-color: ${buttonActiveColor};
   }
 `;
 
@@ -157,26 +155,26 @@ const InviteSubmitIcon = styled.img`
 `;
 
 const InviteFormSubmitting = styled.div`
-  max-width: ${maxInnerWidth}px;
-  height: ${inviteFormHeight}px;
+  ${inviteFormLayout}
   line-height: ${inviteFormHeight}px;
-  margin: 0 auto;
-  border: ${inviteFormBorderWidth}px solid ${formOutlineColor};
-  border-radius: ${inviteFormHeight / 2}px;
-  background: linear-gradient(270deg, #ffffff, ${formOutlineColor}, #ffffff);
-  background-size: 200% 100%;
+  border: ${inviteFormBorderWidth}px solid ${lineFocusColor};
+  background: linear-gradient(
+    270deg,
+    #ffffff,
+    ${lineFocusColor},
+    #ffffff,
+    ${lineFocusColor}
+  );
+  background-size: 300% 100%;
   animation: ${wobble} 1s ease-in-out infinite;
 `;
 
 const InviteFormCompleted = styled.div`
-  max-width: ${maxInnerWidth}px;
-  height: ${inviteFormHeight}px;
+  ${inviteFormLayout}
   line-height: ${inviteFormHeight}px;
-  margin: 0 auto;
-  border: ${inviteFormBorderWidth}px solid ${formOutlineColor};
-  border-radius: ${inviteFormHeight / 2}px;
+  border: ${inviteFormBorderWidth}px solid ${lineLighterColor};
   text-align: center;
-  color: ${buttonColor};
+  color: ${lineLightColor};
 `;
 
 const LandingPage: FunctionComponent<{}> = () => {
@@ -224,11 +222,7 @@ const LandingPage: FunctionComponent<{}> = () => {
   };
 
   let inviteForm;
-  if (state.type === 'Sent') {
-    inviteForm = <InviteFormCompleted>Check your email!</InviteFormCompleted>;
-  } else if (state.type === 'Sending') {
-    inviteForm = <InviteFormSubmitting />;
-  } else {
+  if (state.type === 'NotSent') {
     inviteForm = (
       <div>
         <InviteForm onSubmit={handleSubmit} onClick={handleClick}>
@@ -250,6 +244,10 @@ const LandingPage: FunctionComponent<{}> = () => {
         </InviteForm>
       </div>
     );
+  } else if (state.type === 'Sending') {
+    inviteForm = <InviteFormSubmitting />;
+  } else {
+    inviteForm = <InviteFormCompleted>Check your email!</InviteFormCompleted>;
   }
 
   return (
