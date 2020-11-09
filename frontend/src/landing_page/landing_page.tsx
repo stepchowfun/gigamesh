@@ -218,7 +218,9 @@ const LandingPage: FunctionComponent<{}> = () => {
   };
 
   const handleClick = (): void => {
-    inputRef.current?.focus();
+    if (state.type === 'NotSent') {
+      inputRef.current?.focus();
+    }
   };
 
   let inviteForm;
