@@ -122,7 +122,6 @@ const InviteSubmit = styled.button`
   border: none;
   border-radius: ${inviteFormInnerHeight / 2}px;
   outline: none;
-  color: #ffffff;
   cursor: pointer;
 
   background-color: ${buttonColor};
