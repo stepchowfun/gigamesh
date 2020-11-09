@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useRef, useState } from 'react';
+import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import invite from '../api/invite';
@@ -23,6 +23,10 @@ type State = NotSent | Sending | Sent;
 const darkLine = '#444444';
 const darkerLine = '#222222';
 const lightLine = '#999999';
+const buttonColor = '#31a3f5';
+const buttonColorHover = '#56b8ff';
+const buttonColorActive = '#0c8fec';
+const formOutlineColor = buttonColorHover;
 
 const containerPadding = 16;
 const maxInnerWidth = 400;
@@ -62,9 +66,8 @@ const InviteForm = styled.form`
   overflow: hidden;
   margin: 0 auto;
   padding: ${inviteFormPaddingWidth}px;
-  border: ${inviteFormBorderWidth}px solid #c9e2ff;
+  border: ${inviteFormBorderWidth}px solid ${formOutlineColor};
   border-radius: ${inviteFormHeight / 2}px;
-  background-color: #ffffff;
   cursor: text;
 `;
 
@@ -121,10 +124,14 @@ const InviteSubmit = styled.button`
   color: #ffffff;
   cursor: pointer;
 
-  background-color: #92c3ff;
+  background-color: ${buttonColor};
 
   &:hover {
-    background-color: #b5d6ff;
+    background-color: ${buttonColorHover};
+  }
+
+  &:active {
+    background-color: ${buttonColorActive};
   }
 `;
 
@@ -139,6 +146,10 @@ const LandingPage: FunctionComponent<{}> = () => {
   const cancelToken = useCancel();
   const [state, setState] = useState<State>({ type: 'NotSent', email: '' });
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  });
 
   const handleChangeEmail = (
     event: React.ChangeEvent<HTMLInputElement>,
