@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import invite from '../api/invite';
@@ -65,6 +65,7 @@ const InviteForm = styled.form`
   border: ${inviteFormBorderWidth}px solid #c9e2ff;
   border-radius: ${inviteFormHeight / 2}px;
   background-color: #ffffff;
+  cursor: text;
 `;
 
 const Email = styled.label`
@@ -82,6 +83,7 @@ const EmailLabel = styled.div`
   font-size: 13px;
   font-weight: bold;
   color: ${darkLine};
+  cursor: text;
 `;
 
 const EmailInput = styled.input`
@@ -136,6 +138,7 @@ const InviteFormSubtext = styled.p`
 const LandingPage: FunctionComponent<{}> = () => {
   const cancelToken = useCancel();
   const [state, setState] = useState<State>({ type: 'NotSent', email: '' });
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleChangeEmail = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -166,6 +169,10 @@ const LandingPage: FunctionComponent<{}> = () => {
     }
   };
 
+  const handleClick = (): void => {
+    inputRef.current?.focus();
+  };
+
   return (
     <Container>
       <Heading>A home for all your notes.</Heading>
@@ -173,10 +180,11 @@ const LandingPage: FunctionComponent<{}> = () => {
         <InviteFormCompleted>Check your email!</InviteFormCompleted>
       ) : (
         <div>
-          <InviteForm onSubmit={handleSubmit}>
+          <InviteForm onSubmit={handleSubmit} onClick={handleClick}>
             <Email>
               <EmailLabel>Email</EmailLabel>
               <EmailInput
+                ref={inputRef}
                 type="email"
                 autoComplete="email"
                 placeholder="me@example.com"
