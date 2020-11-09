@@ -20,12 +20,15 @@ interface Sent {
 
 type State = NotSent | Sending | Sent;
 
+const darkLine = '#444444';
+const darkerLine = '#222222';
+const lightLine = '#999999';
+
 const containerPadding = 16;
 const maxInnerWidth = 400;
 
 const Container = styled.div`
   padding: ${containerPadding}px;
-  color: #333333;
 `;
 
 const Heading = styled.h2`
@@ -33,6 +36,7 @@ const Heading = styled.h2`
   margin: 64px auto;
   line-height: 1;
   text-align: center;
+  color: ${darkerLine};
 
   font-size: 64px;
 
@@ -58,7 +62,7 @@ const InviteForm = styled.form`
   overflow: hidden;
   margin: 0 auto;
   padding: ${inviteFormPaddingWidth}px;
-  border: ${inviteFormBorderWidth}px solid #dddddd;
+  border: ${inviteFormBorderWidth}px solid #c9e2ff;
   border-radius: ${inviteFormHeight / 2}px;
   background-color: #ffffff;
 `;
@@ -67,32 +71,39 @@ const Email = styled.label`
   flex-grow: 100;
 `;
 
-const inviteFormEmailLabelHeight = 16;
+const emailInputHeight = inviteFormInnerHeight / 2;
 const inviteFormLeftPadding = inviteFormInnerHeight / 2;
 
 const EmailLabel = styled.div`
   width: 100%;
-  height: ${inviteFormEmailLabelHeight}px;
+  height: ${emailInputHeight}px;
+  line-height: ${emailInputHeight}px;
   padding-left: ${inviteFormLeftPadding}px;
   font-size: 13px;
   font-weight: bold;
+  color: ${darkLine};
 `;
-
-const emailInputHeight = inviteFormInnerHeight - inviteFormEmailLabelHeight;
 
 const EmailInput = styled.input`
   display: block;
   width: 100%;
   height: ${emailInputHeight}px;
+  line-height: ${emailInputHeight}px;
   padding: 0 0 0 ${inviteFormLeftPadding}px;
   border: none;
   outline: none;
+  color: ${darkLine};
 
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
   &:-webkit-autofill:focus,
   &:-webkit-autofill:active {
     box-shadow: inset 0 0 0 ${Math.ceil(emailInputHeight / 2)}px #ffffff;
+  }
+
+  &::placeholder {
+    color: ${lightLine};
+    opacity: 1;
   }
 `;
 
@@ -119,7 +130,7 @@ const InviteFormSubtext = styled.p`
   max-width: ${maxInnerWidth - inviteFormHeight}px;
   margin: 8px auto 0 auto;
   font-size: 13px;
-  color: #999999;
+  color: ${lightLine};
 `;
 
 const LandingPage: FunctionComponent<{}> = () => {
