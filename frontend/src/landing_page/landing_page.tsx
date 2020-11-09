@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
+import chevron from './chevron.svg';
 import invite from '../api/invite';
 import { didNotCancel, useCancel } from '../use_cancel/use_cancel';
 
@@ -135,6 +136,10 @@ const InviteSubmit = styled.button`
   }
 `;
 
+const InviteSubmitIcon = styled.img`
+  display: block;
+`;
+
 const InviteFormSubtext = styled.p`
   max-width: ${maxInnerWidth - inviteFormHeight}px;
   margin: 8px auto 0 auto;
@@ -206,7 +211,7 @@ const LandingPage: FunctionComponent<{}> = () => {
               />
             </Email>
             <InviteSubmit type="submit" disabled={state.type === 'Sending'}>
-              Go
+              <InviteSubmitIcon src={chevron} alt="Go" />
             </InviteSubmit>
           </InviteForm>
           <InviteFormSubtext>
