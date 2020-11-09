@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
 import chevron from './chevron.svg';
 import invite from '../api/invite';
@@ -29,6 +29,20 @@ const buttonColorHover = '#56b8ff';
 const buttonColorActive = '#0c8fec';
 const formOutlineColor = buttonColorHover;
 
+const wobble = keyframes`
+    from {
+      background-position-x: 0%;
+    }
+
+    50% {
+      background-position-x: 100%;
+    }
+
+    to {
+      background-position-x: 0%;
+    }
+`;
+
 const containerPadding = 16;
 const maxInnerWidth = 400;
 
@@ -48,10 +62,6 @@ const Heading = styled.h2`
   @media (max-width: ${maxInnerWidth + containerPadding * 2 - 1}px) {
     font-size: 48px;
   }
-`;
-
-const InviteFormCompleted = styled.div`
-  text-align: center;
 `;
 
 const inviteFormHeight = 64;
@@ -146,6 +156,29 @@ const InviteFormSubtext = styled.p`
   color: ${lightLine};
 `;
 
+const InviteFormSubmitting = styled.div`
+  max-width: ${maxInnerWidth}px;
+  height: ${inviteFormHeight}px;
+  line-height: ${inviteFormHeight}px;
+  margin: 0 auto;
+  border: ${inviteFormBorderWidth}px solid ${formOutlineColor};
+  border-radius: ${inviteFormHeight / 2}px;
+  background: linear-gradient(270deg, #ffffff, ${formOutlineColor}, #ffffff);
+  background-size: 200% 100%;
+  animation: ${wobble} 1s ease-in-out infinite;
+`;
+
+const InviteFormCompleted = styled.div`
+  max-width: ${maxInnerWidth}px;
+  height: ${inviteFormHeight}px;
+  line-height: ${inviteFormHeight}px;
+  margin: 0 auto;
+  border: ${inviteFormBorderWidth}px solid ${formOutlineColor};
+  border-radius: ${inviteFormHeight / 2}px;
+  text-align: center;
+  color: ${buttonColor};
+`;
+
 const LandingPage: FunctionComponent<{}> = () => {
   const cancelToken = useCancel();
   const [state, setState] = useState<State>({ type: 'NotSent', email: '' });
@@ -188,37 +221,43 @@ const LandingPage: FunctionComponent<{}> = () => {
     inputRef.current?.focus();
   };
 
+  let inviteForm;
+  if (state.type === 'Sent') {
+    inviteForm = <InviteFormCompleted>Check your email!</InviteFormCompleted>;
+  } else if (state.type === 'Sending') {
+    inviteForm = <InviteFormSubmitting />;
+  } else {
+    inviteForm = (
+      <div>
+        <InviteForm onSubmit={handleSubmit} onClick={handleClick}>
+          <Email>
+            <EmailLabel>Email</EmailLabel>
+            <EmailInput
+              ref={inputRef}
+              type="email"
+              autoComplete="email"
+              placeholder="me@example.com"
+              value={state.email}
+              onChange={handleChangeEmail}
+              required
+            />
+          </Email>
+          <InviteSubmit type="submit">
+            <InviteSubmitIcon src={chevron} alt="Go" />
+          </InviteSubmit>
+        </InviteForm>
+        <InviteFormSubtext>
+          New to Gigamesh? Returning to log in? Either way, you’re in the right
+          place.
+        </InviteFormSubtext>
+      </div>
+    );
+  }
+
   return (
     <Container>
       <Heading>A home for all your notes.</Heading>
-      {state.type === 'Sent' ? (
-        <InviteFormCompleted>Check your email!</InviteFormCompleted>
-      ) : (
-        <div>
-          <InviteForm onSubmit={handleSubmit} onClick={handleClick}>
-            <Email>
-              <EmailLabel>Email</EmailLabel>
-              <EmailInput
-                ref={inputRef}
-                type="email"
-                autoComplete="email"
-                placeholder="me@example.com"
-                value={state.email}
-                onChange={handleChangeEmail}
-                readOnly={state.type === 'Sending'}
-                required
-              />
-            </Email>
-            <InviteSubmit type="submit" disabled={state.type === 'Sending'}>
-              <InviteSubmitIcon src={chevron} alt="Go" />
-            </InviteSubmit>
-          </InviteForm>
-          <InviteFormSubtext>
-            New to Gigamesh? Returning to log in? Either way, you’re in the
-            right place.
-          </InviteFormSubtext>
-        </div>
-      )}
+      {inviteForm}
     </Container>
   );
 };
