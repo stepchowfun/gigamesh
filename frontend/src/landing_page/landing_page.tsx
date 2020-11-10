@@ -111,16 +111,19 @@ const EmailLabel = styled.div`
   cursor: text;
 `;
 
+const halfEmailInputHeight = Math.ceil(emailInputHeight / 2);
+
 const EmailInput = styled.input`
   ${emailSectionLayout}
-  border: none;
+  border: 0;
   outline: none;
   color: ${lineDarkColor};
+
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
   &:-webkit-autofill:focus,
   &:-webkit-autofill:active {
-    box-shadow: inset 0 0 0 ${Math.ceil(emailInputHeight / 2)}px #ffffff;
+    box-shadow: inset 0 0 0 ${halfEmailInputHeight}px #ffffff;
   }
 
   &::placeholder {
@@ -134,7 +137,7 @@ const InviteSubmit = styled.button`
   width: ${inviteFormInnerHeight}px;
   height: ${inviteFormInnerHeight}px;
   padding: 0;
-  border: none;
+  border: 0;
   border-radius: ${inviteFormInnerHeight / 2}px;
   outline: none;
   cursor: pointer;
