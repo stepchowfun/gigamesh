@@ -166,7 +166,7 @@ const InviteFormSubmitting = styled.div`
     ${lineFocusColor}
   );
   background-size: 300% 100%;
-  animation: ${wobble} 1s ease-in-out infinite;
+  animation: ${wobble} 1.5s ease infinite;
 `;
 
 const InviteFormCompleted = styled.div`

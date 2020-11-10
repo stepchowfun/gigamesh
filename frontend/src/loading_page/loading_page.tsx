@@ -1,13 +1,15 @@
 import React, { FunctionComponent } from 'react';
 import styled, { keyframes } from 'styled-components';
 
+import { buttonDefaultColor, lineLighterColor } from '../constants/constants';
+
 const rotate = keyframes`
   from {
-    transform: translate(-50%, -50%) rotate(0deg);
+    transform: translate(-50%, -50%) rotate(45deg);
   }
 
   to {
-    transform: translate(-50%, -50%) rotate(360deg);
+    transform: translate(-50%, -50%) rotate(405deg);
   }
 `;
 
@@ -25,8 +27,8 @@ const Container = styled.div`
   position: absolute;
   top: 50%;
   left: 50%;
-  animation: ${rotate} 5s linear infinite;
-  border: ${orbitBorderWidth}px solid #eeeeee;
+  animation: ${rotate} 1.5s ease infinite;
+  border: ${orbitBorderWidth}px solid ${lineLighterColor};
   border-radius: 50%;
   overflow: visible;
 
@@ -37,7 +39,7 @@ const Container = styled.div`
     position: relative;
     left: ${planetOffset}px;
     top: ${planetOffset}px;
-    background-color: #cccccc;
+    background-color: ${buttonDefaultColor};
     border: 4px solid #ffffff;
     border-radius: 50%;
     content: '';
