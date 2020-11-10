@@ -63,6 +63,7 @@ tasks:
       - frontend/.eslintrc.js
       - frontend/.gitignore
       - frontend/.prettierrc.json
+      - frontend/.stylelintrc.json
       - frontend/babel.config.json
       - frontend/images.d.ts
       - frontend/jest.config.js
@@ -118,6 +119,7 @@ tasks:
       - frontend/.eslintrc.js
       - frontend/.gitignore
       - frontend/.prettierrc.json
+      - frontend/.stylelintrc.json
       - frontend/babel.config.json
       - frontend/images.d.ts
       - frontend/jest.config.js
@@ -151,6 +153,7 @@ tasks:
       # except symlinks (cf. the note below about symlinks)
       - frontend/.eslintrc.js
       - frontend/.gitignore
+      - frontend/.stylelintrc.json
       - frontend/babel.config.json
       - frontend/images.d.ts
       - frontend/package-lock.json
@@ -209,6 +212,7 @@ tasks:
       - frontend/.eslintrc.js
       - frontend/.gitignore
       - frontend/.prettierrc.json
+      - frontend/.stylelintrc.json
       - frontend/babel.config.json
       - frontend/images.d.ts
       - frontend/jest.config.js

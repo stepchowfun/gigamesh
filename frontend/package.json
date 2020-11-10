@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "webpack --config webpack.production.js",
-    "check": "tsc --project tsconfig.json && jest --config jest.config.js && eslint --config .eslintrc.js --ignore-path .gitignore --report-unused-disable-directives --max-warnings 0 './**/*{.js,.ts,.tsx}' && prettier --config .prettierrc.json --ignore-path .gitignore --check .",
+    "check": "tsc --project tsconfig.json && jest --config jest.config.js && eslint --config .eslintrc.js --ignore-path .gitignore --report-unused-disable-directives --max-warnings 0 './**/*.{js,ts,tsx}' && npx stylelint --config .stylelintrc.json '**/*.{scss,tsx}' && prettier --config .prettierrc.json --ignore-path .gitignore --check .",
     "development": "webpack serve --config webpack.development.js --host 0.0.0.0",
     "format": "prettier --config .prettierrc.json --ignore-path .gitignore --write ."
   },
@@ -48,6 +48,9 @@
     "sass": "^1.27.0",
     "sass-loader": "^10.0.3",
     "style-loader": "^2.0.0",
+    "stylelint": "^13.7.2",
+    "stylelint-config-sass-guidelines": "^7.1.0",
+    "stylelint-config-standard": "^20.0.0",
     "terser-webpack-plugin": "^4.2.3",
     "ts-jest": "^26.4.1",
     "typescript": "^4.0.3",
