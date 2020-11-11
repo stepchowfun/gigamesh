@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "dist",
+    "emitDeclarationOnly": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "strict": true,
+    "target": "ES2020",
+    "types": ["jest"]
+  },
+  "include": ["src/**/*"]
+}

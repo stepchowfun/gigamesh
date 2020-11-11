@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "module": "CommonJS",
+    "jsx": "preserve",
     "moduleResolution": "node",
-    "outDir": "dist",
-    "sourceMap": true,
+    "noEmit": true,
+    "preserveSymlinks": true,
     "strict": true,
-    "target": "ES2018"
+    "target": "ES2020",
+    "types": ["jest"]
   },
-  "files": ["src/entry/entry.ts"]
+  "include": ["src/**/*"]
 }

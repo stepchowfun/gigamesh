@@ -1,6 +1,5 @@
 FROM node:12-slim
-WORKDIR /server
-COPY package*.json ./
-RUN npm ci --only=production
-COPY dist ./dist/
-CMD ["node", "dist/entry/entry.js"]
+COPY . /server/
+WORKDIR /server/src
+ENV HOST=0.0.0.0
+CMD ["node", "main.js"]

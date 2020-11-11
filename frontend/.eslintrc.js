@@ -2,8 +2,8 @@ module.exports = {
   root: true,
   env: {
     browser: true,
-    es6: true,
-    node: true,
+    es2020: true,
+    jest: true,
   },
   extends: [
     'eslint:recommended',
@@ -16,21 +16,16 @@ module.exports = {
     'prettier/react',
     'prettier/@typescript-eslint',
   ],
-  globals: {
-    JSX: 'readonly',
-  },
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
     },
-    ecmaVersion: 11,
-    project: './tsconfig.eslint.json',
+    project: 'tsconfig.json',
     sourceType: 'module',
   },
   plugins: ['react', '@typescript-eslint', 'jest'],
   rules: {
-    'import/extensions': ['error', 'never', { scss: 'always', svg: 'always' }],
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'react/jsx-filename-extension': ['error', { extensions: ['.tsx'] }],
     '@typescript-eslint/ban-types': ['error', { types: { '{}': false } }],
@@ -43,9 +38,6 @@ module.exports = {
   },
   settings: {
     'import/resolver': {
-      // See https://github.com/benmosher/eslint-plugin-import/issues/1396#issuecomment-511007063
-      // for an explanation of why an empty `node` object is here.
-      node: {},
       webpack: {
         config: 'webpack.production.js',
       },

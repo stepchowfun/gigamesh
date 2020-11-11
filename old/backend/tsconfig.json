@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "strict": true,
+    "types": ["jest", "node", "react", "react-dom", "styled-components"]
+  },
+  "files": ["images.d.ts", "src/entry/entry.ts"]
+}
