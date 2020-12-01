@@ -111,7 +111,7 @@ function handleRoot(request: Request, response: Response): void {
   response
     .status(200)
     .set('Content-Type', 'text/html')
-    .set('Cache-Control', 'max-age=0, must-revalidate, private')
+    .set('Cache-Control', 'public, max-age=0, must-revalidate')
     .write(htmlPrefix);
 
   const sheet = new ServerStyleSheet();
