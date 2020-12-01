@@ -630,17 +630,16 @@
     the `master` branch. Follow the steps below to make this work.
     - Create a new Docker repository on [Docker Hub](https://hub.docker.com/).
       You'll need to create a Docker ID if you don't already have one.
-    - Update the workflow in `.github/workflows/ci.yml`.
-      - Change the `username` field of the Docker login action to match your
-        Docker ID.
-      - Change the `repo` field(s) of both of the Toast actions to point to the
-        Docker repository you just created.
-      - Change the `env` field(s) of the second Toast action to set the correct
-        environment variables for the deploy step (see the `toast deploy`
-        command above).
     - Set up two secrets in the repository settings on GitHub.
       - `DOCKER_PASSWORD`: This is your Docker ID password. Toast will use it to
         cache intermediate Docker images when performing builds.
       - `GCP_DEPLOY_CREDENTIALS`: This should contain the contents of the
         credentials file for the deployment service account you created earlier.
-        It's used to authorize the CI job to deploy the website.
+    - Update the workflow in `.github/workflows/ci.yml`.
+      - Change the `username` field of the Docker login action to match your
+        Docker ID.
+      - Change the `repo` field of both of the Toast actions to point to the
+        Docker repository you just created.
+      - Change the `env` field(s) of the second Toast action to set the correct
+        environment variables for the deploy step (see the `toast deploy`
+        command above).
