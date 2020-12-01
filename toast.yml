@@ -65,8 +65,8 @@ tasks:
       - backend/webpack.development.js
       - backend/webpack.production.js
 
-      # All the top-level paths in `frontend-lib/` except those in `.gitignore` and
-      # those which have already been added in dependent tasks
+      # All the top-level paths in `frontend-lib/` except those in `.gitignore`
+      # and those which have already been added in dependent tasks
       - frontend-lib/.eslintrc.js
       - frontend-lib/.stylelintrc.js
       - frontend-lib/babel.config.json
