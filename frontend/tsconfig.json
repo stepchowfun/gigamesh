@@ -4,8 +4,10 @@
     "jsx": "preserve",
     "moduleResolution": "node",
     "noEmit": true,
+    "preserveSymlinks": true,
     "strict": true,
-    "types": ["jest", "node", "react", "react-dom", "styled-components"]
+    "target": "ES2020",
+    "types": ["jest"]
   },
-  "files": ["images.d.ts", "src/index/index.tsx"]
+  "include": ["src/**/*"]
 }

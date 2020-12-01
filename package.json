@@ -1,0 +1,22 @@
+{
+  "name": "gigamesh",
+  "version": "1.0.0",
+  "description": "A home for all your notes.",
+  "private": true,
+  "scripts": {
+    "build-production": "(cd frontend-lib && npm run build-production) && (cd frontend && npm run build-production) && (cd backend && npm run build-production)",
+    "build-development": "(cd frontend-lib && npm run build-development) && (cd frontend && npm run build-development) && (cd backend && npm run build-development)",
+    "check": "(cd frontend-lib && npm run check) && (cd frontend && npm run check) && (cd backend && npm run check) && prettier --config .prettierrc.js --ignore-path .gitignore --check .",
+    "serve-development": "npm run build-development && (cd backend && npm run serve)",
+    "serve-production": "npm run build-production && (cd backend && npm run serve)",
+    "format": "prettier --config .prettierrc.js --ignore-path .gitignore --write ."
+  },
+  "author": "Stephan Boyer",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^2.1.2"
+  },
+  "dependencies": {
+    "@types/compression": "^1.7.0"
+  }
+}

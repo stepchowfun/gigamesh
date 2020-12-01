@@ -1,1 +1,4 @@
-../shared/jest.config.js
+module.exports = {
+  preset: 'ts-jest',
+  roots: ['<rootDir>/src'],
+};

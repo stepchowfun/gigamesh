@@ -1,7 +1,8 @@
 module.exports = {
   root: true,
   env: {
-    es6: true,
+    es2020: true,
+    jest: true,
     node: true,
   },
   extends: [
@@ -11,23 +12,34 @@ module.exports = {
     'plugin:jest/all',
     'airbnb',
     'prettier',
+    'prettier/babel',
+    'prettier/react',
     'prettier/@typescript-eslint',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 11,
-    project: './tsconfig.eslint.json',
+    ecmaFeatures: {
+      jsx: true,
+    },
+    project: 'tsconfig.json',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'jest'],
+  plugins: ['react', '@typescript-eslint', 'jest'],
   rules: {
-    'import/extensions': ['error', 'never'],
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+    'react/jsx-filename-extension': ['error', { extensions: ['.tsx'] }],
+    '@typescript-eslint/ban-types': ['error', { types: { '{}': false } }],
+    'jsx-a11y/label-has-associated-control': ['error', { assert: 'either' }],
+    'react/prop-types': 'off',
+    'no-use-before-define': 'off',
+    '@typescript-eslint/no-use-before-define': 'error',
+    'no-shadow': 'off',
+    '@typescript-eslint/no-shadow': 'error',
   },
   settings: {
     'import/resolver': {
-      node: {
-        extensions: ['.js', '.ts'],
+      webpack: {
+        config: 'webpack.production.js',
       },
     },
   },
