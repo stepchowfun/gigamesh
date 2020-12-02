@@ -35,7 +35,7 @@ const manifest: { 'main.js': string } = JSON.parse(
 const javascriptFileName = manifest['main.js'];
 
 // Pre-compute the static part of the HTML.
-const rootContents = 'ROOT_CONTENTS_PLACEHOLDER';
+const placeholder = 'PLACEHOLDER';
 const html = minify(
   `
     <!DOCTYPE html>
@@ -57,16 +57,19 @@ const html = minify(
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body>
-        <div id="root">${rootContents}</div>
+        <div id="root">${placeholder}</div>
+
+        <script>
+          window.bootstrapData = ${placeholder};
+        </script>
+
         <script src="${javascriptFileName}"></script>
       </body>
     </html>
   `,
-  { collapseWhitespace: true, removeComments: true },
+  { collapseWhitespace: true, minifyJS: true, removeComments: true },
 );
-const htmlParts = html.split(rootContents, 2);
-const htmlPrefix = htmlParts[0];
-const htmlSuffix = htmlParts[1];
+const htmlParts = html.split(placeholder, 3);
 
 // Construct the Express app.
 const app = express();
@@ -79,6 +82,7 @@ app.use(
         defaultSrc: ["'self'"],
         objectSrc: ["'none'"],
         requireTrustedTypesFor: ["'script'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'unsafe-inline'"],
       },
     },
@@ -112,16 +116,22 @@ function handleRoot(request: Request, response: Response): void {
     .status(200)
     .set('Content-Type', 'text/html')
     .set('Cache-Control', 'public, max-age=0, must-revalidate')
-    .write(htmlPrefix);
+    .write(htmlParts[0]);
 
   const sheet = new ServerStyleSheet();
 
   try {
-    const jsx = sheet.collectStyles(<Main />);
+    const bootstrapData = Math.random();
+
+    const jsx = sheet.collectStyles(<Main bootstrapData={bootstrapData} />);
     const stream = sheet.interleaveWithNodeStream(renderToNodeStream(jsx));
 
     stream.pipe(response, { end: false });
-    stream.on('end', () => response.end(htmlSuffix));
+    stream.on('end', () => {
+      response.write(htmlParts[1]);
+      response.write(JSON.stringify(bootstrapData));
+      response.end(htmlParts[2]);
+    });
   } finally {
     sheet.seal();
   }
