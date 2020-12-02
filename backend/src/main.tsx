@@ -1,4 +1,4 @@
-import Main from 'frontend-lib';
+import Main, { BootstrapData } from 'frontend-lib';
 import React from 'react';
 import compression from 'compression';
 import express, { Request, Response } from 'express';
@@ -36,7 +36,7 @@ const javascriptFileName = manifest['main.js'];
 
 // Pre-compute the static part of the HTML.
 const placeholder = 'PLACEHOLDER';
-const html = minify(
+const htmlParts = minify(
   `
     <!DOCTYPE html>
     <html lang="en">
@@ -68,8 +68,37 @@ const html = minify(
     </html>
   `,
   { collapseWhitespace: true, minifyJS: true, removeComments: true },
-);
-const htmlParts = html.split(placeholder, 3);
+).split(placeholder, 3);
+
+// This function renders HTML to a given response object based on the given
+// bootstrap data.
+function renderPage(
+  bootstrapData: BootstrapData,
+  statusCode: number,
+  response: Response,
+): void {
+  response
+    .status(statusCode)
+    .set('Content-Type', 'text/html')
+    .set('Cache-Control', 'public, max-age=0, must-revalidate')
+    .write(htmlParts[0]);
+
+  const sheet = new ServerStyleSheet();
+
+  try {
+    const jsx = sheet.collectStyles(<Main bootstrapData={bootstrapData} />);
+    const stream = sheet.interleaveWithNodeStream(renderToNodeStream(jsx));
+
+    stream.pipe(response, { end: false });
+    stream.on('end', () => {
+      response.write(htmlParts[1]);
+      response.write(JSON.stringify(bootstrapData));
+      response.end(htmlParts[2]);
+    });
+  } finally {
+    sheet.seal();
+  }
+}
 
 // Construct the Express app.
 const app = express();
@@ -110,35 +139,20 @@ app.use(
   }),
 );
 
-// The handler for the home page
-function handleRoot(request: Request, response: Response): void {
-  response
-    .status(200)
-    .set('Content-Type', 'text/html')
-    .set('Cache-Control', 'public, max-age=0, must-revalidate')
-    .write(htmlParts[0]);
-
-  const sheet = new ServerStyleSheet();
-
-  try {
-    const bootstrapData = Math.random();
-
-    const jsx = sheet.collectStyles(<Main bootstrapData={bootstrapData} />);
-    const stream = sheet.interleaveWithNodeStream(renderToNodeStream(jsx));
-
-    stream.pipe(response, { end: false });
-    stream.on('end', () => {
-      response.write(htmlParts[1]);
-      response.write(JSON.stringify(bootstrapData));
-      response.end(htmlParts[2]);
-    });
-  } finally {
-    sheet.seal();
-  }
-}
-
 // Set up the route for the home page.
-app.get('/', handleRoot);
+app.get('/', (request: Request, response: Response) => {
+  const bootstrapData = Math.random();
+
+  renderPage(bootstrapData, 200, response);
+});
+
+// Set up the route for another page.
+app.get('/:number', (request: Request, response: Response) => {
+  // Warning: `request.params.number` has type `any`.
+  const bootstrapData = Number(request.params.number);
+
+  renderPage(bootstrapData, Number.isNaN(bootstrapData) ? 404 : 200, response);
+});
 
 // Start the server.
 app.listen(port, host, () => {
