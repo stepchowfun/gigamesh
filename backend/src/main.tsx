@@ -166,7 +166,7 @@ app.get('/:number', (request: Request, response: Response) => {
     bootstrapData,
     bootstrapData === null ? 404 : 200,
     true,
-    bootstrapData === null ? 0 : 60 * 5,
+    60 * 5,
   );
 });
 
