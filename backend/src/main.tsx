@@ -149,9 +149,12 @@ app.get('/', (request: Request, response: Response) => {
 // Set up the route for another page.
 app.get('/:number', (request: Request, response: Response) => {
   // Warning: `request.params.number` has type `any`.
-  const bootstrapData = Number(request.params.number);
+  const bootstrapDataExtended = Number(request.params.number);
+  const bootstrapData = Number.isFinite(bootstrapDataExtended)
+    ? bootstrapDataExtended
+    : null;
 
-  renderPage(bootstrapData, Number.isNaN(bootstrapData) ? 404 : 200, response);
+  renderPage(bootstrapData, bootstrapData === null ? 404 : 200, response);
 });
 
 // Start the server.
