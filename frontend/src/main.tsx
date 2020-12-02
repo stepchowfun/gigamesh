@@ -1,5 +1,14 @@
-import Main from 'frontend-lib';
+import Main, { BootstrapData } from 'frontend-lib';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-ReactDOM.hydrate(<Main />, document.getElementById('root'));
+declare global {
+  interface Window {
+    bootstrapData: BootstrapData;
+  }
+}
+
+ReactDOM.hydrate(
+  <Main bootstrapData={window.bootstrapData} />,
+  document.getElementById('root'),
+);
