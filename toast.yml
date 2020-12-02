@@ -150,8 +150,9 @@ tasks:
         --gcs-source-staging-dir "gs://$STAGING_BUCKET/build-source" \
         --tag "$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/gigamesh/www"
 
-      # Deploy the Cloud Run service.
-      gcloud run deploy www \
+      # Deploy the Cloud Run service. The `beta` release track is needed to use
+      # the `--min-instances` flag.
+      gcloud beta run deploy www \
         --project "$GCP_PROJECT_ID" \
         --quiet \
         --platform managed \
@@ -162,6 +163,7 @@ tasks:
         --set-env-vars NODE_ENV=production \
         --region "$GCR_REGION" \
         --service-account "$GCR_SERVICE_ACCOUNT" \
+        --min-instances 1 \
         --allow-unauthenticated
 
       # Delete the Docker image.
