@@ -76,17 +76,19 @@ function renderPage(
   response: Response,
   bootstrapData: BootstrapData,
   statusCode: number,
-  maxAgeSeconds: number | null, // `null` means disable caching
+  isPublic: boolean,
+  maxAgeSeconds: number,
 ): void {
-  response.status(statusCode).set('Content-Type', 'text/html');
-
-  if (maxAgeSeconds === null) {
-    response.set('Cache-Control', 'no-store, max-age=0');
-  } else {
-    response.set('Cache-Control', `public, max-age=${maxAgeSeconds}`);
-  }
-
-  response.write(htmlParts[0]);
+  response
+    .status(statusCode)
+    .set('Content-Type', 'text/html')
+    .set(
+      'Cache-Control',
+      `${
+        isPublic ? 'public' : 'private'
+      }, max-age=${maxAgeSeconds}, must-revalidate`,
+    )
+    .write(htmlParts[0]);
 
   const sheet = new ServerStyleSheet();
 
@@ -148,7 +150,7 @@ app.use(
 app.get('/', (request: Request, response: Response) => {
   const bootstrapData = Math.random();
 
-  renderPage(response, bootstrapData, 200, 60 * 5);
+  renderPage(response, bootstrapData, 200, true, 60 * 5);
 });
 
 // Set up the route for another page.
@@ -163,7 +165,8 @@ app.get('/:number', (request: Request, response: Response) => {
     response,
     bootstrapData,
     bootstrapData === null ? 404 : 200,
-    bootstrapData === null ? null : 60 * 5,
+    true,
+    bootstrapData === null ? 0 : 60 * 5,
   );
 });
 
