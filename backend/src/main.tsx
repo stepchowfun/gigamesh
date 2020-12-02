@@ -80,7 +80,7 @@ function renderPage(
   response
     .status(statusCode)
     .set('Content-Type', 'text/html')
-    .set('Cache-Control', 'public, max-age=0, must-revalidate')
+    .set('Cache-Control', 'no-store, max-age=0')
     .write(htmlParts[0]);
 
   const sheet = new ServerStyleSheet();
