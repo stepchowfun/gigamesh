@@ -73,15 +73,20 @@ const htmlParts = minify(
 // This function renders HTML to a given response object based on the given
 // bootstrap data.
 function renderPage(
+  response: Response,
   bootstrapData: BootstrapData,
   statusCode: number,
-  response: Response,
+  maxAgeSeconds: number | null, // `null` means disable caching
 ): void {
-  response
-    .status(statusCode)
-    .set('Content-Type', 'text/html')
-    .set('Cache-Control', 'no-store, max-age=0')
-    .write(htmlParts[0]);
+  response.status(statusCode).set('Content-Type', 'text/html');
+
+  if (maxAgeSeconds === null) {
+    response.set('Cache-Control', 'no-store, max-age=0');
+  } else {
+    response.set('Cache-Control', `public, max-age=${maxAgeSeconds}`);
+  }
+
+  response.write(htmlParts[0]);
 
   const sheet = new ServerStyleSheet();
 
@@ -143,7 +148,7 @@ app.use(
 app.get('/', (request: Request, response: Response) => {
   const bootstrapData = Math.random();
 
-  renderPage(bootstrapData, 200, response);
+  renderPage(response, bootstrapData, 200, 60 * 5);
 });
 
 // Set up the route for another page.
@@ -154,7 +159,12 @@ app.get('/:number', (request: Request, response: Response) => {
     ? bootstrapDataExtended
     : null;
 
-  renderPage(bootstrapData, bootstrapData === null ? 404 : 200, response);
+  renderPage(
+    response,
+    bootstrapData,
+    bootstrapData === null ? 404 : 200,
+    bootstrapData === null ? null : 60 * 5,
+  );
 });
 
 // Start the server.
