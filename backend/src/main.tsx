@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import { ServerStyleSheet } from 'styled-components';
 import { minify } from 'html-minifier';
 import { readFileSync } from 'fs';
-import { renderToNodeStream } from 'react-dom/server';
+import { renderToString } from 'react-dom/server';
 
 // Read the `HOST` environment variable.
 const hostRaw = process.env.HOST;
@@ -55,6 +55,8 @@ const htmlParts = minify(
         <meta name="application-name" content="Gigamesh" />
         <meta name="msapplication-TileColor" content="#ffc40d" />
         <meta name="theme-color" content="#ffffff" />
+
+        ${placeholder}
       </head>
       <body>
         <div id="root">${placeholder}</div>
@@ -68,7 +70,7 @@ const htmlParts = minify(
     </html>
   `,
   { collapseWhitespace: true, minifyJS: true, removeComments: true },
-).split(placeholder, 3);
+).split(placeholder, 4);
 
 // This function renders HTML to a given response object based on the given
 // bootstrap data.
@@ -79,29 +81,32 @@ function renderPage(
   isPublic: boolean,
   maxAgeSeconds: number,
 ): void {
-  response
-    .status(statusCode)
-    .set('Content-Type', 'text/html')
-    .set(
-      'Cache-Control',
-      `${
-        isPublic ? 'public' : 'private'
-      }, max-age=${maxAgeSeconds}, must-revalidate`,
-    )
-    .write(htmlParts[0]);
-
   const sheet = new ServerStyleSheet();
 
   try {
-    const jsx = sheet.collectStyles(<Main bootstrapData={bootstrapData} />);
-    const stream = sheet.interleaveWithNodeStream(renderToNodeStream(jsx));
+    const html = renderToString(
+      sheet.collectStyles(<Main bootstrapData={bootstrapData} />),
+    );
 
-    stream.pipe(response, { end: false });
-    stream.on('end', () => {
-      response.write(htmlParts[1]);
-      response.write(JSON.stringify(bootstrapData));
-      response.end(htmlParts[2]);
-    });
+    const styles = sheet.getStyleTags();
+
+    response
+      .status(statusCode)
+      .set('Content-Type', 'text/html')
+      .set(
+        'Cache-Control',
+        `${
+          isPublic ? 'public' : 'private'
+        }, max-age=${maxAgeSeconds}, must-revalidate`,
+      );
+
+    response.write(htmlParts[0]);
+    response.write(styles);
+    response.write(htmlParts[1]);
+    response.write(html);
+    response.write(htmlParts[2]);
+    response.write(JSON.stringify(bootstrapData));
+    response.end(htmlParts[3]);
   } finally {
     sheet.seal();
   }
