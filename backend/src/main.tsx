@@ -92,21 +92,17 @@ function renderPage(
 
     response
       .status(statusCode)
-      .set('Content-Type', 'text/html')
       .set(
         'Cache-Control',
         `${
           isPublic ? 'public' : 'private'
         }, max-age=${maxAgeSeconds}, must-revalidate`,
+      )
+      .send(
+        `${htmlParts[0]}${styles}${htmlParts[1]}${html}${
+          htmlParts[2]
+        }${JSON.stringify(bootstrapData)}${htmlParts[3]}`,
       );
-
-    response.write(htmlParts[0]);
-    response.write(styles);
-    response.write(htmlParts[1]);
-    response.write(html);
-    response.write(htmlParts[2]);
-    response.write(JSON.stringify(bootstrapData));
-    response.end(htmlParts[3]);
   } finally {
     sheet.seal();
   }
@@ -151,6 +147,9 @@ app.use(
     },
   }),
 );
+
+// Compute a strong ETag for dynamic responses.
+app.set('etag', 'strong');
 
 // Set up the route for the home page.
 app.get('/', (request: Request, response: Response) => {
