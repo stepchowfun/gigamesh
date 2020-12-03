@@ -139,6 +139,7 @@ app.use(express.json());
 // Serve static files.
 app.use(
   express.static('static', {
+    etag: false,
     index: false,
     lastModified: false,
     setHeaders: (response, path) => {
