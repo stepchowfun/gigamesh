@@ -71,7 +71,7 @@ const htmlParts = minify(
     </html>
   `,
   { collapseWhitespace: true, minifyJS: true, removeComments: true },
-).split(placeholder, 4);
+).split(placeholder);
 
 // This function renders HTML to a given response object based on the given
 // bootstrap data.
@@ -107,9 +107,9 @@ function renderPage(
       .send(
         `${htmlParts[0]}${styles}${htmlParts[1]}${html}${
           htmlParts[2]
-        }${scriptNonce}${htmlParts[3]}${scriptNonce}${
+        }${scriptNonce}${htmlParts[3]}${JSON.stringify(bootstrapData)}${
           htmlParts[4]
-        }${JSON.stringify(bootstrapData)}${htmlParts[5]}`,
+        }${scriptNonce}${htmlParts[5]}`,
       );
   } finally {
     sheet.seal();
