@@ -91,13 +91,11 @@ function renderPage(
   response: Response,
   bootstrapData: BootstrapData,
   statusCode: number,
-  isPublic: boolean,
-  maxAgeSeconds: number,
 ): void {
   const sheet = new ServerStyleSheet();
 
   try {
-    const nonce = randomBytes(16).toString('base64');
+    const nonce = response.locals.nonce as string;
 
     // eslint-disable-next-line no-underscore-dangle
     global.__webpack_nonce__ = nonce;
@@ -110,15 +108,7 @@ function renderPage(
 
     response
       .status(statusCode)
-      .set({
-        'Cache-Control': `${
-          isPublic ? 'public' : 'private'
-        }, max-age=${maxAgeSeconds}, must-revalidate`,
-
-        // If you change this policy, validate it with
-        // https://csp-evaluator.withgoogle.com/.
-        'Content-Security-Policy': `default-src 'self';base-uri 'self';object-src 'none';require-trusted-types-for 'script';script-src 'nonce-${nonce}';style-src 'nonce-${nonce}'`,
-      })
+      .set({ 'Cache-Control': 'no-store' })
       .send(
         `${htmlParts[0]}${styles}${htmlParts[1]}${html}${htmlParts[2]}${nonce}${
           htmlParts[3]
@@ -135,12 +125,24 @@ function renderPage(
 const app = express();
 
 // Use Helmet to configure various security-related headers.
-app.use(
+app.use((request, response, next) => {
+  const nonce = randomBytes(16).toString('base64');
+  response.locals.nonce = nonce;
+
   helmet({
-    // The CSP will be set dynamically with a nonce unique to each request.
-    contentSecurityPolicy: false,
-  }),
-);
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        baseUri: ["'self'"],
+        scriptSrc: [`'nonce-${nonce}'`],
+        styleSrc: [`'nonce-${nonce}'`],
+        objectSrc: ["'none'"],
+        requireTrustedTypesFor: ["'script'"],
+        blockAllMixedContent: [],
+      },
+    },
+  })(request, response, next);
+});
 
 // Enable gzip compression.
 app.use(compression());
@@ -164,14 +166,15 @@ app.use(
   }),
 );
 
-// Compute a strong ETag for dynamic responses.
-app.set('etag', 'strong');
+// Don't compute ETags for dynamic responses since the CSP nonces would cause
+// them to change on every request anyway.
+app.set('etag', false);
 
 // Set up the route for the home page.
 app.get('/', (request: Request, response: Response) => {
   const bootstrapData = Math.random();
 
-  renderPage(response, bootstrapData, 200, true, 60 * 5);
+  renderPage(response, bootstrapData, 200);
 });
 
 // Set up the route for another page.
@@ -182,13 +185,7 @@ app.get('/:number', (request: Request, response: Response) => {
     ? bootstrapDataExtended
     : null;
 
-  renderPage(
-    response,
-    bootstrapData,
-    bootstrapData === null ? 404 : 200,
-    true,
-    60 * 5,
-  );
+  renderPage(response, bootstrapData, bootstrapData === null ? 404 : 200);
 });
 
 // Start the server.
