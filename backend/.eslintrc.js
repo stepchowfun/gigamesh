@@ -38,6 +38,9 @@ module.exports = {
   },
   settings: {
     'import/resolver': {
+      // See https://github.com/benmosher/eslint-plugin-import/issues/1396#issuecomment-511007063 for an explanation of the following line.
+      node: {},
+
       webpack: {
         config: 'webpack.production.js',
       },

@@ -5,6 +5,7 @@ import express, { Request, Response } from 'express';
 import helmet from 'helmet';
 import { ServerStyleSheet } from 'styled-components';
 import { minify } from 'html-minifier';
+import { randomBytes } from 'crypto';
 import { readFileSync } from 'fs';
 import { renderToString } from 'react-dom/server';
 
@@ -61,11 +62,11 @@ const htmlParts = minify(
       <body>
         <div id="root">${placeholder}</div>
 
-        <script>
+        <script nonce="${placeholder}">
           window.bootstrapData = ${placeholder};
         </script>
 
-        <script src="${javascriptFileName}"></script>
+        <script nonce="${placeholder}" src="${javascriptFileName}"></script>
       </body>
     </html>
   `,
@@ -90,18 +91,25 @@ function renderPage(
 
     const styles = sheet.getStyleTags();
 
+    const scriptNonce = randomBytes(16).toString('base64');
+
     response
       .status(statusCode)
-      .set(
-        'Cache-Control',
-        `${
+      .set({
+        'Cache-Control': `${
           isPublic ? 'public' : 'private'
         }, max-age=${maxAgeSeconds}, must-revalidate`,
-      )
+
+        // If you change this policy, validate it with
+        // https://csp-evaluator.withgoogle.com/.
+        'Content-Security-Policy': `default-src 'self';base-uri 'self';object-src 'none';require-trusted-types-for 'script';script-src 'nonce-${scriptNonce}';style-src 'unsafe-inline'`,
+      })
       .send(
         `${htmlParts[0]}${styles}${htmlParts[1]}${html}${
           htmlParts[2]
-        }${JSON.stringify(bootstrapData)}${htmlParts[3]}`,
+        }${scriptNonce}${htmlParts[3]}${scriptNonce}${
+          htmlParts[4]
+        }${JSON.stringify(bootstrapData)}${htmlParts[5]}`,
       );
   } finally {
     sheet.seal();
@@ -114,15 +122,8 @@ const app = express();
 // Use Helmet to configure various security-related headers.
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        requireTrustedTypesFor: ["'script'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'unsafe-inline'"],
-      },
-    },
+    // The CSP will be set dynamically with a nonce unique to each request.
+    contentSecurityPolicy: false,
   }),
 );
 
