@@ -27,7 +27,7 @@ module.exports = {
   },
   plugins: ['react', '@typescript-eslint', 'jest'],
   rules: {
-    'import/extensions': ['error', 'never', { scss: 'always', svg: 'always' }],
+    'import/extensions': ['error', 'never'],
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'react/jsx-filename-extension': ['error', { extensions: ['.tsx'] }],
     '@typescript-eslint/ban-types': ['error', { types: { '{}': false } }],

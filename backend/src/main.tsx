@@ -9,6 +9,17 @@ import { randomBytes } from 'crypto';
 import { readFileSync } from 'fs';
 import { renderToString } from 'react-dom/server';
 
+// eslint-disable-next-line no-undef
+interface Global extends NodeJS.Global {
+  // See the following pages for an explanation of this magic variable:
+  // - https://webpack.js.org/guides/csp/
+  // - https://github.com/styled-components/styled-components/issues/887
+  // eslint-disable-next-line camelcase
+  __webpack_nonce__: string;
+}
+
+declare const global: Global;
+
 // Read the `HOST` environment variable.
 const hostRaw = process.env.HOST;
 let host: string;
@@ -64,6 +75,7 @@ const htmlParts = minify(
 
         <script nonce="${placeholder}">
           window.bootstrapData = ${placeholder};
+          window.nonce = ${placeholder};
         </script>
 
         <script nonce="${placeholder}" src="${javascriptFileName}"></script>
@@ -85,13 +97,16 @@ function renderPage(
   const sheet = new ServerStyleSheet();
 
   try {
+    const nonce = randomBytes(16).toString('base64');
+
+    // eslint-disable-next-line no-underscore-dangle
+    global.__webpack_nonce__ = nonce;
+
     const html = renderToString(
       sheet.collectStyles(<Main bootstrapData={bootstrapData} />),
     );
 
     const styles = sheet.getStyleTags();
-
-    const scriptNonce = randomBytes(16).toString('base64');
 
     response
       .status(statusCode)
@@ -102,14 +117,14 @@ function renderPage(
 
         // If you change this policy, validate it with
         // https://csp-evaluator.withgoogle.com/.
-        'Content-Security-Policy': `default-src 'self';base-uri 'self';object-src 'none';require-trusted-types-for 'script';script-src 'nonce-${scriptNonce}';style-src 'unsafe-inline'`,
+        'Content-Security-Policy': `default-src 'self';base-uri 'self';object-src 'none';require-trusted-types-for 'script';script-src 'nonce-${nonce}';style-src 'nonce-${nonce}'`,
       })
       .send(
-        `${htmlParts[0]}${styles}${htmlParts[1]}${html}${
-          htmlParts[2]
-        }${scriptNonce}${htmlParts[3]}${JSON.stringify(bootstrapData)}${
-          htmlParts[4]
-        }${scriptNonce}${htmlParts[5]}`,
+        `${htmlParts[0]}${styles}${htmlParts[1]}${html}${htmlParts[2]}${nonce}${
+          htmlParts[3]
+        }${JSON.stringify(bootstrapData)}${htmlParts[4]}${JSON.stringify(
+          nonce,
+        )}${htmlParts[5]}${nonce}${htmlParts[6]}`,
       );
   } finally {
     sheet.seal();
