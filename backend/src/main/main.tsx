@@ -9,6 +9,8 @@ import { randomBytes } from 'crypto';
 import { readFileSync } from 'fs';
 import { renderToString } from 'react-dom/server';
 
+import logger from '../logger/logger';
+
 // eslint-disable-next-line no-undef
 interface Global extends NodeJS.Global {
   // See the following pages for an explanation of this magic variable:
@@ -172,6 +174,8 @@ app.set('etag', false);
 
 // Set up the route for the home page.
 app.get('/', (request: Request, response: Response) => {
+  logger.info({ request });
+
   const bootstrapData = Math.random();
 
   renderPage(response, bootstrapData, 200);
@@ -179,11 +183,11 @@ app.get('/', (request: Request, response: Response) => {
 
 // Set up the route for another page.
 app.get('/:number', (request: Request, response: Response) => {
+  logger.info({ request });
+
   // Warning: `request.params.number` has type `any`.
-  const bootstrapDataExtended = Number(request.params.number);
-  const bootstrapData = Number.isFinite(bootstrapDataExtended)
-    ? bootstrapDataExtended
-    : null;
+  const requestNumber = Number(request.params.number);
+  const bootstrapData = Number.isFinite(requestNumber) ? requestNumber : null;
 
   renderPage(response, bootstrapData, bootstrapData === null ? 404 : 200);
 });
