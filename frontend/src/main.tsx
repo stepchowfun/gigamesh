@@ -14,6 +14,6 @@ declare global {
 }
 
 ReactDOM.hydrate(
-  <Main bootstrapData={window.bootstrapData} />,
+  <Main bootstrapData={window.bootstrapData} />, // [ref:window_bootstrap_data]
   document.getElementById('root'),
 );
