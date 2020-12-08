@@ -74,8 +74,8 @@ const htmlParts = minify(
         <div id="root">${placeholder}</div>
 
         <script nonce="${placeholder}">
-          window.bootstrapData = ${placeholder};
-          window.nonce = ${placeholder};
+          window.bootstrapData = ${placeholder}; <!-- [tag:window_bootstrap_data] -->
+          window.nonce = ${placeholder}; <!-- [tag:window_nonce] -->
         </script>
 
         <script nonce="${placeholder}" src="${javascriptFileName}"></script>

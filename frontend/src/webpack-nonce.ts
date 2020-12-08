@@ -15,4 +15,4 @@ declare global {
 }
 
 // eslint-disable-next-line camelcase, no-undef
-__webpack_nonce__ = window.nonce;
+__webpack_nonce__ = window.nonce; // [ref:window_nonce]
