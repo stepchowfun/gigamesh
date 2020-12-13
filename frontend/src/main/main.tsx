@@ -1,7 +1,7 @@
 // NOTE: Due to the fact that components using Styled Components generally read
 // the `__webpack_nonce__` variable during module initialization,
 // './webpack-nonce' needs to be imported BEFORE 'frontend-lib'.
-import './webpack-nonce';
+import '../webpack-nonce/webpack-nonce';
 import Main, { BootstrapData } from 'frontend-lib';
 import React from 'react';
 import ReactDOM from 'react-dom';
