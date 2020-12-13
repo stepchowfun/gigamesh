@@ -1,15 +1,23 @@
-import Main, { BootstrapData } from 'frontend-lib';
 import React from 'react';
 import compression from 'compression';
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
+import {
+  BootstrapData,
+  InviteRequest,
+  InviteResponse,
+  Main,
+} from 'frontend-lib';
 import { ServerStyleSheet } from 'styled-components';
+import { Static } from 'runtypes';
 import { minify } from 'html-minifier';
 import { randomBytes } from 'crypto';
 import { readFileSync } from 'fs';
 import { renderToString } from 'react-dom/server';
 
+import invite from '../api/invite/invite';
 import logger from '../logger/logger';
+import { isProduction } from '../constants/constants';
 
 // eslint-disable-next-line no-undef
 interface Global extends NodeJS.Global {
@@ -192,9 +200,35 @@ app.get('/:number', (request: Request, response: Response) => {
   renderPage(response, bootstrapData, bootstrapData === null ? 404 : 200);
 });
 
+// The API endpoints
+app.post(
+  '/api/invite',
+  (request: Request, response: Response, next: NextFunction) => {
+    logger.info({ request });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { body } = request;
+
+    if (InviteRequest.guard(body)) {
+      invite(body)
+        .then((apiResponse: Static<typeof InviteResponse>) => {
+          response.status(200).send(apiResponse);
+        })
+        .catch(next);
+    } else {
+      response.status(400).send('Bad Request');
+      logger.info('Bad request.');
+    }
+  },
+);
+
 // Start the server.
 app.listen(port, host, () => {
-  // The server has started.
-  // eslint-disable-next-line no-console
-  console.log(`Server started on port ${port}.`);
+  if (isProduction) {
+    logger.info('Running in production mode.');
+  } else {
+    logger.info('Not running in production mode.');
+  }
+
+  logger.info(`Server started on port ${port}.`);
 });
