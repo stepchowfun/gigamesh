@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A library containing the frontend components.",
   "main": "dist/frontend-lib.js",
-  "types": "dist/main.d.ts",
+  "types": "dist/main/main.d.ts",
   "private": true,
   "scripts": {
     "build-development": "npx webpack --config webpack.development.js && npx tsc --project tsconfig.json && npm run repackage",

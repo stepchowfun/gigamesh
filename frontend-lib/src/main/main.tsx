@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
-import GlobalStyles from './global-styles/global-styles';
+import GlobalStyles from '../global-styles/global-styles';
 
 export type BootstrapData = number | null;
 
