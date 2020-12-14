@@ -18,6 +18,10 @@ module.exports = {
           configFile: path.resolve(__dirname, 'babel.config.json'),
         },
       },
+      {
+        test: /\.svg$/,
+        type: 'asset/resource',
+      },
     ],
   },
   plugins: [new CleanWebpackPlugin()],
@@ -25,6 +29,8 @@ module.exports = {
     filename: 'frontend-lib.js',
     libraryTarget: 'commonjs2',
     path: path.resolve(__dirname, 'dist'),
+    assetModuleFilename: '[contenthash]-fingerprint[ext]',
+    publicPath: '',
   },
   devtool: 'source-map',
 };

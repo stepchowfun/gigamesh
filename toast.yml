@@ -70,6 +70,7 @@ tasks:
       - frontend-lib/.eslintrc.js
       - frontend-lib/.stylelintrc.js
       - frontend-lib/babel.config.json
+      - frontend-lib/images.d.ts
       - frontend-lib/jest.config.js
       - frontend-lib/src/
       - frontend-lib/tsconfig.json

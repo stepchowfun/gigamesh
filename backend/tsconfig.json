@@ -7,7 +7,7 @@
     "preserveSymlinks": true,
     "strict": true,
     "target": "ES2020",
-    "types": ["jest"]
+    "types": ["jest", "node"]
   },
   "include": ["src/**/*"]
 }
