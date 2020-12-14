@@ -1,7 +1,9 @@
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
+import { Static } from 'runtypes';
 
 import GlobalStyles from '../global-styles/global-styles';
+import { User } from '../api/types/types';
 
 export {
   ChangeEmailRequest,
@@ -23,7 +25,20 @@ export {
   User,
 } from '../api/types/types';
 
-export type BootstrapData = number | null;
+export interface PageNotFound {
+  type: 'PageNotFound';
+}
+
+export interface NotLoggedIn {
+  type: 'NotLoggedIn';
+}
+
+export interface LoggedIn {
+  type: 'LoggedIn';
+  user: Static<typeof User>;
+}
+
+export type BootstrapData = PageNotFound | NotLoggedIn | LoggedIn;
 
 const AppContainer = styled.div`
   display: flex;
@@ -32,9 +47,6 @@ const AppContainer = styled.div`
   position: fixed;
   width: 100%;
   height: 100%;
-  font-size: 40px;
-  color: #f8ff99;
-  background: linear-gradient(20deg, rgb(219, 112, 147), #daa357);
 `;
 
 export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
@@ -43,10 +55,10 @@ export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
   return (
     <React.StrictMode>
       <GlobalStyles />
-      {bootstrapData === null ? (
+      {bootstrapData.type === 'PageNotFound' ? (
         <AppContainer>That page does not exist.</AppContainer>
       ) : (
-        <AppContainer>Here’s a number: {bootstrapData}.</AppContainer>
+        <AppContainer>Hello, World!</AppContainer>
       )}
     </React.StrictMode>
   );
