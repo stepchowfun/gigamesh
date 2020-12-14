@@ -1,10 +1,12 @@
 import compression from 'compression';
 import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
+import { BootstrapData } from 'frontend-lib';
 import { randomBytes } from 'crypto';
 
 import installRoutes from '../routes/routes';
 import logger from '../logger/logger';
+import renderPage from '../page/page';
 import { isProduction } from '../constants/constants';
 
 // Read the `HOST` environment variable.
@@ -84,6 +86,15 @@ app.set('etag', false);
 
 // Set up the routes, excluding those for static files (configured above).
 installRoutes(app);
+
+// Render a 404 page when the URL doesn't match a route.
+app.use((request: Request, response: Response) => {
+  const bootstrapData: BootstrapData = {
+    type: 'PageNotFound',
+  };
+
+  renderPage(response, bootstrapData);
+});
 
 // Start the server.
 app.listen(port, host, () => {
