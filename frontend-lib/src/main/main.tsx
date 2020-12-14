@@ -1,9 +1,9 @@
 import React, { FunctionComponent } from 'react';
-import styled from 'styled-components';
 import { Static } from 'runtypes';
 
 import GlobalStyles from '../global-styles/global-styles';
 import LandingPage from '../landing-page/landing-page';
+import MissingPage from '../missing-page/missing-page';
 import { User } from '../api/types/types';
 
 export {
@@ -41,15 +41,6 @@ export interface LoggedIn {
 
 export type BootstrapData = PageNotFound | NotLoggedIn | LoggedIn;
 
-const PageNotFoundContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-`;
-
 export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
   bootstrapData,
 }) => {
@@ -57,15 +48,13 @@ export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
 
   switch (bootstrapData.type) {
     case 'PageNotFound':
-      page = (
-        <PageNotFoundContainer>That page does not exist.</PageNotFoundContainer>
-      );
+      page = <MissingPage />;
       break;
     case 'NotLoggedIn':
       page = <LandingPage />;
       break;
     case 'LoggedIn':
-      page = <LandingPage />;
+      page = <MissingPage />;
       break;
     default:
       throw new Error('Missing case in switch statement.');
