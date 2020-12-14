@@ -176,14 +176,18 @@ app.use(
   }),
 );
 
+// Log incoming requests.
+app.use((request: Request, response: Response, next: NextFunction) => {
+  logger.info({ request });
+  next();
+});
+
 // Don't compute ETags for dynamic responses since the CSP nonces would cause
 // them to change on every request anyway.
 app.set('etag', false);
 
 // Set up the route for the home page.
 app.get('/', (request: Request, response: Response) => {
-  logger.info({ request });
-
   const bootstrapData = Math.random();
 
   renderPage(response, bootstrapData, 200);
@@ -191,8 +195,6 @@ app.get('/', (request: Request, response: Response) => {
 
 // Set up the route for another page.
 app.get('/:number', (request: Request, response: Response) => {
-  logger.info({ request });
-
   // Warning: `request.params.number` has type `any`.
   const requestNumber = Number(request.params.number);
   const bootstrapData = Number.isFinite(requestNumber) ? requestNumber : null;
@@ -204,8 +206,6 @@ app.get('/:number', (request: Request, response: Response) => {
 app.post(
   '/api/invite',
   (request: Request, response: Response, next: NextFunction) => {
-    logger.info({ request });
-
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { body } = request;
 
@@ -217,7 +217,6 @@ app.post(
         .catch(next);
     } else {
       response.status(400).send('Bad Request');
-      logger.info('Bad request.');
     }
   },
 );
