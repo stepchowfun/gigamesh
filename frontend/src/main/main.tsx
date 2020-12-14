@@ -2,9 +2,10 @@
 // the `__webpack_nonce__` variable during module initialization,
 // './webpack-nonce' needs to be imported BEFORE 'frontend-lib'.
 import '../webpack-nonce/webpack-nonce';
-import Main, { BootstrapData } from 'frontend-lib';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BootstrapData, Main } from 'frontend-lib';
 
 declare global {
   interface Window {

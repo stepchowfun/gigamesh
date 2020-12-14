@@ -3,6 +3,26 @@ import styled from 'styled-components';
 
 import GlobalStyles from '../global-styles/global-styles';
 
+export {
+  ChangeEmailRequest,
+  ChangeEmailResponse,
+  DeleteUserRequest,
+  DeleteUserResponse,
+  GetUserRequest,
+  GetUserResponse,
+  InviteRequest,
+  InviteResponse,
+  LogInRequest,
+  LogInResponse,
+  LogOutRequest,
+  LogOutResponse,
+  ProposeEmailChangeRequest,
+  ProposeEmailChangeResponse,
+  SignUpRequest,
+  SignUpResponse,
+  User,
+} from '../api/types/types';
+
 export type BootstrapData = number | null;
 
 const AppContainer = styled.div`
@@ -17,7 +37,7 @@ const AppContainer = styled.div`
   background: linear-gradient(20deg, rgb(219, 112, 147), #daa357);
 `;
 
-const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
+export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
   bootstrapData,
 }) => {
   return (
@@ -31,5 +51,3 @@ const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
     </React.StrictMode>
   );
 };
-
-export default Main;

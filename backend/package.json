@@ -7,7 +7,7 @@
     "build-development": "npx webpack --config webpack.development.js",
     "build-production": "npx webpack --config webpack.production.js",
     "check": "npx tsc --project tsconfig.json --emitDeclarationOnly false --noEmit && npx jest --config jest.config.js && eslint --config .eslintrc.js --ignore-path ../.gitignore --report-unused-disable-directives --max-warnings 0 'src/**/*.{ts,tsx}'",
-    "serve": "cd dist && HOST=localhost PORT=8080 node --preserve-symlinks --require source-map-support/register main.js"
+    "serve": "cd dist && HOST=0.0.0.0 PORT=8080 node --preserve-symlinks --require source-map-support/register main.js"
   },
   "author": "Stephan Boyer",
   "license": "MIT",
@@ -25,6 +25,7 @@
     "@types/html-minifier": "^4.0.0",
     "@types/jest": "^26.0.15",
     "@types/node": "^14.14.7",
+    "@types/pg": "^7.14.7",
     "@types/react": "^16.9.56",
     "@types/react-dom": "^16.9.9",
     "@types/styled-components": "^5.1.4",
@@ -52,14 +53,18 @@
   },
   "dependencies": {
     "@babel/runtime-corejs3": "^7.12.5",
+    "@google-cloud/secret-manager": "^3.2.3",
+    "@sendgrid/mail": "^7.4.0",
     "bunyan": "^1.8.14",
     "compression": "^1.7.4",
     "express": "^4.17.1",
     "frontend-lib": "file:../.build/frontend-lib",
     "helmet": "^4.2.0",
     "html-minifier": "^4.0.0",
+    "pg": "^8.5.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "runtypes": "^5.0.1",
     "source-map-support": "^0.5.19",
     "styled-components": "^5.2.0"
   },
