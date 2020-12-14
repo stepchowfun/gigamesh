@@ -27,6 +27,11 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         { from: '../frontend/dist', to: './static' },
+        {
+          context: 'node_modules/frontend-lib/dist',
+          from: '*-fingerprint.*',
+          to: './static',
+        },
         { from: './static', to: './static' },
       ],
     }),

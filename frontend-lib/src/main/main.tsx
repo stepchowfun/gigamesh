@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Static } from 'runtypes';
 
 import GlobalStyles from '../global-styles/global-styles';
+import LandingPage from '../landing-page/landing-page';
 import { User } from '../api/types/types';
 
 export {
@@ -40,7 +41,7 @@ export interface LoggedIn {
 
 export type BootstrapData = PageNotFound | NotLoggedIn | LoggedIn;
 
-const AppContainer = styled.div`
+const PageNotFoundContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -52,14 +53,28 @@ const AppContainer = styled.div`
 export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
   bootstrapData,
 }) => {
+  let page;
+
+  switch (bootstrapData.type) {
+    case 'PageNotFound':
+      page = (
+        <PageNotFoundContainer>That page does not exist.</PageNotFoundContainer>
+      );
+      break;
+    case 'NotLoggedIn':
+      page = <LandingPage />;
+      break;
+    case 'LoggedIn':
+      page = <LandingPage />;
+      break;
+    default:
+      throw new Error('Missing case in switch statement.');
+  }
+
   return (
     <React.StrictMode>
       <GlobalStyles />
-      {bootstrapData.type === 'PageNotFound' ? (
-        <AppContainer>That page does not exist.</AppContainer>
-      ) : (
-        <AppContainer>Hello, World!</AppContainer>
-      )}
+      {page}
     </React.StrictMode>
   );
 };
