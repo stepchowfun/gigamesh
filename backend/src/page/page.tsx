@@ -64,8 +64,7 @@ const htmlParts = minify(
   { collapseWhitespace: true, minifyJS: true, removeComments: true },
 ).split(placeholder);
 
-// This function renders HTML to a given response object based on the given
-// bootstrap data.
+// Render HTML to a given response object based on the given bootstrap data.
 export default function renderPage(
   response: Response,
   bootstrapData: BootstrapData,

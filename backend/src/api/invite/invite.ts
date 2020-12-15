@@ -1,15 +1,16 @@
 import { InviteRequest, InviteResponse } from 'frontend-lib';
 import { Static } from 'runtypes';
 
+import { Envelope } from '../envelope/envelope';
 import { getPool } from '../../storage/storage';
-import { origin } from '../../constants/constants';
 import { normalizeEmail, send } from '../../email/email';
+import { origin } from '../../constants/constants';
 
 export default async function invite(
-  request: Static<typeof InviteRequest>,
-): Promise<Static<typeof InviteResponse>> {
+  request: Envelope<Static<typeof InviteRequest>>,
+): Promise<Envelope<Static<typeof InviteResponse>>> {
   // Always trim user-provided input.
-  const trimmedEmail = request.email.trim();
+  const trimmedEmail = request.payload.email.trim();
 
   // Get the database connection pool.
   const pool = await getPool();
@@ -69,5 +70,5 @@ export default async function invite(
   }
 
   // There's nothing useful to return to the client.
-  return {};
+  return { payload: {}, sessionId: request.sessionId };
 }

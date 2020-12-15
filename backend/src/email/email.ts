@@ -16,10 +16,10 @@ export async function send(options: {
   await sendgrid.send({ ...options, from: emailSender });
 }
 
-// This function normalizes an email address for doing email-based database
-// lookups or enforcing uniqueness. This function should not be used to
-// normalize email addresses before using them to send email; we leave such
-// normalization up to SendGrid.
+// Normalize an email address for doing email-based database lookups or
+// enforcing uniqueness. This function should not be used to normalize email
+// addresses before using them to send email; we leave such normalization up to
+// SendGrid.
 export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase().normalize('NFC');
 }

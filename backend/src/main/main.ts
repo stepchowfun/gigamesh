@@ -1,4 +1,5 @@
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import { BootstrapData } from 'frontend-lib';
@@ -55,6 +56,9 @@ app.use(compression());
 
 // Populate the `body` field of incoming requests.
 app.use(express.json());
+
+// Populate the `cookies` field of incoming requests.
+app.use(cookieParser());
 
 // Serve static files.
 app.use(
