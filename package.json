@@ -15,8 +15,5 @@
   "license": "MIT",
   "devDependencies": {
     "prettier": "^2.1.2"
-  },
-  "dependencies": {
-    "@types/compression": "^1.7.0"
   }
 }
