@@ -3,7 +3,7 @@ import { Static } from 'runtypes';
 
 import GlobalStyles from '../global-styles/global-styles';
 import LandingPage from '../landing-page/landing-page';
-import MissingPage from '../missing-page/missing-page';
+import SimplePage from '../simple-page/simple-page';
 import { User } from '../api/types/types';
 
 export {
@@ -58,16 +58,16 @@ export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
 
   switch (bootstrapData.type) {
     case 'PageNotFound':
-      page = <MissingPage />;
+      page = <SimplePage>That page does not exist.</SimplePage>;
       break;
     case 'NotLoggedIn':
       page = <LandingPage />;
       break;
     case 'SignedUp':
-      page = <div>Welcome back! Redirecting…</div>;
+      page = <SimplePage>Welcome back! Redirecting…</SimplePage>;
       break;
     case 'LoggedIn':
-      page = <div>Welcome back!</div>;
+      page = <SimplePage>Welcome back!</SimplePage>;
       break;
     default:
       throw new Error('Missing case in switch statement.');
