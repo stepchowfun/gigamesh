@@ -176,9 +176,12 @@ const InviteFormSubmitting = styled.div`
   animation: ${wobble} 1.5s ease infinite;
 `;
 
+const inputFormCompletedLineHeight =
+  inviteFormHeight - inviteFormBorderWidth * 2;
+
 const InviteFormCompleted = styled.div`
   ${inviteFormLayout}
-  line-height: ${inviteFormHeight}px;
+  line-height: ${inputFormCompletedLineHeight}px;
   border: ${inviteFormBorderWidth}px solid ${lineLighterColor};
   text-align: center;
   color: ${lineLightColor};
