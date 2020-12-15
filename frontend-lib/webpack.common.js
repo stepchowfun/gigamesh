@@ -30,7 +30,7 @@ module.exports = {
     libraryTarget: 'commonjs2',
     path: path.resolve(__dirname, 'dist'),
     assetModuleFilename: '[contenthash]-fingerprint[ext]',
-    publicPath: '',
+    publicPath: '/',
   },
   devtool: 'source-map',
 };

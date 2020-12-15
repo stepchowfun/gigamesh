@@ -57,7 +57,7 @@ const htmlParts = minify(
           window.nonce = ${placeholder}; <!-- [tag:window_nonce] -->
         </script>
 
-        <script nonce="${placeholder}" src="${javascriptFileName}"></script>
+        <script nonce="${placeholder}" src="/${javascriptFileName}"></script>
       </body>
     </html>
   `,

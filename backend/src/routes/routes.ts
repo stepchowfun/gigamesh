@@ -5,13 +5,7 @@ import {
   Request,
   Response,
 } from 'express';
-import {
-  BootstrapData,
-  InviteRequest,
-  InviteResponse,
-  SignUpRequest,
-  SignUpResponse,
-} from 'frontend-lib';
+import { InviteRequest, InviteResponse, SignUpResponse } from 'frontend-lib';
 import { Runtype, Static } from 'runtypes';
 
 import invite from '../api/invite/invite';
@@ -24,6 +18,12 @@ import {
 } from '../constants/constants';
 
 const sessionIdCookieName = 'sessionId';
+
+class UnreachableCaseError extends Error {
+  constructor(value: never) {
+    super(`Unreachable case: ${JSON.stringify(value)}`);
+  }
+}
 
 // Extract the session ID from the request, if present.
 function getSessionId(request: Request): string | null {
@@ -82,24 +82,42 @@ function installApiRoute<RequestType, ResponseType>(
 // Install the routes in an Express app.
 export default function installRoutes(app: Application): void {
   app.get('/', (request: Request, response: Response) => {
-    const bootstrapData: BootstrapData = {
+    renderPage(response, {
       type: 'NotLoggedIn',
-    };
-
-    renderPage(response, bootstrapData);
+    });
   });
+
+  app.get(
+    '/sign-up/:signupProposalId',
+    (request: Request, response: Response) => {
+      signUp({
+        payload: { signupProposalId: request.params.signupProposalId },
+        sessionId: getSessionId(request),
+      })
+        .then((apiResponse: Envelope<Static<typeof SignUpResponse>>) => {
+          const payloadType = apiResponse.payload.type;
+          switch (payloadType) {
+            case 'Success':
+              setSessionId(response, apiResponse.sessionId);
+              renderPage(response, { type: 'SignedUp' });
+              break;
+            case 'ProposalExpiredOrInvalid':
+              renderPage(response, { type: 'PageNotFound' });
+              break;
+            default:
+              throw new UnreachableCaseError(payloadType);
+          }
+        })
+        .catch(() => {
+          response.status(500).send('Internal Server Error');
+        });
+    },
+  );
 
   installApiRoute<Static<typeof InviteRequest>, Static<typeof InviteResponse>>(
     app,
     '/api/invite',
     InviteRequest,
     invite,
-  );
-
-  installApiRoute<Static<typeof SignUpRequest>, Static<typeof SignUpResponse>>(
-    app,
-    '/api/sign-up',
-    SignUpRequest,
-    signUp,
   );
 }

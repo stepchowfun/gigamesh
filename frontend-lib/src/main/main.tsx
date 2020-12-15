@@ -34,12 +34,16 @@ export interface NotLoggedIn {
   type: 'NotLoggedIn';
 }
 
+export interface SignedUp {
+  type: 'SignedUp';
+}
+
 export interface LoggedIn {
   type: 'LoggedIn';
   user: Static<typeof User>;
 }
 
-export type BootstrapData = PageNotFound | NotLoggedIn | LoggedIn;
+export type BootstrapData = PageNotFound | NotLoggedIn | SignedUp | LoggedIn;
 
 export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
   bootstrapData,
@@ -53,8 +57,11 @@ export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
     case 'NotLoggedIn':
       page = <LandingPage />;
       break;
+    case 'SignedUp':
+      page = <div>Welcome back! Redirecting…</div>;
+      break;
     case 'LoggedIn':
-      page = <MissingPage />;
+      page = <div>Welcome back!</div>;
       break;
     default:
       throw new Error('Missing case in switch statement.');

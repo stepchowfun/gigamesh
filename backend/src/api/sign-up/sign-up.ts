@@ -75,7 +75,7 @@ export default async function signUp(
 
   // Return the session token to the client.
   return {
-    payload: { type: 'Success', user: { email: proposal.email } },
+    payload: { type: 'Success' },
     sessionId,
   };
 }
