@@ -116,8 +116,12 @@ const halfEmailInputHeight = Math.ceil(emailInputHeight / 2);
 const EmailInput = styled.input`
   ${emailSectionLayout}
   border: 0;
-  outline: none;
+  outline: 0;
   color: ${lineDarkColor};
+
+  &:focus {
+    outline: 0;
+  }
 
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
@@ -139,7 +143,7 @@ const InviteSubmit = styled.button`
   padding: 0;
   border: 0;
   border-radius: ${inviteFormInnerHeight / 2}px;
-  outline: none;
+  outline: 0;
   cursor: pointer;
   background-color: ${buttonDefaultColor};
 
