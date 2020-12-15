@@ -52,31 +52,26 @@ function setSessionId(response: Response, sessionId: string | null): void {
   }
 }
 
-// Install an API route.
-function installApiRoute<RequestType, ResponseType>(
-  app: Application,
-  route: string,
+// Construct the Express handler for an API endpoint handler.
+function apiHandler<RequestType, ResponseType>(
   requestType: Runtype<RequestType>,
   handler: (request: Envelope<RequestType>) => Promise<Envelope<ResponseType>>,
-): void {
-  app.post(
-    route,
-    (request: Request, response: Response, next: NextFunction) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const { body } = request;
+): (request: Request, response: Response, next: NextFunction) => void {
+  return (request, response, next) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { body } = request;
 
-      if (requestType.guard(body)) {
-        handler({ payload: body, sessionId: getSessionId(request) })
-          .then((apiResponse: Envelope<ResponseType>) => {
-            setSessionId(response, apiResponse.sessionId);
-            response.status(200).send(apiResponse.payload);
-          })
-          .catch(next);
-      } else {
-        response.status(400).send('Bad Request');
-      }
-    },
-  );
+    if (requestType.guard(body)) {
+      handler({ payload: body, sessionId: getSessionId(request) })
+        .then((apiResponse: Envelope<ResponseType>) => {
+          setSessionId(response, apiResponse.sessionId);
+          response.status(200).send(apiResponse.payload);
+        })
+        .catch(next);
+    } else {
+      response.status(400).send('The request was invalid.');
+    }
+  };
 }
 
 // Install the routes in an Express app.
@@ -89,17 +84,19 @@ export default function installRoutes(app: Application): void {
     renderPage(response, bootstrapData);
   });
 
-  installApiRoute<Static<typeof InviteRequest>, Static<typeof InviteResponse>>(
-    app,
+  app.post(
     '/api/invite',
-    InviteRequest,
-    invite,
+    apiHandler<Static<typeof InviteRequest>, Static<typeof InviteResponse>>(
+      InviteRequest,
+      invite,
+    ),
   );
 
-  installApiRoute<Static<typeof SignUpRequest>, Static<typeof SignUpResponse>>(
-    app,
+  app.get(
     '/api/sign-up',
-    SignUpRequest,
-    signUp,
+    apiHandler<Static<typeof SignUpRequest>, Static<typeof SignUpResponse>>(
+      SignUpRequest,
+      signUp,
+    ),
   );
 }
