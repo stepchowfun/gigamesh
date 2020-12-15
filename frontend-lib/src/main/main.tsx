@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import { Static } from 'runtypes';
 
 import GlobalStyles from '../global-styles/global-styles';
@@ -48,6 +48,12 @@ export type BootstrapData = PageNotFound | NotLoggedIn | SignedUp | LoggedIn;
 export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
   bootstrapData,
 }) => {
+  useEffect(() => {
+    if (bootstrapData.type === 'SignedUp') {
+      window.location.replace('/');
+    }
+  });
+
   let page;
 
   switch (bootstrapData.type) {
