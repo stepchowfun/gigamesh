@@ -23,7 +23,6 @@ export const SignUpRequest = Record({
 export const SignUpResponse = Union(
   Record({
     type: Literal('Success'),
-    user: User,
   }),
   Record({
     type: Literal('ProposalExpiredOrInvalid'),
