@@ -1,10 +1,10 @@
 import { InviteRequest, InviteResponse } from 'frontend-lib';
 import { Static } from 'runtypes';
 
-import { Envelope } from '../envelope/envelope';
-import { getPool } from '../../storage/storage';
-import { normalizeEmail, send } from '../../email/email';
-import { origin } from '../../constants/constants';
+import { Envelope } from '../../util/envelope/envelope';
+import { getPool } from '../../../storage/storage';
+import { normalizeEmail, send } from '../../../email/email';
+import { origin } from '../../../constants/constants';
 
 export default async function invite(
   request: Envelope<Static<typeof InviteRequest>>,

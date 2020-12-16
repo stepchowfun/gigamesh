@@ -2,10 +2,10 @@ import validateUuid from 'uuid-validate';
 import { SignUpRequest, SignUpResponse } from 'frontend-lib';
 import { Static } from 'runtypes';
 
-import { Envelope } from '../envelope/envelope';
-import { ErrorCode, getPool } from '../../storage/storage';
-import { normalizeEmail } from '../../email/email';
-import { signupProposalLifespanMs } from '../../constants/constants';
+import { Envelope } from '../../util/envelope/envelope';
+import { ErrorCode, getPool } from '../../../storage/storage';
+import { normalizeEmail } from '../../../email/email';
+import { signupProposalLifespanMs } from '../../../constants/constants';
 
 export default async function signUp(
   request: Envelope<Static<typeof SignUpRequest>>,

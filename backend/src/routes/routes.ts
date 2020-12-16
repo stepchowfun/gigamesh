@@ -5,25 +5,26 @@ import {
   Request,
   Response,
 } from 'express';
-import { InviteRequest, InviteResponse, SignUpResponse } from 'frontend-lib';
+import {
+  GetHomeDataResponse,
+  InviteRequest,
+  InviteResponse,
+  SignUpResponse,
+} from 'frontend-lib';
 import { Runtype, Static } from 'runtypes';
 
-import invite from '../api/invite/invite';
-import signUp from '../api/sign-up/sign-up';
+import UnreachableCaseError from '../unreachable-case-error/unreachable-case-error';
+import getHomeData from '../api/endpoints/get-home-data/get-home-data';
+import invite from '../api/endpoints/invite/invite';
 import renderPage from '../page/page';
-import { Envelope } from '../api/envelope/envelope';
+import signUp from '../api/endpoints/sign-up/sign-up';
+import { Envelope } from '../api/util/envelope/envelope';
 import {
   isProduction,
   sessionLifespanSinceCreationMs,
 } from '../constants/constants';
 
 const sessionIdCookieName = 'sessionId';
-
-class UnreachableCaseError extends Error {
-  constructor(value: never) {
-    super(`Unreachable case: ${JSON.stringify(value)}`);
-  }
-}
 
 // Extract the session ID from the request, if present.
 function getSessionId(request: Request): string | null {
@@ -81,10 +82,27 @@ function installApiRoute<RequestType, ResponseType>(
 
 // Install the routes in an Express app.
 export default function installRoutes(app: Application): void {
-  app.get('/', (request: Request, response: Response) => {
-    renderPage(response, {
-      type: 'NotLoggedIn',
-    });
+  app.get('/', (request: Request, response: Response, next: NextFunction) => {
+    getHomeData({ payload: {}, sessionId: getSessionId(request) })
+      .then((apiResponse: Envelope<Static<typeof GetHomeDataResponse>>) => {
+        const { payload } = apiResponse;
+        switch (payload.type) {
+          case 'Success':
+            renderPage(response, {
+              type: 'LoggedIn',
+              user: payload.user,
+            });
+            break;
+          case 'NotLoggedIn':
+            renderPage(response, {
+              type: 'NotLoggedIn',
+            });
+            break;
+          default:
+            throw new UnreachableCaseError(payload);
+        }
+      })
+      .catch(next);
   });
 
   app.get(
@@ -95,8 +113,8 @@ export default function installRoutes(app: Application): void {
         sessionId: getSessionId(request),
       })
         .then((apiResponse: Envelope<Static<typeof SignUpResponse>>) => {
-          const payloadType = apiResponse.payload.type;
-          switch (payloadType) {
+          const { payload } = apiResponse;
+          switch (payload.type) {
             case 'Success':
               setSessionId(response, apiResponse.sessionId);
               renderPage(response, { type: 'SignedUp' });
@@ -105,7 +123,7 @@ export default function installRoutes(app: Application): void {
               renderPage(response, { type: 'PageNotFound' });
               break;
             default:
-              throw new UnreachableCaseError(payloadType);
+              throw new UnreachableCaseError(payload);
           }
         })
         .catch(next);
