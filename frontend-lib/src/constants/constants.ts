@@ -12,3 +12,5 @@ export const lineDarkerColor = '#222222';
 export const lineFocusColor = buttonHoverColor;
 export const lineLightColor = '#999999';
 export const lineLighterColor = '#cccccc';
+
+export const minPageWidth = 320;
