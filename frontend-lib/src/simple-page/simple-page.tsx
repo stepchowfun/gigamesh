@@ -1,13 +1,12 @@
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
+import { minPageWidth } from '../constants/constants';
+
 const SimplePageContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: fixed;
-  width: 100%;
-  height: 100%;
+  min-width: ${minPageWidth}px;
+  padding: 32px;
+  text-align: center;
 `;
 
 const SimplePage: FunctionComponent<{}> = (props) => {
