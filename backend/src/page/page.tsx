@@ -84,7 +84,7 @@ export default function renderPage(
     const styles = sheet.getStyleTags();
 
     response
-      .status(bootstrapData.type === 'PageNotFound' ? 404 : 200)
+      .status(bootstrapData.type === 'BootstrapPageNotFound' ? 404 : 200)
       .set({ 'Cache-Control': 'no-store' })
       .send(
         `${htmlParts[0]}${styles}${htmlParts[1]}${html}${htmlParts[2]}${nonce}${
