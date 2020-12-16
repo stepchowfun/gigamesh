@@ -5,6 +5,7 @@ import GlobalStyles from '../global-styles/global-styles';
 import LandingPage from '../landing-page/landing-page';
 import SimplePage from '../simple-page/simple-page';
 import { User } from '../api/types/types';
+import { rootRoute } from '../routes/routes';
 
 export {
   ChangeEmailRequest,
@@ -25,6 +26,12 @@ export {
   SignUpResponse,
   User,
 } from '../api/types/types';
+export {
+  inviteRoute,
+  logInRoute,
+  rootRoute,
+  signUpRoute,
+} from '../routes/routes';
 
 export interface PageNotFound {
   type: 'PageNotFound';
@@ -50,7 +57,7 @@ export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
 }) => {
   useEffect(() => {
     if (bootstrapData.type === 'SignedUp') {
-      window.location.replace('/');
+      window.location.replace(rootRoute());
     }
   });
 
