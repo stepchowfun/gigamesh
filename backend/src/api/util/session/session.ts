@@ -1,3 +1,4 @@
+import validateUuid from 'uuid-validate';
 import { Pool, PoolClient } from 'pg';
 
 import { getPool } from '../../../storage/storage';
@@ -10,6 +11,11 @@ export default async function validateSession(
   sessionId: string,
   connection?: Pool | PoolClient,
 ): Promise<string | null> {
+  // Validate the session ID.
+  if (!validateUuid(sessionId, 4)) {
+    return null;
+  }
+
   // Make sure we have a client.
   let clientOrPool = connection;
   if (clientOrPool === undefined) {
