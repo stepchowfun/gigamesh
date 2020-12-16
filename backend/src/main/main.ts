@@ -94,7 +94,7 @@ installRoutes(app);
 // Render a 404 page when the URL doesn't match a route.
 app.use((request: Request, response: Response) => {
   const bootstrapData: BootstrapData = {
-    type: 'PageNotFound',
+    type: 'BootstrapPageNotFound',
   };
 
   renderPage(response, bootstrapData);

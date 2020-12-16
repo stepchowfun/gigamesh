@@ -33,30 +33,34 @@ export {
   signUpRoute,
 } from '../routes/routes';
 
-export interface PageNotFound {
-  type: 'PageNotFound';
+export interface BootstrapPageNotFound {
+  type: 'BootstrapPageNotFound';
 }
 
-export interface NotLoggedIn {
-  type: 'NotLoggedIn';
+export interface BootstrapLandingPage {
+  type: 'BootstrapLandingPage';
 }
 
-export interface SignedUp {
-  type: 'SignedUp';
+export interface BootstrapRedirectToHomePage {
+  type: 'BootstrapRedirectToHomePage';
 }
 
-export interface LoggedIn {
-  type: 'LoggedIn';
+export interface BootstrapHomePage {
+  type: 'BootstrapHomePage';
   user: Static<typeof User>;
 }
 
-export type BootstrapData = PageNotFound | NotLoggedIn | SignedUp | LoggedIn;
+export type BootstrapData =
+  | BootstrapPageNotFound
+  | BootstrapLandingPage
+  | BootstrapRedirectToHomePage
+  | BootstrapHomePage;
 
 export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
   bootstrapData,
 }) => {
   useEffect(() => {
-    if (bootstrapData.type === 'SignedUp') {
+    if (bootstrapData.type === 'BootstrapRedirectToHomePage') {
       window.location.replace(rootRoute());
     }
   });
@@ -64,16 +68,16 @@ export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
   let page;
 
   switch (bootstrapData.type) {
-    case 'PageNotFound':
+    case 'BootstrapPageNotFound':
       page = <SimplePage>That page does not exist.</SimplePage>;
       break;
-    case 'NotLoggedIn':
+    case 'BootstrapLandingPage':
       page = <LandingPage />;
       break;
-    case 'SignedUp':
-      page = <SimplePage>Welcome back! Redirecting…</SimplePage>;
+    case 'BootstrapRedirectToHomePage':
+      page = <SimplePage>Redirecting…</SimplePage>;
       break;
-    case 'LoggedIn':
+    case 'BootstrapHomePage':
       page = <SimplePage>Welcome back!</SimplePage>;
       break;
     default:

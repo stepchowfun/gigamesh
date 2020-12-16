@@ -38,7 +38,6 @@ export const LogInRequest = Record({
 export const LogInResponse = Union(
   Record({
     type: Literal('Success'),
-    user: User,
   }),
   Record({
     type: Literal('ProposalExpiredOrInvalid'),

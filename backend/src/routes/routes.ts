@@ -9,8 +9,10 @@ import {
   GetHomeDataResponse,
   InviteRequest,
   InviteResponse,
+  LogInResponse,
   SignUpResponse,
   inviteRoute,
+  logInRoute,
   rootRoute,
   signUpRoute,
 } from 'frontend-lib';
@@ -19,6 +21,7 @@ import { Runtype, Static } from 'runtypes';
 import UnreachableCaseError from '../unreachable-case-error/unreachable-case-error';
 import getHomeData from '../api/endpoints/get-home-data/get-home-data';
 import invite from '../api/endpoints/invite/invite';
+import logIn from '../api/endpoints/log-in/log-in';
 import renderPage from '../page/page';
 import signUp from '../api/endpoints/sign-up/sign-up';
 import { Envelope } from '../api/util/envelope/envelope';
@@ -94,13 +97,13 @@ export default function installRoutes(app: Application): void {
           switch (payload.type) {
             case 'Success':
               renderPage(response, {
-                type: 'LoggedIn',
+                type: 'BootstrapHomePage',
                 user: payload.user,
               });
               break;
             case 'NotLoggedIn':
               renderPage(response, {
-                type: 'NotLoggedIn',
+                type: 'BootstrapLandingPage',
               });
               break;
             default:
@@ -123,10 +126,35 @@ export default function installRoutes(app: Application): void {
           switch (payload.type) {
             case 'Success':
               setSessionId(response, apiResponse.sessionId);
-              renderPage(response, { type: 'SignedUp' });
+              renderPage(response, { type: 'BootstrapRedirectToHomePage' });
               break;
             case 'ProposalExpiredOrInvalid':
-              renderPage(response, { type: 'PageNotFound' });
+              renderPage(response, { type: 'BootstrapPageNotFound' });
+              break;
+            default:
+              throw new UnreachableCaseError(payload);
+          }
+        })
+        .catch(next);
+    },
+  );
+
+  app.get(
+    logInRoute(':loginProposalId'),
+    (request: Request, response: Response, next: NextFunction) => {
+      logIn({
+        payload: { loginProposalId: request.params.loginProposalId },
+        sessionId: getSessionId(request),
+      })
+        .then((apiResponse: Envelope<Static<typeof LogInResponse>>) => {
+          const { payload } = apiResponse;
+          switch (payload.type) {
+            case 'Success':
+              setSessionId(response, apiResponse.sessionId);
+              renderPage(response, { type: 'BootstrapRedirectToHomePage' });
+              break;
+            case 'ProposalExpiredOrInvalid':
+              renderPage(response, { type: 'BootstrapPageNotFound' });
               break;
             default:
               throw new UnreachableCaseError(payload);
