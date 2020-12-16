@@ -5,7 +5,7 @@ import GlobalStyles from '../global-styles/global-styles';
 import LandingPage from '../landing-page/landing-page';
 import SimplePage from '../simple-page/simple-page';
 import { User } from '../api/types/types';
-import { rootRoute } from '../routes/routes';
+import { rootWebRoute } from '../routes/routes';
 
 export {
   ChangeEmailRequest,
@@ -27,10 +27,14 @@ export {
   User,
 } from '../api/types/types';
 export {
-  inviteRoute,
-  logInRoute,
-  rootRoute,
-  signUpRoute,
+  getHomeDataApiRoute,
+  inviteApiRoute,
+  logInApiRoute,
+  logInWebRoute,
+  logOutApiRoute,
+  rootWebRoute,
+  signUpApiRoute,
+  signUpWebRoute,
 } from '../routes/routes';
 
 export interface BootstrapPageNotFound {
@@ -61,7 +65,7 @@ export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
 }) => {
   useEffect(() => {
     if (bootstrapData.type === 'BootstrapRedirectToHomePage') {
-      window.location.replace(rootRoute());
+      window.location.replace(rootWebRoute());
     }
   });
 
