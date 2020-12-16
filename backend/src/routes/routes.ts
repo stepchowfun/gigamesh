@@ -89,7 +89,7 @@ export default function installRoutes(app: Application): void {
 
   app.get(
     '/sign-up/:signupProposalId',
-    (request: Request, response: Response) => {
+    (request: Request, response: Response, next: NextFunction) => {
       signUp({
         payload: { signupProposalId: request.params.signupProposalId },
         sessionId: getSessionId(request),
@@ -108,9 +108,7 @@ export default function installRoutes(app: Application): void {
               throw new UnreachableCaseError(payloadType);
           }
         })
-        .catch(() => {
-          response.status(500).send('Internal Server Error');
-        });
+        .catch(next);
     },
   );
 
