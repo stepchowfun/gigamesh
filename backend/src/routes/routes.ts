@@ -6,15 +6,24 @@ import {
   Response,
 } from 'express';
 import {
+  GetHomeDataRequest,
   GetHomeDataResponse,
   InviteRequest,
   InviteResponse,
+  LogInRequest,
   LogInResponse,
+  LogOutRequest,
+  LogOutResponse,
+  SignUpRequest,
   SignUpResponse,
-  inviteRoute,
-  logInRoute,
-  rootRoute,
-  signUpRoute,
+  getHomeDataApiRoute,
+  inviteApiRoute,
+  logInApiRoute,
+  logInWebRoute,
+  logOutApiRoute,
+  rootWebRoute,
+  signUpApiRoute,
+  signUpWebRoute,
 } from 'frontend-lib';
 import { Runtype, Static } from 'runtypes';
 
@@ -22,6 +31,7 @@ import UnreachableCaseError from '../unreachable-case-error/unreachable-case-err
 import getHomeData from '../api/endpoints/get-home-data/get-home-data';
 import invite from '../api/endpoints/invite/invite';
 import logIn from '../api/endpoints/log-in/log-in';
+import logOut from '../api/endpoints/log-out/log-out';
 import renderPage from '../page/page';
 import signUp from '../api/endpoints/sign-up/sign-up';
 import { Envelope } from '../api/util/envelope/envelope';
@@ -88,8 +98,10 @@ function installApiRoute<RequestType, ResponseType>(
 
 // Install the routes in an Express app.
 export default function installRoutes(app: Application): void {
+  // Web routes
+
   app.get(
-    rootRoute(),
+    rootWebRoute(),
     (request: Request, response: Response, next: NextFunction) => {
       getHomeData({ payload: {}, sessionId: getSessionId(request) })
         .then((apiResponse: Envelope<Static<typeof GetHomeDataResponse>>) => {
@@ -115,7 +127,7 @@ export default function installRoutes(app: Application): void {
   );
 
   app.get(
-    signUpRoute(':signupProposalId'),
+    signUpWebRoute(':signupProposalId'),
     (request: Request, response: Response, next: NextFunction) => {
       signUp({
         payload: { signupProposalId: request.params.signupProposalId },
@@ -140,7 +152,7 @@ export default function installRoutes(app: Application): void {
   );
 
   app.get(
-    logInRoute(':loginProposalId'),
+    logInWebRoute(':loginProposalId'),
     (request: Request, response: Response, next: NextFunction) => {
       logIn({
         payload: { loginProposalId: request.params.loginProposalId },
@@ -164,10 +176,38 @@ export default function installRoutes(app: Application): void {
     },
   );
 
+  // API routes
+
+  installApiRoute<
+    Static<typeof GetHomeDataRequest>,
+    Static<typeof GetHomeDataResponse>
+  >(app, getHomeDataApiRoute(), GetHomeDataRequest, getHomeData);
+
   installApiRoute<Static<typeof InviteRequest>, Static<typeof InviteResponse>>(
     app,
-    inviteRoute(),
+    inviteApiRoute(),
     InviteRequest,
     invite,
+  );
+
+  installApiRoute<Static<typeof LogInRequest>, Static<typeof LogInResponse>>(
+    app,
+    logInApiRoute(),
+    LogInRequest,
+    logIn,
+  );
+
+  installApiRoute<Static<typeof LogOutRequest>, Static<typeof LogOutResponse>>(
+    app,
+    logOutApiRoute(),
+    LogOutRequest,
+    logOut,
+  );
+
+  installApiRoute<Static<typeof SignUpRequest>, Static<typeof SignUpResponse>>(
+    app,
+    signUpApiRoute(),
+    SignUpRequest,
+    signUp,
   );
 }
