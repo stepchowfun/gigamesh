@@ -12,7 +12,7 @@ import {
   lineLighterColor,
 } from '../constants/constants';
 import chevron from './chevron.svg';
-import invite from '../api/invite/invite';
+import invite from '../api/endpoints/invite/invite';
 import { didNotCancel, useCancel } from '../use-cancel/use-cancel';
 
 interface NotSent {

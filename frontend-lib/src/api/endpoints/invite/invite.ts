@@ -1,8 +1,8 @@
 import axios, { AxiosResponse, CancelToken } from 'axios';
 import { Static } from 'runtypes';
 
-import { apiBaseUrl } from '../../constants/constants';
-import { InviteRequest, InviteResponse } from '../types/types';
+import { apiBaseUrl } from '../../../constants/constants';
+import { InviteRequest, InviteResponse } from '../../types/types';
 
 export default async function invite(
   request: Static<typeof InviteRequest>,
