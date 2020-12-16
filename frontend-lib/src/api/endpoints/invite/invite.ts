@@ -1,7 +1,7 @@
 import axios, { AxiosResponse, CancelToken } from 'axios';
 import { Static } from 'runtypes';
 
-import { apiBaseUrl } from '../../../constants/constants';
+import { inviteRoute } from '../../../routes/routes';
 import { InviteRequest, InviteResponse } from '../../types/types';
 
 export default async function invite(
@@ -10,7 +10,7 @@ export default async function invite(
 ): Promise<Static<typeof InviteResponse>> {
   const axiosResponse: AxiosResponse<Static<
     typeof InviteResponse
-  >> = await axios.post(`${apiBaseUrl}invite`, request, { cancelToken });
+  >> = await axios.post(inviteRoute(), request, { cancelToken });
   InviteResponse.check(axiosResponse.data);
   return axiosResponse.data;
 }

@@ -10,6 +10,9 @@ import {
   InviteRequest,
   InviteResponse,
   SignUpResponse,
+  inviteRoute,
+  rootRoute,
+  signUpRoute,
 } from 'frontend-lib';
 import { Runtype, Static } from 'runtypes';
 
@@ -82,31 +85,34 @@ function installApiRoute<RequestType, ResponseType>(
 
 // Install the routes in an Express app.
 export default function installRoutes(app: Application): void {
-  app.get('/', (request: Request, response: Response, next: NextFunction) => {
-    getHomeData({ payload: {}, sessionId: getSessionId(request) })
-      .then((apiResponse: Envelope<Static<typeof GetHomeDataResponse>>) => {
-        const { payload } = apiResponse;
-        switch (payload.type) {
-          case 'Success':
-            renderPage(response, {
-              type: 'LoggedIn',
-              user: payload.user,
-            });
-            break;
-          case 'NotLoggedIn':
-            renderPage(response, {
-              type: 'NotLoggedIn',
-            });
-            break;
-          default:
-            throw new UnreachableCaseError(payload);
-        }
-      })
-      .catch(next);
-  });
+  app.get(
+    rootRoute(),
+    (request: Request, response: Response, next: NextFunction) => {
+      getHomeData({ payload: {}, sessionId: getSessionId(request) })
+        .then((apiResponse: Envelope<Static<typeof GetHomeDataResponse>>) => {
+          const { payload } = apiResponse;
+          switch (payload.type) {
+            case 'Success':
+              renderPage(response, {
+                type: 'LoggedIn',
+                user: payload.user,
+              });
+              break;
+            case 'NotLoggedIn':
+              renderPage(response, {
+                type: 'NotLoggedIn',
+              });
+              break;
+            default:
+              throw new UnreachableCaseError(payload);
+          }
+        })
+        .catch(next);
+    },
+  );
 
   app.get(
-    '/sign-up/:signupProposalId',
+    signUpRoute(':signupProposalId'),
     (request: Request, response: Response, next: NextFunction) => {
       signUp({
         payload: { signupProposalId: request.params.signupProposalId },
@@ -132,7 +138,7 @@ export default function installRoutes(app: Application): void {
 
   installApiRoute<Static<typeof InviteRequest>, Static<typeof InviteResponse>>(
     app,
-    '/api/invite',
+    inviteRoute(),
     InviteRequest,
     invite,
   );

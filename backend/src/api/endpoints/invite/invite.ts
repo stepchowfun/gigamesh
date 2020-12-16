@@ -1,4 +1,9 @@
-import { InviteRequest, InviteResponse } from 'frontend-lib';
+import {
+  InviteRequest,
+  InviteResponse,
+  signUpRoute,
+  logInRoute,
+} from 'frontend-lib';
 import { Static } from 'runtypes';
 
 import { Envelope } from '../../util/envelope/envelope';
@@ -34,7 +39,7 @@ export default async function invite(
     ).rows[0].id;
 
     // Construct the signup link.
-    const signupLink = `${origin()}/sign-up/${signupProposalId}`;
+    const signupLink = `${origin()}${signUpRoute(signupProposalId)}`;
 
     // Send the proposal to the user.
     await send({
@@ -58,7 +63,7 @@ export default async function invite(
     ).rows[0].id;
 
     // Construct the login link.
-    const logInLink = `${origin()}/log-in/${loginProposalId}`;
+    const logInLink = `${origin()}${logInRoute(loginProposalId)}`;
 
     // Send the proposal to the user.
     await send({
