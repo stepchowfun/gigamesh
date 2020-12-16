@@ -1,3 +1,4 @@
+import validateUuid from 'uuid-validate';
 import { SignUpRequest, SignUpResponse } from 'frontend-lib';
 import { Static } from 'runtypes';
 
@@ -9,6 +10,15 @@ import { signupProposalLifespanMs } from '../../constants/constants';
 export default async function signUp(
   request: Envelope<Static<typeof SignUpRequest>>,
 ): Promise<Envelope<Static<typeof SignUpResponse>>> {
+  // Validate the signup proposal ID.
+  const { signupProposalId } = request.payload;
+  if (!validateUuid(signupProposalId, 4)) {
+    return {
+      payload: { type: 'ProposalExpiredOrInvalid' },
+      sessionId: request.sessionId,
+    };
+  }
+
   // Get the database connection pool.
   const pool = await getPool();
 
@@ -21,7 +31,7 @@ export default async function signUp(
       'DELETE FROM signup_proposal ' +
         'WHERE id = $1 ' +
         'RETURNING created_at AS "createdAt", email',
-      [request.payload.signupProposalId],
+      [signupProposalId],
     )
   ).rows;
   if (proposals.length === 0) {
