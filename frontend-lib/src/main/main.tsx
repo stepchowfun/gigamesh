@@ -5,6 +5,7 @@ import GlobalStyles from '../global-styles/global-styles';
 import HomePage from '../home-page/home-page';
 import LandingPage from '../landing-page/landing-page';
 import SimplePage from '../simple-page/simple-page';
+import UnreachableCaseError from '../unreachable-case-error/unreachable-case-error';
 import { User } from '../api/types/types';
 import { rootWebRoute } from '../routes/routes';
 
@@ -80,7 +81,7 @@ export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
 
   switch (bootstrapData.type) {
     case 'BootstrapPageNotFound':
-      page = <SimplePage>That page does not exist.</SimplePage>;
+      page = <SimplePage>That page doesn’t exist.</SimplePage>;
       break;
     case 'BootstrapLandingPage':
       page = <LandingPage />;
@@ -92,7 +93,7 @@ export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
       page = <HomePage />;
       break;
     default:
-      throw new Error('Missing case in switch statement.');
+      throw new UnreachableCaseError(bootstrapData);
   }
 
   return (
