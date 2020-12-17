@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
+import React, {
+  FunctionComponent,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import styled, { css, keyframes } from 'styled-components';
 
 import {
@@ -192,7 +197,7 @@ const LandingPage: FunctionComponent<{}> = () => {
   const [state, setState] = useState<State>({ type: 'NotSent', email: '' });
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     inputRef.current?.focus();
   });
 
