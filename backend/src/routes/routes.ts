@@ -6,6 +6,8 @@ import {
   Response,
 } from 'express';
 import {
+  ChangeEmailRequest,
+  ChangeEmailResponse,
   DeleteUserRequest,
   DeleteUserResponse,
   GetHomeDataRequest,
@@ -16,26 +18,33 @@ import {
   LogInResponse,
   LogOutRequest,
   LogOutResponse,
+  ProposeEmailChangeRequest,
+  ProposeEmailChangeResponse,
   SignUpRequest,
   SignUpResponse,
   UnreachableCaseError,
+  changeEmailApiRoute,
+  changeEmailWebRoute,
   deleteUserApiRoute,
   getHomeDataApiRoute,
   inviteApiRoute,
   logInApiRoute,
   logInWebRoute,
   logOutApiRoute,
+  proposeEmailChangeApiRoute,
   rootWebRoute,
   signUpApiRoute,
   signUpWebRoute,
 } from 'frontend-lib';
 import { Runtype, Static } from 'runtypes';
 
+import changeEmail from '../api/endpoints/change-email/change-email';
 import deleteUser from '../api/endpoints/delete-user/delete-user';
 import getHomeData from '../api/endpoints/get-home-data/get-home-data';
 import invite from '../api/endpoints/invite/invite';
 import logIn from '../api/endpoints/log-in/log-in';
 import logOut from '../api/endpoints/log-out/log-out';
+import proposeEmailChange from '../api/endpoints/propose-email-change/propose-email-change';
 import renderPage from '../page/page';
 import signUp from '../api/endpoints/sign-up/sign-up';
 import { Envelope } from '../api/util/envelope/envelope';
@@ -103,6 +112,35 @@ function installApiRoute<RequestType, ResponseType>(
 // Install the routes in an Express app.
 export default function installRoutes(app: Application): void {
   // Web routes (in alphabetical order)
+
+  app.get(
+    changeEmailWebRoute(':emailChangeProposalId'),
+    (request: Request, response: Response, next: NextFunction) => {
+      changeEmail({
+        payload: {
+          emailChangeProposalId: request.params.emailChangeProposalId,
+        },
+        sessionId: getSessionId(request),
+      })
+        .then((apiResponse: Envelope<Static<typeof ChangeEmailResponse>>) => {
+          const { payload } = apiResponse;
+          switch (payload.type) {
+            case 'Success':
+              renderPage(response, { type: 'BootstrapRedirectToHomePage' });
+              break;
+            case 'NotLoggedIn':
+              renderPage(response, { type: 'BootstrapPageNotFound' });
+              break;
+            case 'ProposalExpiredOrInvalid':
+              renderPage(response, { type: 'BootstrapPageNotFound' });
+              break;
+            default:
+              throw new UnreachableCaseError(payload);
+          }
+        })
+        .catch(next);
+    },
+  );
 
   app.get(
     logInWebRoute(':loginProposalId'),
@@ -183,6 +221,11 @@ export default function installRoutes(app: Application): void {
   // API routes (in alphabetical order)
 
   installApiRoute<
+    Static<typeof ChangeEmailRequest>,
+    Static<typeof ChangeEmailResponse>
+  >(app, changeEmailApiRoute(), ChangeEmailRequest, changeEmail);
+
+  installApiRoute<
     Static<typeof DeleteUserRequest>,
     Static<typeof DeleteUserResponse>
   >(app, deleteUserApiRoute(), DeleteUserRequest, deleteUser);
@@ -211,6 +254,16 @@ export default function installRoutes(app: Application): void {
     logOutApiRoute(),
     LogOutRequest,
     logOut,
+  );
+
+  installApiRoute<
+    Static<typeof ProposeEmailChangeRequest>,
+    Static<typeof ProposeEmailChangeResponse>
+  >(
+    app,
+    proposeEmailChangeApiRoute(),
+    ProposeEmailChangeRequest,
+    proposeEmailChange,
   );
 
   installApiRoute<Static<typeof SignUpRequest>, Static<typeof SignUpResponse>>(

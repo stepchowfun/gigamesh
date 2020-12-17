@@ -101,7 +101,6 @@ export const ChangeEmailRequest = Record({
 export const ChangeEmailResponse = Union(
   Record({
     type: Literal('Success'),
-    user: User,
   }),
   Record({
     type: Literal('NotLoggedIn'),

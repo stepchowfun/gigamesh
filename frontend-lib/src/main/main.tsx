@@ -28,12 +28,15 @@ export {
   User,
 } from '../api/types/types';
 export {
+  changeEmailApiRoute,
+  changeEmailWebRoute,
   deleteUserApiRoute,
   getHomeDataApiRoute,
   inviteApiRoute,
   logInApiRoute,
   logInWebRoute,
   logOutApiRoute,
+  proposeEmailChangeApiRoute,
   rootWebRoute,
   signUpApiRoute,
   signUpWebRoute,
