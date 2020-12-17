@@ -8,7 +8,7 @@ import { randomBytes } from 'crypto';
 import installRoutes from '../routes/routes';
 import logger from '../logger/logger';
 import renderPage from '../page/page';
-import { isProduction } from '../constants/constants';
+import { isProduction, origin } from '../constants/constants';
 
 // Read the `HOST` environment variable.
 const hostRaw = process.env.HOST;
@@ -59,6 +59,12 @@ app.use(express.json());
 
 // Populate the `cookies` field of incoming requests.
 app.use(cookieParser());
+
+// Set the canonical URL as a response header.
+app.use((request: Request, response: Response, next: NextFunction) => {
+  response.set({ Link: `<${origin}${request.url}>; rel="canonical"` });
+  next();
+});
 
 // Serve static files.
 app.use(

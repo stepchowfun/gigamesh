@@ -6,14 +6,11 @@ const gcpRegion = 'us-central1';
 // in production than in development/test.
 export const isProduction = process.env.NODE_ENV === 'production';
 
-// This is used to generate links in emails.
-export function origin(): string {
-  if (isProduction) {
-    return 'https://www.gigamesh.io';
-  }
-
-  return 'http://localhost:8080';
-}
+// This is used to generate links in emails and to add canonical URLs to HTTP
+// responses.
+export const origin = isProduction
+  ? 'https://www.gigamesh.io'
+  : 'http://localhost:8080';
 
 // This constant points to the secrets in GCP Secret Manager.
 export const postgresSecretName = `projects/${gcpProjectId}/secrets/postgres-production/versions/latest`;
