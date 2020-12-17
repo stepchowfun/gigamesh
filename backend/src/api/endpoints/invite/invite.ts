@@ -39,7 +39,7 @@ export default async function invite(
     ).rows[0].id;
 
     // Construct the signup link.
-    const signupLink = `${origin()}${signUpWebRoute(signupProposalId)}`;
+    const signupLink = `${origin}${signUpWebRoute(signupProposalId)}`;
 
     // Send the proposal to the user.
     await send({
@@ -63,7 +63,7 @@ export default async function invite(
     ).rows[0].id;
 
     // Construct the login link.
-    const logInLink = `${origin()}${logInWebRoute(loginProposalId)}`;
+    const logInLink = `${origin}${logInWebRoute(loginProposalId)}`;
 
     // Send the proposal to the user.
     await send({
