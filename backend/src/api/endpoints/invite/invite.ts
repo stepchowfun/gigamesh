@@ -63,14 +63,14 @@ export default async function invite(
     ).rows[0].id;
 
     // Construct the login link.
-    const logInLink = `${origin}${logInWebRoute(loginProposalId)}`;
+    const loginLink = `${origin}${logInWebRoute(loginProposalId)}`;
 
     // Send the proposal to the user.
     await send({
       to: trimmedEmail,
       subject: 'Your Gigamesh login link',
-      text: `Navigate here to log in: ${logInLink}`,
-      html: `Click <a href="${logInLink}">here</a> to log in!`,
+      text: `Navigate here to log in: ${loginLink}`,
+      html: `Click <a href="${loginLink}">here</a> to log in!`,
     });
   }
 

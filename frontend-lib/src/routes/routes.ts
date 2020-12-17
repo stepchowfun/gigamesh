@@ -1,5 +1,9 @@
 // Web routes (in alphabetical order)
 
+export function changeEmailWebRoute(emailChangeProposalId: string): string {
+  return `/change-email/${emailChangeProposalId}`;
+}
+
 export function logInWebRoute(loginProposalId: string): string {
   return `/log-in/${loginProposalId}`;
 }
@@ -13,6 +17,10 @@ export function signUpWebRoute(signupProposalId: string): string {
 }
 
 // API routes (in alphabetical order)
+
+export function changeEmailApiRoute(): string {
+  return '/api/change-email';
+}
 
 export function deleteUserApiRoute(): string {
   return '/api/delete-user';
@@ -32,6 +40,10 @@ export function logInApiRoute(): string {
 
 export function logOutApiRoute(): string {
   return '/api/log-out';
+}
+
+export function proposeEmailChangeApiRoute(): string {
+  return '/api/propose-email-change';
 }
 
 export function signUpApiRoute(): string {
