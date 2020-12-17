@@ -28,6 +28,7 @@ export {
   User,
 } from '../api/types/types';
 export {
+  deleteUserApiRoute,
   getHomeDataApiRoute,
   inviteApiRoute,
   logInApiRoute,
@@ -37,6 +38,8 @@ export {
   signUpApiRoute,
   signUpWebRoute,
 } from '../routes/routes';
+
+export { default as UnreachableCaseError } from '../unreachable-case-error/unreachable-case-error';
 
 export interface BootstrapPageNotFound {
   type: 'BootstrapPageNotFound';

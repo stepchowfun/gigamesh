@@ -6,6 +6,8 @@ import {
   Response,
 } from 'express';
 import {
+  DeleteUserRequest,
+  DeleteUserResponse,
   GetHomeDataRequest,
   GetHomeDataResponse,
   InviteRequest,
@@ -16,6 +18,8 @@ import {
   LogOutResponse,
   SignUpRequest,
   SignUpResponse,
+  UnreachableCaseError,
+  deleteUserApiRoute,
   getHomeDataApiRoute,
   inviteApiRoute,
   logInApiRoute,
@@ -27,7 +31,7 @@ import {
 } from 'frontend-lib';
 import { Runtype, Static } from 'runtypes';
 
-import UnreachableCaseError from '../unreachable-case-error/unreachable-case-error';
+import deleteUser from '../api/endpoints/delete-user/delete-user';
 import getHomeData from '../api/endpoints/get-home-data/get-home-data';
 import invite from '../api/endpoints/invite/invite';
 import logIn from '../api/endpoints/log-in/log-in';
@@ -98,7 +102,32 @@ function installApiRoute<RequestType, ResponseType>(
 
 // Install the routes in an Express app.
 export default function installRoutes(app: Application): void {
-  // Web routes
+  // Web routes (in alphabetical order)
+
+  app.get(
+    logInWebRoute(':loginProposalId'),
+    (request: Request, response: Response, next: NextFunction) => {
+      logIn({
+        payload: { loginProposalId: request.params.loginProposalId },
+        sessionId: getSessionId(request),
+      })
+        .then((apiResponse: Envelope<Static<typeof LogInResponse>>) => {
+          const { payload } = apiResponse;
+          switch (payload.type) {
+            case 'Success':
+              setSessionId(response, apiResponse.sessionId);
+              renderPage(response, { type: 'BootstrapRedirectToHomePage' });
+              break;
+            case 'ProposalExpiredOrInvalid':
+              renderPage(response, { type: 'BootstrapPageNotFound' });
+              break;
+            default:
+              throw new UnreachableCaseError(payload);
+          }
+        })
+        .catch(next);
+    },
+  );
 
   app.get(
     rootWebRoute(),
@@ -151,32 +180,12 @@ export default function installRoutes(app: Application): void {
     },
   );
 
-  app.get(
-    logInWebRoute(':loginProposalId'),
-    (request: Request, response: Response, next: NextFunction) => {
-      logIn({
-        payload: { loginProposalId: request.params.loginProposalId },
-        sessionId: getSessionId(request),
-      })
-        .then((apiResponse: Envelope<Static<typeof LogInResponse>>) => {
-          const { payload } = apiResponse;
-          switch (payload.type) {
-            case 'Success':
-              setSessionId(response, apiResponse.sessionId);
-              renderPage(response, { type: 'BootstrapRedirectToHomePage' });
-              break;
-            case 'ProposalExpiredOrInvalid':
-              renderPage(response, { type: 'BootstrapPageNotFound' });
-              break;
-            default:
-              throw new UnreachableCaseError(payload);
-          }
-        })
-        .catch(next);
-    },
-  );
+  // API routes (in alphabetical order)
 
-  // API routes
+  installApiRoute<
+    Static<typeof DeleteUserRequest>,
+    Static<typeof DeleteUserResponse>
+  >(app, deleteUserApiRoute(), DeleteUserRequest, deleteUser);
 
   installApiRoute<
     Static<typeof GetHomeDataRequest>,
