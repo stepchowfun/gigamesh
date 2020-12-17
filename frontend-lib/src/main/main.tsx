@@ -2,6 +2,7 @@ import React, { FunctionComponent, useEffect } from 'react';
 import { Static } from 'runtypes';
 
 import GlobalStyles from '../global-styles/global-styles';
+import HomePage from '../home-page/home-page';
 import LandingPage from '../landing-page/landing-page';
 import SimplePage from '../simple-page/simple-page';
 import { User } from '../api/types/types';
@@ -82,7 +83,7 @@ export const Main: FunctionComponent<{ bootstrapData: BootstrapData }> = ({
       page = <SimplePage>Redirecting…</SimplePage>;
       break;
     case 'BootstrapHomePage':
-      page = <SimplePage>Welcome back!</SimplePage>;
+      page = <HomePage />;
       break;
     default:
       throw new Error('Missing case in switch statement.');
