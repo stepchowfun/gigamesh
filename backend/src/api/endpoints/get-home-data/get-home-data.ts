@@ -8,14 +8,14 @@ import { getPool } from '../../../storage/storage';
 export default async function getHomeData(
   request: Envelope<Static<typeof GetHomeDataRequest>>,
 ): Promise<Envelope<Static<typeof GetHomeDataResponse>>> {
-  // Get the database connection pool.
-  const pool = await getPool();
-
   // Is the session ID missing?
   const { sessionId } = request;
   if (sessionId === null) {
     return { payload: { type: 'NotLoggedIn' }, sessionId: null };
   }
+
+  // Get the database connection pool.
+  const pool = await getPool();
 
   // Validate the session and fetch the user ID.
   const userId = await validateSession(sessionId, pool);

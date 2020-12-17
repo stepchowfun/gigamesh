@@ -1,4 +1,8 @@
-// Web routes
+// Web routes (in alphabetical order)
+
+export function logInWebRoute(loginProposalId: string): string {
+  return `/log-in/${loginProposalId}`;
+}
 
 export function rootWebRoute(): string {
   return '/';
@@ -8,11 +12,11 @@ export function signUpWebRoute(signupProposalId: string): string {
   return `/sign-up/${signupProposalId}`;
 }
 
-export function logInWebRoute(loginProposalId: string): string {
-  return `/log-in/${loginProposalId}`;
-}
+// API routes (in alphabetical order)
 
-// API routes
+export function deleteUserApiRoute(): string {
+  return '/api/delete-user';
+}
 
 export function getHomeDataApiRoute(): string {
   return '/api/get-home-data';
