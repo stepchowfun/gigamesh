@@ -8,7 +8,11 @@ import { randomBytes } from 'crypto';
 import installRoutes from '../routes/routes';
 import logger from '../logger/logger';
 import renderPage from '../page/page';
-import { isProduction, origin } from '../constants/constants';
+import {
+  htmlMaxAgeSeconds,
+  isProduction,
+  origin,
+} from '../constants/constants';
 
 // Read the `HOST` environment variable.
 const hostRaw = process.env.HOST;
@@ -103,7 +107,10 @@ app.use((request: Request, response: Response) => {
     type: 'BootstrapPageNotFound',
   };
 
-  renderPage(response, bootstrapData);
+  renderPage(response, bootstrapData, {
+    isPublic: true,
+    maxAgeSeconds: htmlMaxAgeSeconds,
+  });
 });
 
 // Start the server.

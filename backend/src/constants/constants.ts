@@ -46,6 +46,9 @@ export const emailSender = {
   name: 'Gigamesh',
 };
 
+// For HTML pages that can be cached, this is the default cache TTL in seconds.
+export const htmlMaxAgeSeconds = 60 * 5; // 5 minutes
+
 // This is the maximum duration in milliseconds for which a signup proposal
 // is valid.
 export const signupProposalLifespanMs = 1000 * 60 * 60 * 24; // 1 day

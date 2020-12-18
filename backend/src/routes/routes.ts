@@ -49,6 +49,7 @@ import renderPage from '../page/page';
 import signUp from '../api/endpoints/sign-up/sign-up';
 import { Envelope } from '../api/util/envelope/envelope';
 import {
+  htmlMaxAgeSeconds,
   isProduction,
   sessionLifespanSinceCreationMs,
 } from '../constants/constants';
@@ -139,13 +140,17 @@ export default function installRoutes(app: Application): void {
           const { payload } = apiResponse;
           switch (payload.type) {
             case 'Success':
-              renderPage(response, { type: 'BootstrapRedirectToHomePage' });
+              renderPage(
+                response,
+                { type: 'BootstrapRedirectToHomePage' },
+                null,
+              );
               break;
             case 'NotLoggedIn':
-              renderPage(response, { type: 'BootstrapPageNotFound' });
+              renderPage(response, { type: 'BootstrapPageNotFound' }, null);
               break;
             case 'ProposalExpiredOrInvalid':
-              renderPage(response, { type: 'BootstrapPageNotFound' });
+              renderPage(response, { type: 'BootstrapPageNotFound' }, null);
               break;
             default:
               throw new UnreachableCaseError(payload);
@@ -170,10 +175,14 @@ export default function installRoutes(app: Application): void {
           const { payload } = apiResponse;
           switch (payload.type) {
             case 'Success':
-              renderPage(response, { type: 'BootstrapRedirectToHomePage' });
+              renderPage(
+                response,
+                { type: 'BootstrapRedirectToHomePage' },
+                null,
+              );
               break;
             case 'ProposalExpiredOrInvalid':
-              renderPage(response, { type: 'BootstrapPageNotFound' });
+              renderPage(response, { type: 'BootstrapPageNotFound' }, null);
               break;
             default:
               throw new UnreachableCaseError(payload);
@@ -195,15 +204,23 @@ export default function installRoutes(app: Application): void {
           const { payload } = apiResponse;
           switch (payload.type) {
             case 'Success':
-              renderPage(response, {
-                type: 'BootstrapHomePage',
-                user: payload.user,
-              });
+              renderPage(
+                response,
+                {
+                  type: 'BootstrapHomePage',
+                  user: payload.user,
+                },
+                null,
+              );
               break;
             case 'NotLoggedIn':
-              renderPage(response, {
-                type: 'BootstrapLandingPage',
-              });
+              renderPage(
+                response,
+                {
+                  type: 'BootstrapLandingPage',
+                },
+                { isPublic: true, maxAgeSeconds: htmlMaxAgeSeconds },
+              );
               break;
             default:
               throw new UnreachableCaseError(payload);
@@ -228,10 +245,14 @@ export default function installRoutes(app: Application): void {
           const { payload } = apiResponse;
           switch (payload.type) {
             case 'Success':
-              renderPage(response, { type: 'BootstrapRedirectToHomePage' });
+              renderPage(
+                response,
+                { type: 'BootstrapRedirectToHomePage' },
+                null,
+              );
               break;
             case 'ProposalExpiredOrInvalid':
-              renderPage(response, { type: 'BootstrapPageNotFound' });
+              renderPage(response, { type: 'BootstrapPageNotFound' }, null);
               break;
             default:
               throw new UnreachableCaseError(payload);
