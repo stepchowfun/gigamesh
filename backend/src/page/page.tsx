@@ -68,6 +68,10 @@ const htmlParts = minify(
 export default function renderPage(
   response: Response,
   bootstrapData: BootstrapData,
+  cache: {
+    isPublic: boolean;
+    maxAgeSeconds: number;
+  } | null,
 ): void {
   const sheet = new ServerStyleSheet();
 
@@ -85,7 +89,14 @@ export default function renderPage(
 
     response
       .status(bootstrapData.type === 'BootstrapPageNotFound' ? 404 : 200)
-      .set({ 'Cache-Control': 'no-store' })
+      .set({
+        'Cache-Control':
+          cache === null
+            ? 'no-store'
+            : `${cache.isPublic ? 'public' : 'private'}, max-age=${
+                cache.maxAgeSeconds
+              }`,
+      })
       .send(
         `${htmlParts[0]}${styles}${htmlParts[1]}${html}${htmlParts[2]}${nonce}${
           htmlParts[3]
