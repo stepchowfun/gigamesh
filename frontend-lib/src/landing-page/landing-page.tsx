@@ -1,5 +1,6 @@
 import React, {
   FunctionComponent,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -7,6 +8,7 @@ import React, {
 import styled, { css, keyframes } from 'styled-components';
 
 import {
+  isBrowser,
   buttonActiveColor,
   buttonDefaultColor,
   buttonHoverColor,
@@ -197,7 +199,7 @@ const LandingPage: FunctionComponent<{}> = () => {
   const [state, setState] = useState<State>({ type: 'NotSent', email: '' });
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  useLayoutEffect(() => {
+  (isBrowser ? useLayoutEffect : useEffect)(() => {
     inputRef.current?.focus();
   });
 
