@@ -49,7 +49,6 @@ import renderPage from '../page/page';
 import signUp from '../api/endpoints/sign-up/sign-up';
 import { Envelope } from '../api/util/envelope/envelope';
 import {
-  htmlMaxAgeSeconds,
   isProduction,
   sessionLifespanSinceCreationMs,
 } from '../constants/constants';
@@ -219,7 +218,7 @@ export default function installRoutes(app: Application): void {
                 {
                   type: 'BootstrapLandingPage',
                 },
-                { isPublic: true, maxAgeSeconds: htmlMaxAgeSeconds },
+                null,
               );
               break;
             default:
