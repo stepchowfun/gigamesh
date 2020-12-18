@@ -67,7 +67,11 @@ function getSessionId(request: Request): string | null {
 }
 
 // Set the session ID on the response, if given.
-function setSessionId(response: Response, sessionId: string | null): void {
+function setSessionId(
+  previousSessionId: string | null,
+  response: Response,
+  sessionId: string | null,
+): void {
   const options: CookieOptions = {
     httpOnly: true,
     maxAge: sessionLifespanSinceCreationMs,
@@ -75,10 +79,12 @@ function setSessionId(response: Response, sessionId: string | null): void {
     secure: isProduction,
   };
 
-  if (sessionId === null) {
-    response.clearCookie(sessionIdCookieName, options);
-  } else {
-    response.cookie(sessionIdCookieName, sessionId, options);
+  if (sessionId !== previousSessionId) {
+    if (sessionId === null) {
+      response.clearCookie(sessionIdCookieName, { options, ...{ maxAge: 1 } });
+    } else {
+      response.cookie(sessionIdCookieName, sessionId, options);
+    }
   }
 }
 
@@ -95,10 +101,13 @@ function installApiRoute<RequestType, ResponseType>(
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const { body } = request;
 
+      const sessionId = getSessionId(request);
+
       if (requestType.guard(body)) {
-        handler({ payload: body, sessionId: getSessionId(request) })
+        handler({ payload: body, sessionId })
           .then((apiResponse: Envelope<ResponseType>) => {
-            setSessionId(response, apiResponse.sessionId);
+            setSessionId(sessionId, response, apiResponse.sessionId);
+
             response.status(200).send(apiResponse.payload);
           })
           .catch(next);
@@ -116,13 +125,17 @@ export default function installRoutes(app: Application): void {
   app.get(
     changeEmailWebRoute(':emailChangeProposalId'),
     (request: Request, response: Response, next: NextFunction) => {
+      const sessionId = getSessionId(request);
+
       changeEmail({
         payload: {
           emailChangeProposalId: request.params.emailChangeProposalId,
         },
-        sessionId: getSessionId(request),
+        sessionId,
       })
         .then((apiResponse: Envelope<Static<typeof ChangeEmailResponse>>) => {
+          setSessionId(sessionId, response, apiResponse.sessionId);
+
           const { payload } = apiResponse;
           switch (payload.type) {
             case 'Success':
@@ -145,15 +158,18 @@ export default function installRoutes(app: Application): void {
   app.get(
     logInWebRoute(':loginProposalId'),
     (request: Request, response: Response, next: NextFunction) => {
+      const sessionId = getSessionId(request);
+
       logIn({
         payload: { loginProposalId: request.params.loginProposalId },
-        sessionId: getSessionId(request),
+        sessionId,
       })
         .then((apiResponse: Envelope<Static<typeof LogInResponse>>) => {
+          setSessionId(sessionId, response, apiResponse.sessionId);
+
           const { payload } = apiResponse;
           switch (payload.type) {
             case 'Success':
-              setSessionId(response, apiResponse.sessionId);
               renderPage(response, { type: 'BootstrapRedirectToHomePage' });
               break;
             case 'ProposalExpiredOrInvalid':
@@ -170,8 +186,12 @@ export default function installRoutes(app: Application): void {
   app.get(
     rootWebRoute(),
     (request: Request, response: Response, next: NextFunction) => {
-      getHomeData({ payload: {}, sessionId: getSessionId(request) })
+      const sessionId = getSessionId(request);
+
+      getHomeData({ payload: {}, sessionId })
         .then((apiResponse: Envelope<Static<typeof GetHomeDataResponse>>) => {
+          setSessionId(sessionId, response, apiResponse.sessionId);
+
           const { payload } = apiResponse;
           switch (payload.type) {
             case 'Success':
@@ -196,15 +216,18 @@ export default function installRoutes(app: Application): void {
   app.get(
     signUpWebRoute(':signupProposalId'),
     (request: Request, response: Response, next: NextFunction) => {
+      const sessionId = getSessionId(request);
+
       signUp({
         payload: { signupProposalId: request.params.signupProposalId },
-        sessionId: getSessionId(request),
+        sessionId,
       })
         .then((apiResponse: Envelope<Static<typeof SignUpResponse>>) => {
+          setSessionId(sessionId, response, apiResponse.sessionId);
+
           const { payload } = apiResponse;
           switch (payload.type) {
             case 'Success':
-              setSessionId(response, apiResponse.sessionId);
               renderPage(response, { type: 'BootstrapRedirectToHomePage' });
               break;
             case 'ProposalExpiredOrInvalid':
