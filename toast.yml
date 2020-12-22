@@ -185,7 +185,7 @@ tasks:
         --tag "$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/gigamesh/www"
 
       # Deploy the Cloud Run service. The `beta` release track is needed to use
-      # the `--min-instances` flag.
+      # the `ingress` and `--min-instances` flags.
       gcloud beta run deploy www \
         --project "$GCP_PROJECT_ID" \
         --quiet \
@@ -197,6 +197,7 @@ tasks:
         --set-env-vars NODE_ENV=production \
         --region "$GCR_REGION" \
         --service-account "$GCR_SERVICE_ACCOUNT" \
+        --ingress internal-and-cloud-load-balancing \
         --min-instances 1 \
         --allow-unauthenticated
 
