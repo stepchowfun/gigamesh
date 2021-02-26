@@ -1,7 +1,7 @@
 const TerserPlugin = require('terser-webpack-plugin');
-const WebpackManifestPlugin = require('webpack-manifest-plugin');
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 
 module.exports = {
   entry: './src/main/main.tsx',

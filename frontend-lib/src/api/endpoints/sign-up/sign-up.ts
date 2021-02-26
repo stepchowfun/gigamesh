@@ -8,9 +8,9 @@ export default async function signUp(
   request: Static<typeof SignUpRequest>,
   cancelToken: CancelToken,
 ): Promise<Static<typeof SignUpResponse>> {
-  const axiosResponse: AxiosResponse<Static<
-    typeof SignUpResponse
-  >> = await axios.post(signUpApiRoute(), request, { cancelToken });
+  const axiosResponse: AxiosResponse<
+    Static<typeof SignUpResponse>
+  > = await axios.post(signUpApiRoute(), request, { cancelToken });
   SignUpResponse.check(axiosResponse.data);
   return axiosResponse.data;
 }
