@@ -8,9 +8,9 @@ export default async function deleteUser(
   request: Static<typeof DeleteUserRequest>,
   cancelToken: CancelToken,
 ): Promise<Static<typeof DeleteUserResponse>> {
-  const axiosResponse: AxiosResponse<Static<
-    typeof DeleteUserResponse
-  >> = await axios.post(deleteUserApiRoute(), request, { cancelToken });
+  const axiosResponse: AxiosResponse<
+    Static<typeof DeleteUserResponse>
+  > = await axios.post(deleteUserApiRoute(), request, { cancelToken });
   DeleteUserResponse.check(axiosResponse.data);
   return axiosResponse.data;
 }

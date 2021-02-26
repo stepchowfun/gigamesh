@@ -11,9 +11,9 @@ export default async function proposeEmailChange(
   request: Static<typeof ProposeEmailChangeRequest>,
   cancelToken: CancelToken,
 ): Promise<Static<typeof ProposeEmailChangeResponse>> {
-  const axiosResponse: AxiosResponse<Static<
-    typeof ProposeEmailChangeResponse
-  >> = await axios.post(proposeEmailChangeApiRoute(), request, { cancelToken });
+  const axiosResponse: AxiosResponse<
+    Static<typeof ProposeEmailChangeResponse>
+  > = await axios.post(proposeEmailChangeApiRoute(), request, { cancelToken });
   ProposeEmailChangeResponse.check(axiosResponse.data);
   return axiosResponse.data;
 }
