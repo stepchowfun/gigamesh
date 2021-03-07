@@ -142,9 +142,8 @@ tasks:
       gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
 
       # Start all the servers.
-      cloud_sql_proxy \
-        "-instances=$DATABASE_INSTANCE_CONNECTION_NAME=tcp:5432" &
-      (cd backend && npm run serve)
+      cloud_sql_proxy "-instances=$DATABASE_INSTANCE_CONNECTION_NAME=tcp:5432" &
+        (cd backend && npm run serve)
 
   deploy:
     dependencies:
@@ -152,12 +151,12 @@ tasks:
       - check
     cache: false
     environment:
+      ARTIFACT_REGISTRY_LOCATION: null
+      CLOUD_RUN_REGION: null
+      CLOUD_RUN_SERVICE_ACCOUNT: null
       DATABASE_INSTANCE_CONNECTION_NAME: null
-      GAR_LOCATION: null
       GCP_DEPLOY_CREDENTIALS: null
       GCP_PROJECT_ID: null
-      GCR_REGION: null
-      GCR_SERVICE_ACCOUNT: null
       STAGING_BUCKET: null
     user: user
     command: |
@@ -182,7 +181,7 @@ tasks:
         --quiet \
         --gcs-log-dir "gs://$STAGING_BUCKET/build-logs" \
         --gcs-source-staging-dir "gs://$STAGING_BUCKET/build-source" \
-        --tag "$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/gigamesh/www"
+        --tag "$ARTIFACT_REGISTRY_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/gigamesh/www"
 
       # Deploy the Cloud Run service. The `beta` release track is needed to use
       # the `ingress` and `--min-instances` flags.
@@ -190,13 +189,12 @@ tasks:
         --project "$GCP_PROJECT_ID" \
         --quiet \
         --platform managed \
-        --image "$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/gigamesh/www" \
+        --image "$ARTIFACT_REGISTRY_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/gigamesh/www" \
         --set-cloudsql-instances "$DATABASE_INSTANCE_CONNECTION_NAME" \
-        --set-env-vars \
-          "INSTANCE_CONNECTION_NAME=$DATABASE_INSTANCE_CONNECTION_NAME" \
+        --set-env-vars "INSTANCE_CONNECTION_NAME=$DATABASE_INSTANCE_CONNECTION_NAME" \
         --set-env-vars NODE_ENV=production \
-        --region "$GCR_REGION" \
-        --service-account "$GCR_SERVICE_ACCOUNT" \
+        --region "$CLOUD_RUN_REGION" \
+        --service-account "$CLOUD_RUN_SERVICE_ACCOUNT" \
         --ingress internal-and-cloud-load-balancing \
         --min-instances 1 \
         --allow-unauthenticated
@@ -205,8 +203,7 @@ tasks:
       gcloud beta artifacts docker images delete \
         --project "$GCP_PROJECT_ID" \
         --quiet \
-        --delete-tags \
-        "$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/gigamesh/www"
+        --delete-tags "$ARTIFACT_REGISTRY_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/gigamesh/www"
 
       # Clean up the Cloud Storage objects created during the build.
       gsutil -m rm -r \

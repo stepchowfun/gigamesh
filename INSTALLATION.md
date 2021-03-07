@@ -346,12 +346,12 @@
       [Artifact Registry](https://cloud.google.com/artifact-registry).
 
       ```sh
-      GAR_LOCATION=us-central1 # The Artifact Registry location (not particularly important)
+      ARTIFACT_REGISTRY_LOCATION=us-central1 # The Artifact Registry location (not particularly important)
 
       gcloud beta artifacts repositories create gigamesh \
         --project "$GCP_PROJECT_ID" \
         --repository-format docker \
-        --location "$GAR_LOCATION"
+        --location "$ARTIFACT_REGISTRY_LOCATION"
       ```
 
       - Grant the appropriate permissions to the deployer service account.
@@ -359,7 +359,7 @@
         ```sh
         gcloud beta artifacts repositories add-iam-policy-binding gigamesh \
           --project "$GCP_PROJECT_ID" \
-          --location "$GAR_LOCATION" \
+          --location "$ARTIFACT_REGISTRY_LOCATION" \
           --member "serviceAccount:deployer@${GCP_PROJECT_ID}.iam.gserviceaccount.com" \
           --role roles/artifactregistry.repoAdmin
         ```
@@ -416,11 +416,11 @@
 
       ```sh
       export DATABASE_INSTANCE_CONNECTION_NAME=gigamesh:us-central1:gigamesh # Database connection info
-      export GAR_LOCATION=us-central1 # The Artifact Registry location
+      export ARTIFACT_REGISTRY_LOCATION=us-central1 # The Artifact Registry location
       export GCP_DEPLOY_CREDENTIALS="$(cat deploy-credentials.json)" # Credentials for the deployment service account
       export GCP_PROJECT_ID=gigamesh # Your Google Cloud Platform project ID
-      export GCR_REGION=us-central1 # A Cloud Run region close to your users
-      export GCR_SERVICE_ACCOUNT=production@gigamesh.iam.gserviceaccount.com # The API service account
+      export CLOUD_RUN_REGION=us-central1 # A Cloud Run region close to your users
+      export CLOUD_RUN_SERVICE_ACCOUNT=production@gigamesh.iam.gserviceaccount.com # The API service account
       export STAGING_BUCKET=gigamesh-staging # A bucket we created earlier
 
       toast deploy
@@ -438,7 +438,7 @@
         --member "serviceAccount:deployer@${GCP_PROJECT_ID}.iam.gserviceaccount.com" \
         --role roles/run.admin \
         --platform managed \
-        --region "$GCR_REGION"
+        --region "$CLOUD_RUN_REGION"
 
       # Revoke the permission to create new Cloud Run services.
       gcloud projects remove-iam-policy-binding "$GCP_PROJECT_ID" \
@@ -506,7 +506,7 @@
         # Create a network endpoint group (NEG).
         gcloud compute network-endpoint-groups create www \
           --project "$GCP_PROJECT_ID" \
-          --region "$GCR_REGION" \
+          --region "$CLOUD_RUN_REGION" \
           --network-endpoint-type serverless \
           --cloud-run-service www
 
@@ -521,7 +521,7 @@
           --project "$GCP_PROJECT_ID" \
           --global \
           --network-endpoint-group www \
-          --network-endpoint-group-region "$GCR_REGION"
+          --network-endpoint-group-region "$CLOUD_RUN_REGION"
 
         # Create a URL map.
         gcloud compute url-maps create www \
