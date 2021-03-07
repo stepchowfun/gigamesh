@@ -14,12 +14,18 @@ This will be apparent from the required status check(s) in the pull request.
 
 Here is how to run Gigamesh in development:
 
+- Based on the installation instructions
+  [here](https://github.com/stepchowfun/gigamesh/blob/master/INSTALLATION.md),
+  create a Google Cloud Platform project, a PostgreSQL database instance within
+  that project, a service account with permission to access that instance, and a
+  SendGrid account.
 - Install [Toast](https://github.com/stepchowfun/toast), our automation tool of
   choice.
 - Once you have Toast installed, run `toast development` to start the
-  development servers.
+  development servers. Toast will inform you about which environment variables
+  you need to set.
 - With the previous command running, point your browser to
-  [http://localhost:1234/](http://localhost:1234/).
+  [http://localhost:8080/](http://localhost:8080/).
 
 Before committing any changes, run `toast check`. Formatting errors can be fixed
 with `toast format`.
