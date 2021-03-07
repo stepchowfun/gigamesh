@@ -24,11 +24,11 @@ jobs:
           repo: stephanmisc/toast
           write_remote_cache: ${{ github.event_name == 'push' }}
         env:
+          ARTIFACT_REGISTRY_LOCATION: us-central1
+          CLOUD_RUN_REGION: us-central1
+          CLOUD_RUN_SERVICE_ACCOUNT: production@gigamesh-296502.iam.gserviceaccount.com
           DATABASE_INSTANCE_CONNECTION_NAME: gigamesh-296502:us-central1:gigamesh
-          GAR_LOCATION: us-central1
           GCP_DEPLOY_CREDENTIALS: ${{ secrets.GCP_DEPLOY_CREDENTIALS }}
           GCP_PROJECT_ID: gigamesh-296502
-          GCR_REGION: us-central1
-          GCR_SERVICE_ACCOUNT: production@gigamesh-296502.iam.gserviceaccount.com
           STAGING_BUCKET: gigamesh-staging
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
