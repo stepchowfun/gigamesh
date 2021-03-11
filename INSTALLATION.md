@@ -625,9 +625,9 @@
         ```
 
   - Set up continuous integration. This repository has a
-    [GitHub action](https://github.com/stepchowfun/gigamesh/blob/master/.github/workflows/ci.yml)
+    [GitHub action](https://github.com/stepchowfun/gigamesh/blob/main/.github/workflows/ci.yml)
     configured to build and deploy the service, with deploys only happening on
-    the `master` branch. Follow the steps below to make this work.
+    the `main` branch. Follow the steps below to make this work.
     - Create a new Docker repository on [Docker Hub](https://hub.docker.com/).
       You'll need to create a Docker ID if you don't already have one.
     - Set up two secrets in the repository settings on GitHub.

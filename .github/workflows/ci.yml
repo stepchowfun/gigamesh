@@ -10,15 +10,15 @@ jobs:
           username: stephanmisc
           password: ${{ secrets.DOCKER_PASSWORD }}
         if: github.event_name == 'push'
-      - uses: stepchowfun/toast/.github/actions/toast@master
+      - uses: stepchowfun/toast/.github/actions/toast@main
         with:
           repo: stephanmisc/toast
           write_remote_cache: ${{ github.event_name == 'push' }}
       - uses: softprops/turnstyle@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-      - uses: stepchowfun/toast/.github/actions/toast@master
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - uses: stepchowfun/toast/.github/actions/toast@main
         with:
           tasks: deploy
           repo: stephanmisc/toast
@@ -31,4 +31,4 @@ jobs:
           GCP_DEPLOY_CREDENTIALS: ${{ secrets.GCP_DEPLOY_CREDENTIALS }}
           GCP_PROJECT_ID: gigamesh-296502
           STAGING_BUCKET: gigamesh-staging
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'

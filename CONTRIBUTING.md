@@ -4,7 +4,7 @@ Thank you for your interest in contributing to Gigamesh! You can contribute by
 filing [issues](https://github.com/stepchowfun/gigamesh/issues) and submitting
 [pull requests](https://github.com/stepchowfun/gigamesh/pulls). Please observe
 our
-[code of conduct](https://github.com/stepchowfun/gigamesh/blob/master/CODE_OF_CONDUCT.md).
+[code of conduct](https://github.com/stepchowfun/gigamesh/blob/main/CODE_OF_CONDUCT.md).
 
 If you submit a pull request, please ensure your change passes the
 [GitHub Actions](https://github.com/stepchowfun/gigamesh/actions) CI checks.
@@ -15,7 +15,7 @@ This will be apparent from the required status check(s) in the pull request.
 Here is how to run Gigamesh in development:
 
 - Based on the installation instructions
-  [here](https://github.com/stepchowfun/gigamesh/blob/master/INSTALLATION.md),
+  [here](https://github.com/stepchowfun/gigamesh/blob/main/INSTALLATION.md),
   create a Google Cloud Platform project, a PostgreSQL database instance within
   that project, a service account with permission to access that instance, and a
   SendGrid account.
@@ -33,7 +33,7 @@ with `toast format`.
 ## Production
 
 To run Gigamesh in production, follow the installation instructions
-[here](https://github.com/stepchowfun/gigamesh/blob/master/INSTALLATION.md).
+[here](https://github.com/stepchowfun/gigamesh/blob/main/INSTALLATION.md).
 
 # Project organization
 
