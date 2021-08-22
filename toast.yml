@@ -164,8 +164,12 @@ tasks:
         --min-instances 1 \
         --allow-unauthenticated
 
-      # Delete the Docker image.
-      gcloud artifacts docker images delete \
+      # Delete the Docker image. This command fails due to a bug in Google Cloud Platform (internal
+      # bug ID: 197457347), but the image is deleted nevertheless. To prevent this issue from
+      # failing the deploy, a `!` has been temporarily added to turn the failure into a success.
+      # When this starts failing again, we'll know the bug has been fixed and the `!` can be
+      # removed.
+      ! gcloud artifacts docker images delete \
         --project "$GCP_PROJECT_ID" \
         --quiet \
         --delete-tags \
