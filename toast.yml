@@ -1,12 +1,12 @@
 image: ubuntu:20.04
 default: check
+user: user
+command_prefix: set -euo pipefail
 tasks:
   install_packages:
     description: Install system packages.
+    user: root
     command: |
-      # Make Bash not silently ignore errors.
-      set -euo pipefail
-
       apt-get update
       echo 'deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main' | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
       apt-get install --yes apt-transport-https ca-certificates curl gnupg
@@ -21,18 +21,14 @@ tasks:
     description: Install Tagref, a reference checking tool.
     dependencies:
       - install_packages
+    user: root
     command: |
-      # Make Bash not silently ignore errors.
-      set -euo pipefail
-
       curl https://raw.githubusercontent.com/stepchowfun/tagref/main/install.sh -LSfs | sh
 
   create_user:
     description: Create a user who doesn't have root privileges.
+    user: root
     command: |
-      # Make Bash not silently ignore errors.
-      set -euo pipefail
-
       adduser --disabled-password --gecos '' user
 
   install_dependencies:
@@ -50,11 +46,7 @@ tasks:
       - frontend/package.json
       - package-lock.json
       - package.json
-    user: user
     command: |
-      # Make Bash not silently ignore errors.
-      set -euo pipefail
-
       (cd frontend-lib && npm ci && npm run repackage)
       (cd backend && npm ci)
       (cd frontend && npm ci)
@@ -83,22 +75,14 @@ tasks:
     description: Build the source code.
     dependencies:
       - add_source_files
-    user: user
     command: |
-      # Make Bash not silently ignore errors.
-      set -euo pipefail
-
       npm run build-production
 
   check:
     description: Run the linters.
     dependencies:
       - build
-    user: user
     command: |
-      # Make Bash not silently ignore errors.
-      set -euo pipefail
-
       npm run check
       tagref
 
@@ -114,11 +98,7 @@ tasks:
       SENDGRID_SECRET: null
     ports:
       - 8080:8080
-    user: user
     command: |
-      # Make Bash not silently ignore errors.
-      set -euo pipefail
-
       # Build in development mode.
       npm run build-development
 
@@ -145,11 +125,7 @@ tasks:
       GCP_DEPLOY_CREDENTIALS: null
       GCP_PROJECT_ID: null
       STAGING_BUCKET: null
-    user: user
     command: |
-      # Make Bash not silently ignore errors.
-      set -euo pipefail
-
       # Authenticate with the Google Cloud SDK.
       GOOGLE_KEY_FILE=~/gcp-credentials.json
       echo "$GCP_DEPLOY_CREDENTIALS" > "$GOOGLE_KEY_FILE"
