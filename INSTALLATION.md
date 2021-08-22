@@ -348,7 +348,7 @@
       ```sh
       ARTIFACT_REGISTRY_LOCATION=us-central1 # The Artifact Registry location (not particularly important)
 
-      gcloud beta artifacts repositories create gigamesh \
+      gcloud artifacts repositories create gigamesh \
         --project "$GCP_PROJECT_ID" \
         --repository-format docker \
         --location "$ARTIFACT_REGISTRY_LOCATION"
@@ -357,7 +357,7 @@
       - Grant the appropriate permissions to the deployer service account.
 
         ```sh
-        gcloud beta artifacts repositories add-iam-policy-binding gigamesh \
+        gcloud artifacts repositories add-iam-policy-binding gigamesh \
           --project "$GCP_PROJECT_ID" \
           --location "$ARTIFACT_REGISTRY_LOCATION" \
           --member "serviceAccount:deployer@${GCP_PROJECT_ID}.iam.gserviceaccount.com" \
