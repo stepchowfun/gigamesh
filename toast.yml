@@ -1,7 +1,9 @@
 image: ubuntu:20.04
 default: check
 user: user
-command_prefix: set -euo pipefail
+command_prefix: |
+  # Make Bash not silently ignore errors.
+  set -euo pipefail
 tasks:
   install_packages:
     description: Install system packages.
@@ -11,7 +13,7 @@ tasks:
       echo 'deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main' | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
       apt-get install --yes apt-transport-https ca-certificates curl gnupg
       curl -LSs https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-      curl -LSs https://deb.nodesource.com/setup_15.x | bash -
+      curl -LSs https://deb.nodesource.com/setup_16.x | bash -
       apt-get update
       apt-get install --yes google-cloud-sdk nodejs
       curl -LSs https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -o /usr/local/bin/cloud_sql_proxy
@@ -147,9 +149,8 @@ tasks:
         --gcs-source-staging-dir "gs://$STAGING_BUCKET/build-source" \
         --tag "$ARTIFACT_REGISTRY_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/gigamesh/www"
 
-      # Deploy the Cloud Run service. The `beta` release track is needed to use
-      # the `ingress` and `--min-instances` flags.
-      gcloud beta run deploy www \
+      # Deploy the Cloud Run service.
+      gcloud run deploy www \
         --project "$GCP_PROJECT_ID" \
         --quiet \
         --platform managed \
@@ -164,10 +165,11 @@ tasks:
         --allow-unauthenticated
 
       # Delete the Docker image.
-      gcloud beta artifacts docker images delete \
+      gcloud artifacts docker images delete \
         --project "$GCP_PROJECT_ID" \
         --quiet \
-        --delete-tags "$ARTIFACT_REGISTRY_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/gigamesh/www"
+        --delete-tags \
+        "$ARTIFACT_REGISTRY_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/gigamesh/www"
 
       # Clean up the Cloud Storage objects created during the build.
       gsutil -m rm -r \
