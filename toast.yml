@@ -101,17 +101,16 @@ tasks:
     ports:
       - 8080:8080
     command: |
-      # Build in development mode.
-      npm run build-development
-
       # Authenticate with the Google Cloud SDK.
       GOOGLE_KEY_FILE=~/gcp-credentials.json
       echo "$GCP_DEVELOPMENT_CREDENTIALS" > "$GOOGLE_KEY_FILE"
       gcloud auth activate-service-account --key-file "$GOOGLE_KEY_FILE"
 
-      # Start all the servers.
+      # Start the database proxy in the background.
       cloud_sql_proxy "-instances=$DATABASE_INSTANCE_CONNECTION_NAME=tcp:5432" &
-        (cd backend && npm run serve)
+
+      # Build and run the server in development mode.
+      npm run serve-development
 
   deploy:
     description: Deploy to Google Cloud Platform.
