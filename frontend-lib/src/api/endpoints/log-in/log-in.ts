@@ -8,9 +8,8 @@ export default async function logIn(
   request: Static<typeof LogInRequest>,
   cancelToken: CancelToken,
 ): Promise<Static<typeof LogInResponse>> {
-  const axiosResponse: AxiosResponse<
-    Static<typeof LogInResponse>
-  > = await axios.post(logInApiRoute(), request, { cancelToken });
+  const axiosResponse: AxiosResponse<Static<typeof LogInResponse>> =
+    await axios.post(logInApiRoute(), request, { cancelToken });
   LogInResponse.check(axiosResponse.data);
   return axiosResponse.data;
 }

@@ -134,10 +134,8 @@ export default async function changeEmail(
       await send({
         to: user.email, // The old email
         subject: 'Your Gigamesh email address has changed',
-        text:
-          "The email address on your Gigamesh account has been changed. It's no longer this address.",
-        html:
-          "The email address on your Gigamesh account has been changed. It's no longer this address.",
+        text: "The email address on your Gigamesh account has been changed. It's no longer this address.",
+        html: "The email address on your Gigamesh account has been changed. It's no longer this address.",
       });
 
       // If we made it this far, the email has been changed.
