@@ -116,3 +116,12 @@ Note that having local dependencies like this results in symlinks in
 tools without additional configuration. So we need to set
 `resolve: { symlinks: false }` for Webpack, `preserveSymlinks: true` for
 TypeScript, and `--preserve-symlinks` for Node.
+
+# Dependency versions
+
+In general, Gigamesh aims to use the latest versions of its dependencies. The
+following exceptions apply:
+
+- We are stuck one `styled-components` v5.2.0, because later versions have
+  [this bug](https://github.com/styled-components/styled-components/issues/3571).
+  When that bug is fixed, we should try upgrading.
