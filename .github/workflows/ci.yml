@@ -12,7 +12,7 @@ jobs:
         if: github.event_name == 'push'
       - uses: stepchowfun/toast/.github/actions/toast@main
         with:
-          repo: stephanmisc/toast
+          docker_repo: stephanmisc/toast
           write_remote_cache: ${{ github.event_name == 'push' }}
       - uses: softprops/turnstyle@v1
         env:
@@ -21,7 +21,7 @@ jobs:
       - uses: stepchowfun/toast/.github/actions/toast@main
         with:
           tasks: deploy
-          repo: stephanmisc/toast
+          docker_repo: stephanmisc/toast
           write_remote_cache: ${{ github.event_name == 'push' }}
         env:
           ARTIFACT_REGISTRY_LOCATION: us-central1
