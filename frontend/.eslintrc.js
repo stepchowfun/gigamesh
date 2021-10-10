@@ -22,7 +22,6 @@ module.exports = {
       jsx: true,
     },
     project: 'tsconfig.json',
-    sourceType: 'module',
   },
   plugins: ['react', '@typescript-eslint', 'jest'],
   rules: {
