@@ -6,10 +6,10 @@
   "types": "dist/main/main.d.ts",
   "private": true,
   "scripts": {
-    "build-development": "npx webpack --config webpack.development.js && npx tsc --project tsconfig.json && npm run repackage",
-    "build-production": "npx webpack --config webpack.production.js && npx tsc --project tsconfig.json && npm run repackage",
+    "build-development": "webpack --config webpack.development.js && tsc --project tsconfig.json && npm run repackage",
+    "build-production": "webpack --config webpack.production.js && tsc --project tsconfig.json && npm run repackage",
     "repackage": "rm -f frontend-lib-1.0.0.tgz && npm pack && tar -xf frontend-lib-1.0.0.tgz -C . && rm frontend-lib-1.0.0.tgz && mkdir -p ../.build && rm -rf ../.build/frontend-lib && mv package ../.build/frontend-lib",
-    "check": "npx tsc --project tsconfig.json --emitDeclarationOnly false --noEmit && npx jest --config jest.config.js && eslint --config .eslintrc.js --ignore-path ../.gitignore --report-unused-disable-directives --max-warnings 0 'src/**/*.{ts,tsx}' && npx stylelint --config .stylelintrc.js '**/*.{scss,tsx}'"
+    "check": "tsc --project tsconfig.json --emitDeclarationOnly false --noEmit && jest --config jest.config.js && eslint --config .eslintrc.js --ignore-path ../.gitignore --report-unused-disable-directives --max-warnings 0 'src/**/*.{ts,tsx}' && stylelint --config .stylelintrc.js '**/*.{scss,tsx}'"
   },
   "author": "Stephan Boyer",
   "license": "MIT",

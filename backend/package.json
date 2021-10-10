@@ -4,9 +4,9 @@
   "description": "The backend.",
   "private": true,
   "scripts": {
-    "build-development": "npx webpack --config webpack.development.js",
-    "build-production": "npx webpack --config webpack.production.js",
-    "check": "npx tsc --project tsconfig.json --emitDeclarationOnly false --noEmit && npx jest --config jest.config.js && eslint --config .eslintrc.js --ignore-path ../.gitignore --report-unused-disable-directives --max-warnings 0 'src/**/*.{ts,tsx}'",
+    "build-development": "webpack --config webpack.development.js",
+    "build-production": "webpack --config webpack.production.js",
+    "check": "tsc --project tsconfig.json --emitDeclarationOnly false --noEmit && jest --config jest.config.js && eslint --config .eslintrc.js --ignore-path ../.gitignore --report-unused-disable-directives --max-warnings 0 'src/**/*.{ts,tsx}'",
     "serve": "cd dist && HOST=0.0.0.0 PORT=8080 node --preserve-symlinks --require source-map-support/register main.js"
   },
   "author": "Stephan Boyer",
