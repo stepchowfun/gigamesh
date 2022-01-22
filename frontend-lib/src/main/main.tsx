@@ -1,4 +1,5 @@
-import React, { FunctionComponent, useEffect } from 'react';
+import * as React from 'react';
+import { FunctionComponent, useEffect } from 'react';
 import { Static } from 'runtypes';
 
 import GlobalStyles from '../global-styles/global-styles';

@@ -3,8 +3,8 @@
 // './webpack-nonce' needs to be imported BEFORE 'frontend-lib'.
 import '../webpack-nonce/webpack-nonce';
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import { BootstrapData, Main } from 'frontend-lib';
 
 declare global {

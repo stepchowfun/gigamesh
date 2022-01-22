@@ -1,4 +1,5 @@
-import React, { FunctionComponent, useState } from 'react';
+import * as React from 'react';
+import { FunctionComponent, useState } from 'react';
 import styled from 'styled-components';
 
 import UnreachableCaseError from '../unreachable-case-error/unreachable-case-error';
