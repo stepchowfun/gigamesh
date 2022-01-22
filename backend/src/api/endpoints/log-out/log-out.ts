@@ -1,4 +1,4 @@
-import validateUuid from 'uuid-validate';
+import * as validateUuid from 'uuid-validate';
 import { LogOutRequest, LogOutResponse } from 'frontend-lib';
 import { Static } from 'runtypes';
 

@@ -1,8 +1,9 @@
-import compression from 'compression';
-import cookieParser from 'cookie-parser';
-import express, { NextFunction, Request, Response } from 'express';
-import helmet from 'helmet';
+import * as compression from 'compression';
+import * as cookieParser from 'cookie-parser';
+import * as express from 'express';
+import * as helmet from 'helmet';
 import { BootstrapData } from 'frontend-lib';
+import { NextFunction, Request, Response } from 'express';
 import { randomBytes } from 'crypto';
 
 import installRoutes from '../routes/routes';

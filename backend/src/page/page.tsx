@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Response } from 'express';
 import { BootstrapData, Main } from 'frontend-lib';
 import { minify } from 'html-minifier';

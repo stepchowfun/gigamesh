@@ -1,4 +1,4 @@
-import validateUuid from 'uuid-validate';
+import * as validateUuid from 'uuid-validate';
 import { Pool, PoolClient } from 'pg';
 
 import { getPool } from '../../../storage/storage';
