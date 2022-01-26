@@ -9,6 +9,7 @@ tasks:
     description: Install system packages.
     user: root
     command: |
+      # Install the Google Cloud SDK and Node.js.
       apt-get update
       echo 'deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main' | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
       apt-get install --yes apt-transport-https ca-certificates curl gnupg
@@ -16,6 +17,8 @@ tasks:
       curl -LSs https://deb.nodesource.com/setup_16.x | bash -
       apt-get update
       apt-get install --yes google-cloud-sdk nodejs
+
+      # Install the Cloud SQL Auth Proxy.
       curl -LSs https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -o /usr/local/bin/cloud_sql_proxy
       chmod a+rx /usr/local/bin/cloud_sql_proxy
 
@@ -25,12 +28,14 @@ tasks:
       - install_packages
     user: root
     command: |
+      # Install Tagref using the official installer script.
       curl https://raw.githubusercontent.com/stepchowfun/tagref/main/install.sh -LSfs | sh
 
   create_user:
     description: Create a user who doesn't have root privileges.
     user: root
     command: |
+      # Create a user named `user` with a home directory.
       adduser --disabled-password --gecos '' user
 
   install_dependencies:
@@ -49,6 +54,7 @@ tasks:
       - package-lock.json
       - package.json
     command: |
+      # Download the dependencies for all the subprojects.
       (cd frontend-lib && npm ci && npm run repackage)
       (cd backend && npm ci)
       (cd frontend && npm ci)
@@ -78,6 +84,7 @@ tasks:
     dependencies:
       - add_source_files
     command: |
+      # Build all the subprojects.
       npm run build-production
 
   check:
@@ -85,7 +92,10 @@ tasks:
     dependencies:
       - build
     command: |
+      # Run the linters for all the subprojects.
       npm run check
+
+      # Check references with Tagref.
       tagref
 
   development:
