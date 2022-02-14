@@ -57,7 +57,7 @@
     "@babel/runtime-corejs3": "^7.12.5",
     "@google-cloud/secret-manager": "^3.2.3",
     "@sendgrid/mail": "^7.4.0",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "bunyan": "^1.8.14",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
