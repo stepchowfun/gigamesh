@@ -630,7 +630,8 @@
     the `main` branch. Follow the steps below to make this work.
     - Create a new Docker repository on [Docker Hub](https://hub.docker.com/).
       You'll need to create a Docker ID if you don't already have one.
-    - Set up two secrets in the repository settings on GitHub.
+    - Set up two secrets in the repository settings on GitHub as described in
+      [MAINTAINERS.md](https://github.com/stepchowfun/gigamesh/blob/main/MAINTAINERS.md).
       - `DOCKER_PASSWORD`: This is your Docker ID password. Toast will use it to
         cache intermediate Docker images when performing builds.
       - `GCP_DEPLOY_CREDENTIALS`: This should contain the contents of the
