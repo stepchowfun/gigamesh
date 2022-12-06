@@ -61,7 +61,7 @@
     "bunyan": "^1.8.14",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "frontend-lib": "file:../.build/frontend-lib",
     "helmet": "^4.2.0",
     "html-minifier": "^4.0.0",
