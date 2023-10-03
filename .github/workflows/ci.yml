@@ -6,20 +6,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: azure/docker-login@v1
+      - if: github.event_name == 'push'
+        uses: docker/login-action@v3
         with:
           username: stephanmisc
           password: ${{ secrets.DOCKER_PASSWORD }}
-        if: github.event_name == 'push'
       - uses: stepchowfun/toast/.github/actions/toast@main
         with:
           docker_repo: stephanmisc/toast
           write_remote_cache: ${{ github.event_name == 'push' }}
-      - uses: softprops/turnstyle@v1
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/turnstyle@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      - uses: stepchowfun/toast/.github/actions/toast@main
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: stepchowfun/toast/.github/actions/toast@main
         with:
           tasks: deploy
           docker_repo: stephanmisc/toast
@@ -32,4 +33,3 @@ jobs:
           GCP_DEPLOY_CREDENTIALS: ${{ secrets.GCP_DEPLOY_CREDENTIALS }}
           GCP_PROJECT_ID: gigamesh-296502
           STAGING_BUCKET: gigamesh-staging
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
